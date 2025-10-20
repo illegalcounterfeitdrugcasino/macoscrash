@@ -3,95 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPU Animation Demo</title>
+    <title>🔥 GPU Cooker - Stress Test</title>
     <style>
-        body {
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
             margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-            background: #1a1a1a;
-            color: white;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0000 100%);
+            color: #fff;
             text-align: center;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-        }
-        
-        .container {
-            max-width: 600px;
-            z-index: 1000001;
+            overflow: hidden;
             position: relative;
         }
         
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,50,0,0.05) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 0.6; }
+        }
+        
+        .container {
+            max-width: 700px;
+            z-index: 1000001;
+            position: relative;
+            background: rgba(20, 0, 0, 0.8);
+            border: 2px solid rgba(255, 50, 0, 0.5);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 
+                0 0 40px rgba(255, 50, 0, 0.3),
+                inset 0 0 40px rgba(255, 50, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .logo {
+            font-size: 72px;
+            margin-bottom: 10px;
+            animation: flicker 2s infinite;
+            text-shadow: 0 0 20px rgba(255, 100, 0, 0.8);
+        }
+        
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
         h1 {
-            color: #ff6b6b;
-            margin-bottom: 20px;
+            color: #ff3200;
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-weight: 900;
+            text-shadow: 
+                0 0 10px rgba(255, 50, 0, 0.8),
+                0 0 20px rgba(255, 50, 0, 0.6),
+                0 0 30px rgba(255, 50, 0, 0.4);
+        }
+        
+        .subtitle {
+            color: #ff8800;
+            font-size: 18px;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            font-weight: 400;
         }
         
         .warning {
-            background: rgba(255, 107, 107, 0.1);
-            border: 1px solid #ff6b6b;
-            border-radius: 8px;
+            background: rgba(255, 50, 0, 0.15);
+            border: 2px solid #ff3200;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .warning::before {
+            content: '⚠️';
+            font-size: 40px;
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.3; }
+        }
+        
+        .warning h3 {
+            color: #ffaa00;
+            margin-bottom: 10px;
+            padding-left: 60px;
+            font-size: 20px;
+            text-align: left;
+        }
+        
+        .warning p {
+            color: #ffccaa;
+            font-size: 14px;
+            line-height: 1.6;
+            padding-left: 60px;
+            text-align: left;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .stat-box {
+            background: rgba(255, 100, 0, 0.1);
+            border: 1px solid rgba(255, 100, 0, 0.3);
+            border-radius: 10px;
             padding: 15px;
-            margin: 20px 0;
+        }
+        
+        .stat-label {
+            color: #ff8800;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            color: #fff;
+            font-size: 24px;
+            font-weight: 700;
         }
         
         .activate-btn {
-            background: linear-gradient(45deg, #ff6b6b, #ffa500);
-            border: none;
+            background: linear-gradient(135deg, #ff3200 0%, #ff6600 50%, #ff3200 100%);
+            background-size: 200% 100%;
+            border: 3px solid #ffaa00;
             border-radius: 50px;
             color: white;
-            padding: 15px 40px;
-            font-size: 18px;
-            font-weight: bold;
+            padding: 20px 50px;
+            font-size: 24px;
+            font-weight: 900;
             cursor: pointer;
-            margin: 20px 0;
+            margin: 25px 0;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            box-shadow: 
+                0 8px 30px rgba(255, 50, 0, 0.5),
+                inset 0 -2px 10px rgba(0, 0, 0, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-family: 'Orbitron', monospace;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .activate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .activate-btn:hover::before {
+            left: 100%;
         }
         
         .activate-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 12px 40px rgba(255, 50, 0, 0.7),
+                inset 0 -2px 10px rgba(0, 0, 0, 0.3);
+            background-position: 100% 0;
         }
         
         .activate-btn:active {
-            transform: translateY(0);
+            transform: translateY(-1px) scale(1.02);
+        }
+        
+        .activate-btn:disabled {
+            background: #333;
+            border-color: #666;
+            cursor: not-allowed;
+            box-shadow: none;
         }
         
         .info {
             color: #888;
-            font-size: 14px;
+            font-size: 12px;
             margin-top: 30px;
+            line-height: 1.6;
+        }
+        
+        .temp-indicator {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #ff6666;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>GPU Animation Demo</h1>
+        <div class="logo">🔥</div>
+        <h1>GPU COOKER</h1>
+        <p class="subtitle">Ultimate Stress Test Utility</p>
         
-        
-        <p>Click the button below to activate the GPU-intensive animation.</p>
+        <div class="warning">
+            <h3>EXTREME WARNING</h3>
+            <p>This tool generates extremely GPU-intensive animations designed to stress test your graphics hardware. Known to cause SpringBoard crashes on iOS and WindowServer crashes on macOS. Use at own risk.</p>
+        </div>
         
         <button class="activate-btn" onclick="activateAnimation()">
-            ACTIVATE ANIMATION
+            🔥 IGNITE 🔥
         </button>
-        
-        <p class="info">
-            The animation will create multiple elements with complex CSS transformations and filters.
-        </p>
+        ´
     </div>
 
     <script>
-        /**
-         * CSS Animation Inferno - Standalone Function
-         * Creates extreme GPU-intensive CSS animations
-         * WARNING: Can cause significant performance degradation
-         */
         function cssAnimationInferno() {
-            // Inject the animation styles
             const style = document.createElement('style');
             style.textContent = `
                 @keyframes gpuMeltdown {
@@ -168,7 +328,6 @@
             `;
             document.head.appendChild(style);
 
-            // Create and spawn animated elements
             let elementCount = 0;
             function createGpuKiller() {
                 try {
@@ -188,30 +347,36 @@
                         elementCount++;
                     }
                     
-                    // Continue spawning elements up to a limit
                     if (elementCount < 2000) {
                         requestAnimationFrame(createGpuKiller);
                     }
                 } catch(e) {
-                    // If error occurs, keep trying
                     requestAnimationFrame(createGpuKiller);
                 }
             }
             
-            // Start the inferno
             createGpuKiller();
         }
 
         function activateAnimation() {
-            // Disable the button to prevent multiple clicks
             const button = document.querySelector('.activate-btn');
             button.disabled = true;
-            button.textContent = 'ANIMATION ACTIVATED';
-            button.style.background = '#555';
+            button.textContent = '🔥 COOKING... 🔥';
+            button.style.background = '#333';
+            button.style.borderColor = '#666';
             button.style.cursor = 'not-allowed';
             
-            // Execute the animation
-            cssAnimationInferno();
+            // Add a dramatic countdown
+            let count = 3;
+            const countdown = setInterval(() => {
+                button.textContent = `🔥 ${count}... 🔥`;
+                count--;
+                if (count < 0) {
+                    clearInterval(countdown);
+                    button.textContent = '🔥 ACTIVE 🔥';
+                    cssAnimationInferno();
+                }
+            }, 500);
         }
     </script>
 </body>
