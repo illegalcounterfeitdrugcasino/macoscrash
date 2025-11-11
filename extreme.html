@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU Stress Test - Extreme</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        @keyframes pulse-red {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .animate-pulse-fast {
+            animation: pulse-red 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        input[type="radio"]:checked + label {
+            border-color: #ef4444;
+            background-color: #7f1d1d;
+        }
+        input[type="radio"]:disabled + label {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #374151;
+        }
+        .glitch {
+            text-shadow: 2px 0 #ef4444, -2px 0 #3b82f6;
+            animation: glitch 3s infinite;
+        }
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <canvas id="glCanvas" class="hidden w-0 h-0"></canvas>
+
+    <div class="w-full max-w-4xl bg-slate-800/50 border border-red-700 rounded-2xl shadow-2xl backdrop-blur-sm overflow-hidden">
+        <div class="p-6 border-b border-red-700 bg-red-900/20">
+            <h1 class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400 glitch">
+                GPU STRESS TEST - EXTREME
+            </h1>
+            <p id="headerDesc" class="text-red-300 mt-2 text-sm md:text-base">
+                Pushing GPU to absolute limits with maximum texture size detection
+            </p>
+        </div>
+
+        <div class="p-6 md:p-8 space-y-6">
+            <!-- GPU Info Section -->
+            <div id="gpuInfo" class="hidden p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
+                <div class="text-red-300 font-medium mb-2">Detected GPU Limits:</div>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <span class="text-slate-400">Max Texture Size:</span>
+                        <span id="maxTexSize" class="text-white ml-2">---</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400">Test Texture Size:</span>
+                        <span id="testTexSize" class="text-white ml-2">---</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400">Memory Usage:</span>
+                        <span id="memoryUsage" class="text-white ml-2">---</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400">GPU Vendor:</span>
+                        <span id="gpuVendor" class="text-white ml-2">---</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stress Mode Selection -->
+            <div>
+                <fieldset class="flex flex-col sm:flex-row gap-3">
+                    <legend class="text-red-300 font-medium mb-2 text-sm">Stress Mode:</legend>
+                    <div class="flex-1">
+                        <input type="radio" name="stressMode" value="constant" id="modeConstant" class="hidden" checked>
+                        <label for="modeConstant" class="cursor-pointer block w-full p-3 bg-slate-900/50 border-2 border-slate-700 rounded-lg text-center transition-all">
+                            <span class="font-semibold text-white">Constant</span>
+                            <span class="block text-xs text-slate-400">Maximum rate transfers</span>
+                        </label>
+                    </div>
+                    <div class="flex-1">
+                        <input type="radio" name="stressMode" value="massive" id="modeMassive" class="hidden">
+                        <label for="modeMassive" class="cursor-pointer block w-full p-3 bg-slate-900/50 border-2 border-slate-700 rounded-lg text-center transition-all">
+                            <span class="font-semibold text-white">Massive</span>
+                            <span class="block text-xs text-slate-400">Large texture transfers</span>
+                        </label>
+                    </div>
+                    <div class="flex-1">
+                        <input type="radio" name="stressMode" value="burst" id="modeBurst" class="hidden">
+                        <label for="modeBurst" class="cursor-pointer block w-full p-3 bg-slate-900/50 border-2 border-slate-700 rounded-lg text-center transition-all">
+                            <span class="font-semibold text-white">Burst</span>
+                            <span class="block text-xs text-slate-400">Rapid alternating transfers</span>
+                        </label>
+                    </div>
+                </fieldset>
+            </div>
+
+            <!-- Intensity Control -->
+            <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700/50">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-red-300 font-medium">Intensity Multiplier:</label>
+                    <span id="intensityValue" class="text-white font-bold">1x</span>
+                </div>
+                <input type="range" min="1" max="50" value="1" id="intensitySlider" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider">
+                <div class="flex justify-between text-xs text-slate-400 mt-1">
+                    <span>Minimal</span>
+                    <span>Extreme</span>
+                </div>
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div id="statusArea" class="flex-1">
+                    <div class="text-red-300 font-medium mb-2 flex items-center gap-2">
+                        Status: <span id="statusText" class="text-white">Ready</span>
+                        <span id="loadingSpinner" class="hidden">
+                            <svg class="animate-spin h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="h-3 w-full bg-slate-700 rounded-full overflow-hidden">
+                        <div id="progressBar" class="h-full w-0 bg-gradient-to-r from-red-500 to-orange-500 transition-all duration-300 ease-out"></div>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button id="startBtn" class="px-6 py-3 bg-red-600 hover:bg-red-500 active:bg-red-700 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-red-500/20 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                        </svg>
+                        Start Stress Test
+                    </button>
+                    <button id="stopBtn" class="px-6 py-3 bg-slate-600 hover:bg-slate-500 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" />
+                        </svg>
+                        Stop
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Display -->
+            <div id="statsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4 opacity-50 pointer-events-none transition-opacity duration-500">
+                <div class="stats-card bg-slate-900/50 p-4 rounded-xl border border-slate-700/50">
+                    <div class="text-slate-400 text-sm font-medium uppercase tracking-wider mb-1">Transfers Completed</div>
+                    <div class="flex items-baseline gap-1">
+                        <span id="transferCount" class="text-2xl md:text-3xl font-bold text-white">0</span>
+                        <span class="text-red-400 text-sm font-semibold">ops</span>
+                    </div>
+                    <div id="transferRate" class="text-xs text-slate-500 mt-2">Rate: -- ops/sec</div>
+                </div>
+
+                <div class="stats-card bg-slate-900/50 p-4 rounded-xl border border-slate-700/50">
+                    <div class="text-slate-400 text-sm font-medium uppercase tracking-wider mb-1">Data Processed</div>
+                    <div class="flex items-baseline gap-1">
+                        <span id="dataProcessed" class="text-2xl md:text-3xl font-bold text-white">0</span>
+                        <span class="text-orange-400 text-sm font-semibold">GB</span>
+                    </div>
+                    <div id="dataRate" class="text-xs text-slate-500 mt-2">Rate: -- GB/s</div>
+                </div>
+
+                <div class="stats-card bg-slate-900/50 p-4 rounded-xl border border-slate-700/50">
+                    <div class="text-slate-400 text-sm font-medium uppercase tracking-wider mb-1">Test Duration</div>
+                    <div class="flex items-baseline gap-1">
+                        <span id="testDuration" class="text-2xl md:text-3xl font-bold text-white">0</span>
+                        <span class="text-yellow-400 text-sm font-semibold">sec</span>
+                    </div>
+                    <div id="startTime" class="text-xs text-slate-500 mt-2">Started: --</div>
+                </div>
+            </div>
+
+            <!-- Warning -->
+            <div id="warningStatus" class="p-3 bg-red-900/20 border border-red-500/30 rounded-lg text-red-400 text-sm flex items-center justify-center gap-2 animate-pulse-fast">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                WARNING: This test may cause system instability, crashes, or kernel panics
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const statusText = document.getElementById('statusText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const progressBar = document.getElementById('progressBar');
+        const statsGrid = document.getElementById('statsGrid');
+        const warningStatus = document.getElementById('warningStatus');
+        const gpuInfo = document.getElementById('gpuInfo');
+        const intensitySlider = document.getElementById('intensitySlider');
+        const intensityValue = document.getElementById('intensityValue');
+        const canvas = document.getElementById('glCanvas');
+
+        // Stats elements
+        const transferCount = document.getElementById('transferCount');
+        const transferRate = document.getElementById('transferRate');
+        const dataProcessed = document.getElementById('dataProcessed');
+        const dataRate = document.getElementById('dataRate');
+        const testDuration = document.getElementById('testDuration');
+        const startTime = document.getElementById('startTime');
+        const maxTexSize = document.getElementById('maxTexSize');
+        const testTexSize = document.getElementById('testTexSize');
+        const memoryUsage = document.getElementById('memoryUsage');
+        const gpuVendor = document.getElementById('gpuVendor');
+
+        // --- WebGL Globals ---
+        let gl = null;
+        let shaderProgram = null;
+        let sourceTexture = null;
+        let destTexture = null;
+        let fbo = null;
+        let quadBuffer = null;
+        let programInfo = {};
+
+        // --- Test Config ---
+        let MAX_TEXTURE_SIZE = 0;
+        let TEX_WIDTH, TEX_HEIGHT, BYTES_PER_ELEMENT, ELEMENT_COUNT, TOTAL_BYTES, TOTAL_GB;
+        let intensity = 1;
+        let stressMode = 'constant';
+
+        // --- Test State ---
+        let isRunning = false;
+        let animationFrameId = null;
+        let startTimestamp = 0;
+        let transferCounter = 0;
+        let dataCounter = 0;
+        let lastUpdateTime = 0;
+        let transfersPerSecond = 0;
+        let dataPerSecond = 0;
+
+        // Utility to yield control to the browser for UI updates
+        const waitFrame = () => new Promise(resolve => requestAnimationFrame(resolve));
+
+        function updateStatus(text, progressPct) {
+            statusText.textContent = text;
+            progressBar.style.width = `${progressPct}%`;
+        }
+
+        function updateStats() {
+            const now = performance.now();
+            const elapsed = (now - startTimestamp) / 1000;
+            
+            // Update stats every 500ms to avoid UI lag
+            if (now - lastUpdateTime > 500) {
+                transfersPerSecond = transferCounter / elapsed;
+                dataPerSecond = dataCounter / (1024 * 1024 * 1024) / elapsed;
+                
+                transferCount.textContent = transferCounter.toLocaleString();
+                transferRate.textContent = `Rate: ${transfersPerSecond.toFixed(0)} ops/sec`;
+                
+                dataProcessed.textContent = (dataCounter / (1024 * 1024 * 1024)).toFixed(2);
+                dataRate.textContent = `Rate: ${dataPerSecond.toFixed(2)} GB/s`;
+                
+                testDuration.textContent = elapsed.toFixed(1);
+                
+                lastUpdateTime = now;
+            }
+        }
+
+        function resetStats() {
+            transferCounter = 0;
+            dataCounter = 0;
+            startTimestamp = performance.now();
+            lastUpdateTime = startTimestamp;
+            
+            transferCount.textContent = '0';
+            transferRate.textContent = 'Rate: -- ops/sec';
+            dataProcessed.textContent = '0';
+            dataRate.textContent = 'Rate: -- GB/s';
+            testDuration.textContent = '0';
+            startTime.textContent = 'Started: --';
+        }
+
+        function detectGpuLimits() {
+            try {
+                const tempCanvas = document.createElement('canvas');
+                const tempGl = tempCanvas.getContext('webgl2') || tempCanvas.getContext('webgl') || 
+                              tempCanvas.getContext('experimental-webgl');
+                
+                if (!tempGl) {
+                    throw new Error("WebGL not supported");
+                }
+                
+                MAX_TEXTURE_SIZE = tempGl.getParameter(tempGl.MAX_TEXTURE_SIZE);
+                const vendor = tempGl.getParameter(tempGl.UNMASKED_VENDOR_WEBGL) || 'Unknown';
+                const renderer = tempGl.getParameter(tempGl.UNMASKED_RENDERER_WEBGL) || 'Unknown';
+                
+                maxTexSize.textContent = `${MAX_TEXTURE_SIZE}x${MAX_TEXTURE_SIZE}`;
+                gpuVendor.textContent = `${vendor} / ${renderer}`;
+                
+                // Set texture size to maximum detected
+                TEX_WIDTH = MAX_TEXTURE_SIZE;
+                TEX_HEIGHT = MAX_TEXTURE_SIZE;
+                
+                BYTES_PER_ELEMENT = 4; // RGBA
+                ELEMENT_COUNT = TEX_WIDTH * TEX_HEIGHT;
+                TOTAL_BYTES = ELEMENT_COUNT * BYTES_PER_ELEMENT;
+                TOTAL_GB = TOTAL_BYTES / (1024 * 1024 * 1024);
+                
+                testTexSize.textContent = `${TEX_WIDTH}x${TEX_HEIGHT}`;
+                memoryUsage.textContent = `${TOTAL_GB.toFixed(2)} GB`;
+                
+                gpuInfo.classList.remove('hidden');
+                
+                const ext = tempGl.getExtension('WEBGL_lose_context');
+                if (ext) ext.loseContext();
+                
+                return true;
+            } catch (e) {
+                console.error("GPU detection failed:", e);
+                statusText.textContent = `Error: ${e.message}`;
+                return false;
+            }
+        }
+
+        // --- WebGL Setup Functions ---
+        function initWebGL() {
+            gl = canvas.getContext('webgl2', { antialias: false, preserveDrawingBuffer: false }) || 
+                 canvas.getContext('webgl', { antialias: false, preserveDrawingBuffer: false }) ||
+                 canvas.getContext('experimental-webgl', { antialias: false, preserveDrawingBuffer: false });
+            
+            if (!gl) throw new Error('WebGL not supported or disabled.');
+
+            setupShaders();
+            setupBuffers();
+            gl.viewport(0, 0, TEX_WIDTH, TEX_HEIGHT);
+            gl.disable(gl.DEPTH_TEST);
+            gl.disable(gl.BLEND);
+        }
+
+        function setupShaders() {
+            const vsSource = `
+                attribute vec2 a_position;
+                varying vec2 v_texCoord;
+                void main() {
+                    gl_Position = vec4(a_position, 0.0, 1.0);
+                    v_texCoord = a_position * 0.5 + 0.5;
+                }
+            `;
+            
+            const fsSource = `
+                precision highp float;
+                uniform sampler2D u_texture;
+                uniform float u_time;
+                varying vec2 v_texCoord;
+                
+                void main() {
+                    vec4 color = texture2D(u_texture, v_texCoord);
+                    // Add some computational complexity
+                    color.r = sin(color.r * 10.0 + u_time) * 0.5 + 0.5;
+                    color.g = cos(color.g * 8.0 + u_time) * 0.5 + 0.5;
+                    color.b = sin(color.b * 12.0 - u_time) * 0.5 + 0.5;
+                    gl_FragColor = color;
+                }
+            `;
+            
+            const vertexShader = loadShader(gl.VERTEX_SHADER, vsSource);
+            const fragmentShader = loadShader(gl.FRAGMENT_SHADER, fsSource);
+            
+            shaderProgram = gl.createProgram();
+            gl.attachShader(shaderProgram, vertexShader);
+            gl.attachShader(shaderProgram, fragmentShader);
+            gl.linkProgram(shaderProgram);
+            
+            if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+                throw new Error('Shader program link error: ' + gl.getProgramInfoLog(shaderProgram));
+            }
+            
+            programInfo = {
+                a_position: gl.getAttribLocation(shaderProgram, 'a_position'),
+                u_texture: gl.getUniformLocation(shaderProgram, 'u_texture'),
+                u_time: gl.getUniformLocation(shaderProgram, 'u_time')
+            };
+            
+            gl.useProgram(shaderProgram);
+        }
+
+        function setupBuffers() {
+            quadBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+            const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+            gl.vertexAttribPointer(programInfo.a_position, 2, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(programInfo.a_position);
+        }
+
+        function loadShader(type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                throw new Error('Shader compile error: ' + gl.getShaderInfoLog(shader));
+            }
+            return shader;
+        }
+
+        function createTexture() {
+            const tex = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, tex);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, TEX_WIDTH, TEX_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            return tex;
+        }
+
+        function createTextureWithData() {
+            const tex = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, tex);
+            
+            // Create some initial data to make transfers more expensive
+            const data = new Uint8Array(TOTAL_BYTES);
+            for (let i = 0; i < data.length; i++) {
+                data[i] = Math.floor(Math.random() * 256);
+            }
+            
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, TEX_WIDTH, TEX_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            return tex;
+        }
+
+        // --- Stress Test Modes ---
+        function runConstantStress() {
+            if (!isRunning) return;
+            
+            try {
+                // Constant rapid transfers
+                const iterations = Math.max(1, Math.floor(10 * intensity));
+                
+                for (let i = 0; i < iterations; i++) {
+                    // Bind source texture and draw to destination
+                    gl.bindTexture(gl.TEXTURE_2D, sourceTexture);
+                    gl.uniform1i(programInfo.u_texture, 0);
+                    gl.uniform1f(programInfo.u_time, performance.now() / 1000);
+                    
+                    // Draw to destination texture
+                    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+                    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, destTexture, 0);
+                    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                    
+                    // Swap textures for next iteration
+                    [sourceTexture, destTexture] = [destTexture, sourceTexture];
+                    
+                    transferCounter++;
+                    dataCounter += TOTAL_BYTES;
+                }
+                
+                updateStats();
+                animationFrameId = requestAnimationFrame(runConstantStress);
+            } catch (e) {
+                console.error("Error in constant stress mode:", e);
+                stopTest();
+            }
+        }
+
+        function runMassiveStress() {
+            if (!isRunning) return;
+            
+            try {
+                // Create and upload new texture data repeatedly
+                const data = new Uint8Array(TOTAL_BYTES);
+                
+                for (let i = 0; i < intensity; i++) {
+                    // Fill with random data (expensive operation)
+                    for (let j = 0; j < data.length; j += 4) {
+                        const val = Math.floor(Math.random() * 256);
+                        data[j] = val;
+                        data[j+1] = val;
+                        data[j+2] = val;
+                        data[j+3] = 255;
+                    }
+                    
+                    // Upload to texture
+                    gl.bindTexture(gl.TEXTURE_2D, sourceTexture);
+                    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, TEX_WIDTH, TEX_HEIGHT, gl.RGBA, gl.UNSIGNED_BYTE, data);
+                    
+                    // Draw to destination
+                    gl.uniform1i(programInfo.u_texture, 0);
+                    gl.uniform1f(programInfo.u_time, performance.now() / 1000);
+                    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+                    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, destTexture, 0);
+                    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                    
+                    // Swap textures
+                    [sourceTexture, destTexture] = [destTexture, sourceTexture];
+                    
+                    transferCounter++;
+                    dataCounter += TOTAL_BYTES * 2; // Count both upload and render
+                }
+                
+                updateStats();
+                animationFrameId = requestAnimationFrame(runMassiveStress);
+            } catch (e) {
+                console.error("Error in massive stress mode:", e);
+                stopTest();
+            }
+        }
+
+        function runBurstStress() {
+            if (!isRunning) return;
+            
+            try {
+                // Alternate between different operations
+                const operation = Math.floor(Math.random() * 3);
+                const burstSize = Math.max(1, Math.floor(5 * intensity));
+                
+                switch (operation) {
+                    case 0: // Rapid texture copies
+                        for (let i = 0; i < burstSize; i++) {
+                            gl.bindTexture(gl.TEXTURE_2D, sourceTexture);
+                            gl.uniform1i(programInfo.u_texture, 0);
+                            gl.uniform1f(programInfo.u_time, performance.now() / 1000);
+                            
+                            gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+                            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, destTexture, 0);
+                            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                            
+                            [sourceTexture, destTexture] = [destTexture, sourceTexture];
+                            
+                            transferCounter++;
+                            dataCounter += TOTAL_BYTES;
+                        }
+                        break;
+                        
+                    case 1: // Texture uploads
+                        const uploadData = new Uint8Array(TOTAL_BYTES);
+                        for (let i = 0; i < burstSize; i++) {
+                            for (let j = 0; j < uploadData.length; j++) {
+                                uploadData[j] = Math.floor(Math.random() * 256);
+                            }
+                            
+                            gl.bindTexture(gl.TEXTURE_2D, sourceTexture);
+                            gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, TEX_WIDTH, TEX_HEIGHT, gl.RGBA, gl.UNSIGNED_BYTE, uploadData);
+                            
+                            transferCounter++;
+                            dataCounter += TOTAL_BYTES;
+                        }
+                        break;
+                        
+                    case 2: // Complex shader operations
+                        for (let i = 0; i < burstSize; i++) {
+                            gl.bindTexture(gl.TEXTURE_2D, sourceTexture);
+                            gl.uniform1i(programInfo.u_texture, 0);
+                            gl.uniform1f(programInfo.u_time, performance.now() / 1000 + i * 0.1);
+                            
+                            gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+                            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, destTexture, 0);
+                            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                            
+                            transferCounter++;
+                            dataCounter += TOTAL_BYTES;
+                        }
+                        break;
+                }
+                
+                updateStats();
+                animationFrameId = requestAnimationFrame(runBurstStress);
+            } catch (e) {
+                console.error("Error in burst stress mode:", e);
+                stopTest();
+            }
+        }
+
+        function startStressTest() {
+            if (!isRunning) {
+                const modeRadios = document.getElementsByName('stressMode');
+                for (const radio of modeRadios) {
+                    if (radio.checked) {
+                        stressMode = radio.value;
+                        break;
+                    }
+                }
+                
+                isRunning = true;
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                loadingSpinner.classList.remove('hidden');
+                statsGrid.classList.remove('opacity-50', 'pointer-events-none');
+                resetStats();
+                
+                updateStatus('Initializing stress test...', 10);
+                
+                try {
+                    initWebGL();
+                    
+                    // Create textures
+                    sourceTexture = createTextureWithData();
+                    destTexture = createTexture();
+                    
+                    // Create framebuffer
+                    fbo = gl.createFramebuffer();
+                    
+                    updateStatus(`Running ${stressMode} stress test...`, 50);
+                    
+                    // Start the appropriate stress function
+                    startTimestamp = performance.now();
+                    startTime.textContent = `Started: ${new Date().toLocaleTimeString()}`;
+                    
+                    switch (stressMode) {
+                        case 'constant':
+                            animationFrameId = requestAnimationFrame(runConstantStress);
+                            break;
+                        case 'massive':
+                            animationFrameId = requestAnimationFrame(runMassiveStress);
+                            break;
+                        case 'burst':
+                            animationFrameId = requestAnimationFrame(runBurstStress);
+                            break;
+                    }
+                    
+                } catch (e) {
+                    console.error("Failed to start stress test:", e);
+                    updateStatus(`Error: ${e.message}`, 100);
+                    stopTest();
+                }
+            }
+        }
+
+        function stopTest() {
+            isRunning = false;
+            
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+            
+            // Clean up WebGL resources
+            if (gl) {
+                try {
+                    if (sourceTexture) gl.deleteTexture(sourceTexture);
+                    if (destTexture) gl.deleteTexture(destTexture);
+                    if (fbo) gl.deleteFramebuffer(fbo);
+                    if (quadBuffer) gl.deleteBuffer(quadBuffer);
+                    if (shaderProgram) gl.deleteProgram(shaderProgram);
+                    
+                    const ext = gl.getExtension('WEBGL_lose_context');
+                    if (ext) ext.loseContext();
+                } catch (e) {
+                    console.error("Error during cleanup:", e);
+                }
+                
+                gl = null;
+            }
+            
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            loadingSpinner.classList.add('hidden');
+            
+            updateStatus('Test stopped', 100);
+        }
+
+        // Event Listeners
+        startBtn.addEventListener('click', startStressTest);
+        stopBtn.addEventListener('click', stopTest);
+
+        intensitySlider.addEventListener('input', function() {
+            intensity = parseInt(this.value);
+            intensityValue.textContent = intensity + 'x';
+        });
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (detectGpuLimits()) {
+                updateStatus('Ready - GPU detected', 0);
+            } else {
+                updateStatus('Error: WebGL not supported', 100);
+                startBtn.disabled = true;
+            }
+            
+            stopBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>
