@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPU Stress Test - Extreme VRAM Overload</title>
+    <title>Extreme GPU Stress Test (v-lag)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -11,59 +11,18 @@
             font-family: 'Inter', sans-serif;
             background-color: #0f172a;
             color: #e2e8f0;
-            overflow-x: hidden;
-        }
-        @keyframes pulse-red {
-            0%, 100% { opacity: 1; }
-            50% { opacity: .5; }
-        }
-        .animate-pulse-fast {
-            animation: pulse-red 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        .glitch-text {
-            text-shadow: 2px 0 #ff0000, -2px 0 #00ffff;
-            animation: glitch 3s infinite;
-        }
-        @keyframes glitch {
-            0% { transform: translate(0); }
-            20% { transform: translate(-2px, 2px); }
-            40% { transform: translate(-2px, -2px); }
-            60% { transform: translate(2px, 2px); }
-            80% { transform: translate(2px, -2px); }
-            100% { transform: translate(0); }
-        }
-        .stress-indicator {
-            background: linear-gradient(90deg, #10b981, #ef4444, #10b981);
-            background-size: 200% 100%;
-            animation: gradient-shift 2s infinite;
-        }
-        @keyframes gradient-shift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
         }
         input[type="radio"]:checked + label {
-            border-color: #ef4444;
-            background-color: #7f1d1d;
+            border-color: #3b82f6;
+            background-color: #1e3a8a;
         }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            background: #ef4444;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+        input[type="radio"]:disabled + label {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
-        .overload-warning {
-            background: linear-gradient(45deg, #7f1d1d, #450a0a, #7f1d1d);
-            background-size: 400% 400%;
-            animation: warning-pulse 3s infinite;
-        }
-        @keyframes warning-pulse {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -71,184 +30,115 @@
 
     <canvas id="glCanvas" class="hidden w-0 h-0"></canvas>
 
-    <div class="w-full max-w-4xl bg-slate-800/50 border border-red-700 rounded-2xl shadow-2xl backdrop-blur-sm overflow-hidden">
-        <div class="p-6 border-b border-red-700 bg-slate-800/80">
-            <h1 class="text-2xl md:text-3xl font-bold glitch-text">
-                GPU STRESS TEST - EXTREME VRAM OVERLOAD
+    <div class="w-full max-w-2xl bg-slate-800/50 border border-slate-700 rounded-2xl shadow-2xl backdrop-blur-sm overflow-hidden">
+        
+        <div class="p-6 border-b border-slate-700 bg-slate-800/80">
+            <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+                Extreme GPU Stress Test
             </h1>
-            <p id="headerDesc" class="text-red-400 mt-2 text-sm md:text-base font-medium">
-                Pushing GPU limits to maximum with sustained massive transfers
+            <p id="headerDesc" class="text-slate-400 mt-2 text-sm">
+                Detecting GPU limits...
+            </p>
+        </div>
+
+        <div class="p-4 m-6 bg-yellow-900/30 border border-yellow-500/50 rounded-lg">
+            <h3 class="font-bold text-yellow-300">⚠️ System Warning</h3>
+            <p class="text-yellow-400 text-sm mt-1">
+                This test is designed to cause **extreme lag** and **freeze your browser**.
+                Use the "Stop Test" button to recover. You may need to force-quit.
             </p>
         </div>
 
         <div class="p-6 md:p-8 space-y-6">
-            <div class="overload-warning p-4 rounded-lg border border-red-500">
-                <div class="flex items-center gap-2 text-red-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                    <span class="font-bold">WARNING:</span> This test can cause system instability, crashes, or permanent damage to your device.
-                </div>
-            </div>
-
+            
             <div>
-                <fieldset class="flex flex-col sm:flex-row gap-3">
-                    <legend class="text-red-300 font-medium mb-2 text-sm">Stress Mode:</legend>
-                    <div class="flex-1">
-                        <input type="radio" name="stressMode" value="massive" id="modeMassive" class="hidden" checked>
-                        <label for="modeMassive" class="cursor-pointer block w-full p-3 bg-slate-900/50 border-2 border-red-700 rounded-lg text-center transition-all">
-                            <span class="font-semibold text-white">MASSIVE TRANSFERS</span>
-                            <span class="block text-xs text-red-400">Maximum texture size - Extreme</span>
-                        </label>
-                    </div>
-                    <div class="flex-1">
-                        <input type="radio" name="stressMode" value="constant" id="modeConstant" class="hidden">
-                        <label for="modeConstant" class="cursor-pointer block w-full p-3 bg-slate-900/50 border-2 border-red-700 rounded-lg text-center transition-all">
-                            <span class="font-semibold text-white">CONSTANT STREAM</span>
-                            <span class="block text-xs text-red-400">Small transfers at max rate</span>
-                        </label>
-                    </div>
-                    <div class="flex-1">
-                        <input type="radio" name="stressMode" value="custom" id="modeCustom" class="hidden">
-                        <label for="modeCustom" class="cursor-pointer block w-full p-3 bg-slate-900/50 border-2 border-red-700 rounded-lg text-center transition-all">
-                            <span class="font-semibold text-white">CUSTOM OVERLOAD</span>
-                            <span class="block text-xs text-red-400">Manual configuration</span>
-                        </label>
+                <fieldset>
+                    <legend class="text-slate-300 font-medium mb-2 text-sm">Test Mode:</legend>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div>
+                            <input type.radio name="testMode" value="massive" id="modeMassive" class="hidden" checked>
+                            <label for="modeMassive" class="cursor-pointer block w-full p-3 bg-slate-900/50 border-2 border-slate-700 rounded-lg text-center transition-all">
+                                <span class="font-semibold text-white">Massive</span>
+                                <span class="block text-xs text-slate-400">(Max Size)</span>
+                            </label>
+                        </div>
+                        <div>
+                            <input type.radio name="testMode" value="benchmark" id="modeBenchmark" class="hidden">
+                            <label for="modeBenchmark" class="cursor-pointer block w-full p-3 bg-slate-900/50 border-2 border-slate-700 rounded-lg text-center transition-all">
+                                <span class="font-semibold text-white">Sustained</span>
+                                <span class="block text-xs text-slate-400">(8192px)</span>
+                            </label>
+                        </div>
+                        <div>
+                            <input type.radio name="testMode" value="tiny" id="modeTiny" class="hidden">
+                            <label for="modeTiny" class="cursor-pointer block w-full p-3 bg-slate-900/50 border-2 border-slate-700 rounded-lg text-center transition-all">
+                                <span class="font-semibold text-white">Tiny</span>
+                                <span class="block text-xs text-slate-400">(1px)</span>
+                            </label>
+                        </div>
+                        <div>
+                            <input type.radio name="testMode" value="custom" id="modeCustom" class="hidden">
+                            <label for="modeCustom" class="cursor-pointer block w-full p-3 bg-slate-900/50 border-2 border-slate-700 rounded-lg text-center transition-all">
+                                <span class="font-semibold text-white">Custom</span>
+                                <span class="block text-xs text-slate-400">(Manual)</span>
+                            </label>
+                        </div>
                     </div>
                 </fieldset>
             </div>
 
-            <div id="customControls" class="hidden space-y-4 bg-slate-900/30 p-4 rounded-lg border border-red-700/50">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="text-red-300 font-medium mb-2 block">Texture Size Multiplier</label>
-                    <div class="flex items-center gap-4">
-                        <input type="range" min="1" max="10" value="1" class="flex-1" id="sizeMultiplier">
-                        <span id="sizeMultiplierValue" class="text-white font-bold">1x</span>
-                    </div>
+                    <label for="iterationsInput" class="block text-sm font-medium text-slate-300 mb-2">Iterations per Tick (Multiplier)</label>
+                    <input type="number" id="iterationsInput" value="10000" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                 </div>
-                <div>
-                    <label class="text-red-300 font-medium mb-2 block">Transfer Rate Multiplier</label>
-                    <div class="flex items-center gap-4">
-                        <input type="range" min="1" max="100" value="10" class="flex-1" id="rateMultiplier">
-                        <span id="rateMultiplierValue" class="text-white font-bold">10x</span>
-                    </div>
-                </div>
-                <div>
-                    <label class="text-red-300 font-medium mb-2 block">Duration (seconds)</label>
-                    <div class="flex items-center gap-4">
-                        <input type="range" min="5" max="300" value="30" class="flex-1" id="durationSlider">
-                        <span id="durationValue" class="text-white font-bold">30s</span>
-                    </div>
+                <div id="customSizeContainer" class="hidden">
+                    <label for="customSizeInput" class="block text-sm font-medium text-slate-300 mb-2">Custom Texture Size (px)</label>
+                    <input type="number" id="customSizeInput" value="4096" class="w-full bg-slate-900/50 border border-slate-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                 </div>
             </div>
-
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div id="statusArea" class="flex-1">
-                    <div class="text-red-300 font-medium mb-2 flex items-center gap-2">
-                        Status: <span id="statusText" class="text-white">Ready</span>
-                        <span id="loadingSpinner" class="hidden">
-                            <svg class="animate-spin h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                        </span>
-                    </div>
-                    <div class="h-3 w-full bg-slate-700 rounded-full overflow-hidden">
-                        <div id="progressBar" class="h-full w-0 stress-indicator transition-all duration-300 ease-out"></div>
-                    </div>
+            
+            <div class="space-y-4">
+                <div class="flex items-center gap-3">
+                    <span class="text-slate-300 font-medium">Status:</span>
+                    <span id="statusText" class="text-white font-semibold">Ready</span>
+                    <span id="loadingSpinner" class="hidden">
+                        <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </span>
                 </div>
-                <div class="flex gap-2">
-                    <button id="startBtn" class="w-full sm:w-auto px-6 py-3 bg-red-600 hover:bg-red-500 active:bg-red-700 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-red-500/20 flex items-center justify-center gap-2">
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button id="startBtn" class="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
                         </svg>
-                        START STRESS TEST
+                        Start Stress Test
                     </button>
-                    <button id="stopBtn" class="w-full sm:w-auto px-6 py-3 bg-slate-600 hover:bg-slate-500 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 hidden">
+                    <button id="stopBtn" disabled class="flex-1 px-6 py-3 bg-red-600 hover:bg-red-500 active:bg-red-700 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-red-500/20 flex items-center justify-center gap-2 opacity-50 cursor-not-allowed">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" />
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 8a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2V8z" clip-rule="evenodd" />
                         </svg>
-                        STOP
+                        Stop Test
                     </button>
                 </div>
-            </div>
-
-            <div id="statsGrid" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="stat-card bg-slate-900/50 p-4 rounded-xl border border-red-700/50">
-                    <div class="text-red-400 text-sm font-medium uppercase tracking-wider mb-1">GPU Status</div>
-                    <div class="flex items-baseline gap-1">
-                        <span id="gpuStatus" class="text-xl font-bold text-white">IDLE</span>
-                    </div>
-                    <div class="text-xs text-slate-500 mt-2" id="gpuDetail">No active stress</div>
-                </div>
-
-                <div class="stat-card bg-slate-900/50 p-4 rounded-xl border border-red-700/50">
-                    <div class="text-red-400 text-sm font-medium uppercase tracking-wider mb-1">Texture Size</div>
-                    <div class="flex items-baseline gap-1">
-                        <span id="textureSize" class="text-xl font-bold text-white">--</span>
-                        <span class="text-red-400 text-sm font-semibold">px</span>
-                    </div>
-                    <div class="text-xs text-slate-500 mt-2" id="textureMemory">-- MB</div>
-                </div>
-
-                <div class="stat-card bg-slate-900/50 p-4 rounded-xl border border-red-700/50">
-                    <div class="text-red-400 text-sm font-medium uppercase tracking-wider mb-1">Transfer Rate</div>
-                    <div class="flex items-baseline gap-1">
-                        <span id="transferRate" class="text-xl font-bold text-white">--</span>
-                        <span class="text-red-400 text-sm font-semibold">GB/s</span>
-                    </div>
-                    <div class="text-xs text-slate-500 mt-2" id="transferCount">0 transfers</div>
-                </div>
-
-                <div class="stat-card bg-slate-900/50 p-4 rounded-xl border border-red-700/50">
-                    <div class="text-red-400 text-sm font-medium uppercase tracking-wider mb-1">Stress Level</div>
-                    <div class="flex items-baseline gap-1">
-                        <span id="stressLevel" class="text-xl font-bold text-white">--</span>
-                        <span class="text-red-400 text-sm font-semibold">%</span>
-                    </div>
-                    <div class="text-xs text-slate-500 mt-2" id="stressTime">0s elapsed</div>
-                </div>
-            </div>
-
-            <div id="crashWarning" class="hidden p-3 bg-red-900/50 border border-red-500 rounded-lg text-red-300 text-sm flex items-center justify-center gap-2 animate-pulse-fast">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-                GPU under extreme stress - System instability likely
             </div>
         </div>
     </div>
 
     <script>
-        // DOM Elements
+        // --- DOM Elements ---
         const startBtn = document.getElementById('startBtn');
         const stopBtn = document.getElementById('stopBtn');
         const statusText = document.getElementById('statusText');
         const loadingSpinner = document.getElementById('loadingSpinner');
-        const progressBar = document.getElementById('progressBar');
-        const customControls = document.getElementById('customControls');
-        const crashWarning = document.getElementById('crashWarning');
+        const headerDesc = document.getElementById('headerDesc');
         const canvas = document.getElementById('glCanvas');
-
-        // Stats elements
-        const gpuStatus = document.getElementById('gpuStatus');
-        const gpuDetail = document.getElementById('gpuDetail');
-        const textureSize = document.getElementById('textureSize');
-        const textureMemory = document.getElementById('textureMemory');
-        const transferRate = document.getElementById('transferRate');
-        const transferCount = document.getElementById('transferCount');
-        const stressLevel = document.getElementById('stressLevel');
-        const stressTime = document.getElementById('stressTime');
-
-        // Control elements
-        const sizeMultiplier = document.getElementById('sizeMultiplier');
-        const sizeMultiplierValue = document.getElementById('sizeMultiplierValue');
-        const rateMultiplier = document.getElementById('rateMultiplier');
-        const rateMultiplierValue = document.getElementById('rateMultiplierValue');
-        const durationSlider = document.getElementById('durationSlider');
-        const durationValue = document.getElementById('durationValue');
-
-        // WebGL Globals
+        const customSizeContainer = document.getElementById('customSizeContainer');
+        
+        // --- WebGL Globals ---
         let gl = null;
         let shaderProgram = null;
         let sourceTexture = null;
@@ -256,139 +146,198 @@
         let fbo = null;
         let quadBuffer = null;
         let programInfo = {};
+        
+        // --- Test Config ---
+        let TEX_WIDTH, TEX_HEIGHT;
+        let DETECTED_MAX_TEX_SIZE = 4096; // Default fallback
 
-        // Test State
+        // --- State ---
         let isRunning = false;
-        let stressInterval = null;
-        let startTime = 0;
-        let transferCounter = 0;
-        let maxTextureSize = 4096;
-        let currentMode = 'massive';
+        let totalOps = 0;
+        let loopStartTime = 0;
 
-        // Initialize controls
-        sizeMultiplier.addEventListener('input', () => {
-            sizeMultiplierValue.textContent = `${sizeMultiplier.value}x`;
-        });
-
-        rateMultiplier.addEventListener('input', () => {
-            rateMultiplierValue.textContent = `${rateMultiplier.value}x`;
-        });
-
-        durationSlider.addEventListener('input', () => {
-            durationValue.textContent = `${durationSlider.value}s`;
-        });
-
-        // Mode selection
-        document.querySelectorAll('input[name="stressMode"]').forEach(radio => {
-            radio.addEventListener('change', () => {
-                currentMode = radio.value;
-                if (currentMode === 'custom') {
-                    customControls.classList.remove('hidden');
-                } else {
-                    customControls.classList.add('hidden');
-                }
-            });
-        });
-
-        // Utility functions
-        const waitFrame = () => new Promise(resolve => requestAnimationFrame(resolve));
-
-        function updateStatus(text, progressPct) {
-            statusText.textContent = text;
-            progressBar.style.width = `${progressPct}%`;
-        }
-
-        function updateStats() {
-            const elapsed = Math.floor((performance.now() - startTime) / 1000);
-            stressTime.textContent = `${elapsed}s elapsed`;
-            transferCount.textContent = `${transferCounter.toLocaleString()} transfers`;
+        // --- Utility to update UI elements ---
+        function setControlsEnabled(enabled) {
+            startBtn.disabled = !enabled;
+            stopBtn.disabled = enabled;
             
-            // Calculate fake stress level based on time and transfers
-            const baseStress = Math.min(100, Math.floor(elapsed / 3 * 10) + Math.floor(transferCounter / 10000));
-            stressLevel.textContent = baseStress;
-            
-            // Update GPU status based on stress level
-            if (baseStress < 30) {
-                gpuStatus.textContent = "STRESSED";
-                gpuStatus.className = "text-xl font-bold text-yellow-400";
-                gpuDetail.textContent = "Moderate load";
-            } else if (baseStress < 70) {
-                gpuStatus.textContent = "OVERLOADED";
-                gpuStatus.className = "text-xl font-bold text-orange-500";
-                gpuDetail.textContent = "High stress level";
+            if (enabled) {
+                startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                stopBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                loadingSpinner.classList.add('hidden');
             } else {
-                gpuStatus.textContent = "CRITICAL";
-                gpuStatus.className = "text-xl font-bold text-red-600 animate-pulse";
-                gpuDetail.textContent = "Extreme stress - Crash imminent";
-                crashWarning.classList.remove('hidden');
+                startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                stopBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                loadingSpinner.classList.remove('hidden');
+            }
+
+            // Disable all inputs
+            document.querySelectorAll('input').forEach(input => input.disabled = !enabled);
+        }
+
+        // --- Core Test Logic ---
+        
+        function detectMaxTextureSize() {
+            try {
+                const tempCanvas = document.createElement('canvas');
+                const tempGl = tempCanvas.getContext('webgl', { antialias: false });
+                if (!tempGl) throw new Error("WebGL not supported");
+                
+                DETECTED_MAX_TEX_SIZE = tempGl.getParameter(tempGl.MAX_TEXTURE_SIZE);
+                headerDesc.textContent = `GPU sequential read stress test. Max Texture Size: ${DETECTED_MAX_TEX_SIZE}px`;
+                
+                const ext = tempGl.getExtension('WEBGL_lose_context');
+                if (ext) ext.loseContext();
+            } catch (e) {
+                console.warn("Could not detect max texture size:", e.message);
+                headerDesc.textContent = "Could not detect GPU limits. Using fallback 4096px.";
+            }
+        }
+        
+        function getTestConfig() {
+            const mode = document.querySelector('input[name="testMode"]:checked').value;
+            const customSize = parseInt(document.getElementById('customSizeInput').value) || 4096;
+            
+            switch (mode) {
+                case 'massive':
+                    TEX_WIDTH = TEX_HEIGHT = DETECTED_MAX_TEX_SIZE;
+                    break;
+                case 'benchmark':
+                    TEX_WIDTH = TEX_HEIGHT = Math.min(8192, DETECTED_MAX_TEX_SIZE);
+                    break;
+                case 'tiny':
+                    TEX_WIDTH = TEX_HEIGHT = 1;
+                    break;
+                case 'custom':
+                    TEX_WIDTH = TEX_HEIGHT = Math.min(customSize, DETECTED_MAX_TEX_SIZE);
+                    break;
+            }
+            
+            statusText.textContent = `Using ${TEX_WIDTH}x${TEX_HEIGHT} textures...`;
+        }
+
+        function startTest() {
+            if (isRunning) return;
+            isRunning = true;
+            setControlsEnabled(false);
+            
+            try {
+                getTestConfig();
+                initWebGL();
+
+                // Create a dummy source texture to read from
+                const dummyData = new Uint8Array(TEX_WIDTH * TEX_HEIGHT * 4);
+                sourceTexture = createTexture(dummyData); // Upload data once
+                destTexture = createTexture(null); // Empty target
+
+                // Setup Framebuffer
+                fbo = gl.createFramebuffer();
+                gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, destTexture, 0);
+
+                // Bind resources once
+                gl.bindTexture(gl.TEXTURE_2D, sourceTexture);
+                gl.uniform1i(programInfo.u_texture, 0);
+                gl.viewport(0, 0, TEX_WIDTH, TEX_HEIGHT);
+
+                totalOps = 0;
+                loopStartTime = performance.now();
+
+                // Start the relentless loop
+                runStressLoop();
+
+            } catch (e) {
+                statusText.textContent = 'Error: ' + e.message;
+                console.error(e);
+                setControlsEnabled(true);
+                isRunning = false;
             }
         }
 
-        // WebGL Setup
-        function initWebGL() {
-            try {
-                gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-                if (!gl) throw new Error('WebGL not supported');
-                
-                // Get maximum texture size
-                maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-                console.log(`Max texture size: ${maxTextureSize}`);
-                
-                setupShaders();
-                setupBuffers();
-                
-                return true;
-            } catch (e) {
-                console.error('WebGL initialization failed:', e);
-                return false;
+        function runStressLoop() {
+            if (!isRunning) {
+                cleanupWebGL();
+                return;
             }
+
+            const iterationsPerTick = parseInt(document.getElementById('iterationsInput').value) || 10000;
+            
+            // This is the hot, blocking loop.
+            // It runs `iterationsPerTick` times *within* this single event loop task.
+            for (let i = 0; i < iterationsPerTick; i++) {
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            }
+            
+            totalOps += iterationsPerTick;
+            const elapsedSeconds = (performance.now() - loopStartTime) / 1000;
+
+            // Update stats text, but not so often it becomes the bottleneck
+            if (totalOps % (iterationsPerTick * 10) === 0) { 
+                const opsPerSec = (totalOps / elapsedSeconds).toExponential(2);
+                statusText.textContent = `Running... ${opsPerSec} ops/s`;
+            }
+
+            // THIS IS THE KEY:
+            // `setTimeout(0)` re-queues this function to run as soon as possible,
+            // starving UI rendering (requestAnimationFrame) and user input.
+            // This causes the intended extreme lag without an immediate page crash.
+            setTimeout(runStressLoop, 0);
+        }
+
+        function stopTest() {
+            if (!isRunning) return;
+            statusText.textContent = "Stopping...";
+            isRunning = false; // The loop will see this and call cleanupWebGL
+        }
+
+        function cleanupWebGL() {
+            if (!gl) return;
+            
+            gl.deleteTexture(sourceTexture);
+            gl.deleteTexture(destTexture);
+            gl.deleteFramebuffer(fbo);
+            gl.deleteBuffer(quadBuffer);
+            gl.deleteProgram(shaderProgram);
+            
+            const ext = gl.getExtension('WEBGL_lose_context');
+            if (ext) ext.loseContext();
+            
+            gl = null;
+            sourceTexture = null;
+            destTexture = null;
+            fbo = null;
+            quadBuffer = null;
+            shaderProgram = null;
+
+            statusText.textContent = "Stopped. GPU assets released.";
+            setControlsEnabled(true);
+        }
+
+        // --- WebGL Setup Functions (from original) ---
+        function initWebGL() {
+            gl = canvas.getContext('webgl', { antialias: false });
+            if (!gl) throw new Error('WebGL not supported or disabled.');
+            if (gl.getParameter(gl.MAX_TEXTURE_SIZE) < TEX_WIDTH) throw new Error(`GPU max texture size is too small for this test.`);
+            setupShaders();
+            setupBuffers();
+            gl.disable(gl.DEPTH_TEST);
+            gl.disable(gl.BLEND);
         }
 
         function setupShaders() {
-            const vsSource = `
-                attribute vec2 a_position;
-                varying vec2 v_texCoord;
-                void main() {
-                    gl_Position = vec4(a_position, 0.0, 1.0);
-                    v_texCoord = a_position * 0.5 + 0.5;
-                }
-            `;
-            
-            const fsSource = `
-                precision highp float;
-                uniform sampler2D u_texture;
-                uniform float u_time;
-                varying vec2 v_texCoord;
-                void main() {
-                    vec2 coord = v_texCoord;
-                    coord.x += sin(coord.y * 10.0 + u_time) * 0.1;
-                    coord.y += cos(coord.x * 10.0 + u_time) * 0.1;
-                    vec4 color = texture2D(u_texture, coord);
-                    color.r = sin(color.r * 10.0 + u_time) * 0.5 + 0.5;
-                    color.g = cos(color.g * 8.0 + u_time) * 0.5 + 0.5;
-                    color.b = sin(color.b * 12.0 + u_time * 0.7) * 0.5 + 0.5;
-                    gl_FragColor = color;
-                }
-            `;
-            
+            const vsSource = `attribute vec2 a_position;varying vec2 v_texCoord;void main() {gl_Position = vec4(a_position, 0.0, 1.0);v_texCoord = a_position * 0.5 + 0.5;}`;
+            const fsSource = `precision mediump float;uniform sampler2D u_texture;varying vec2 v_texCoord;void main() {gl_FragColor = texture2D(u_texture, v_texCoord);}`;
             const vertexShader = loadShader(gl.VERTEX_SHADER, vsSource);
             const fragmentShader = loadShader(gl.FRAGMENT_SHADER, fsSource);
-            
             shaderProgram = gl.createProgram();
             gl.attachShader(shaderProgram, vertexShader);
             gl.attachShader(shaderProgram, fragmentShader);
             gl.linkProgram(shaderProgram);
-            
-            if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-                throw new Error('Shader program link error');
-            }
-            
+            if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) throw new Error('Shader program link error.');
             programInfo = {
                 a_position: gl.getAttribLocation(shaderProgram, 'a_position'),
                 u_texture: gl.getUniformLocation(shaderProgram, 'u_texture'),
-                u_time: gl.getUniformLocation(shaderProgram, 'u_time')
             };
-            
             gl.useProgram(shaderProgram);
         }
 
@@ -405,326 +354,37 @@
             const shader = gl.createShader(type);
             gl.shaderSource(shader, source);
             gl.compileShader(shader);
-            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                console.error('Shader compile error:', gl.getShaderInfoLog(shader));
-                throw new Error('Shader compile error');
-            }
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw new Error('Shader compile error.');
             return shader;
         }
 
-        function createTexture(width, height, data) {
+        function createTexture(data) {
             const tex = gl.createTexture();
             gl.bindTexture(gl.TEXTURE_2D, tex);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, TEX_WIDTH, TEX_HEIGHT, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
             return tex;
         }
 
-        // Stress test functions
-        function massiveTransferStress() {
-            if (!gl || !isRunning) return;
-            
-            try {
-                // Use maximum texture size for extreme stress
-                const texWidth = maxTextureSize;
-                const texHeight = maxTextureSize;
-                
-                // Update stats
-                textureSize.textContent = `${texWidth}×${texHeight}`;
-                const memoryMB = (texWidth * texHeight * 4) / (1024 * 1024);
-                textureMemory.textContent = `${memoryMB.toFixed(1)} MB`;
-                
-                // Create source texture with random data
-                const dataSize = texWidth * texHeight * 4;
-                const sourceData = new Uint8Array(dataSize);
-                for (let i = 0; i < dataSize; i++) {
-                    sourceData[i] = Math.floor(Math.random() * 256);
+        // --- Event Listeners ---
+        startBtn.addEventListener('click', startTest);
+        stopBtn.addEventListener('click', stopTest);
+        document.addEventListener('DOMContentLoaded', detectMaxTextureSize);
+        
+        // Show/hide custom size input
+        document.querySelectorAll('input[name="testMode"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'custom') {
+                    customSizeContainer.classList.remove('hidden');
+                } else {
+                    customSizeContainer.classList.add('hidden');
                 }
-                
-                sourceTexture = createTexture(texWidth, texHeight, sourceData);
-                
-                // Create destination texture and FBO
-                destTexture = createTexture(texWidth, texHeight, null);
-                fbo = gl.createFramebuffer();
-                gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, destTexture, 0);
-                
-                // Set viewport to texture size
-                gl.viewport(0, 0, texWidth, texHeight);
-                
-                // Bind source texture
-                gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, sourceTexture);
-                gl.uniform1i(programInfo.u_texture, 0);
-                
-                // Perform massive transfers as fast as possible
-                const transfersPerFrame = 5; // Multiple transfers per frame for maximum stress
-                for (let i = 0; i < transfersPerFrame && isRunning; i++) {
-                    gl.uniform1f(programInfo.u_time, performance.now() / 1000);
-                    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-                    transferCounter++;
-                }
-                
-                // Calculate and display transfer rate
-                const elapsed = (performance.now() - startTime) / 1000;
-                const dataTransferredGB = (transferCounter * memoryMB) / 1024;
-                const rate = dataTransferredGB / elapsed;
-                transferRate.textContent = rate.toFixed(1);
-                
-            } catch (e) {
-                console.error('Error in massive transfer:', e);
-                // Continue anyway - we want to push limits
-            }
-        }
-
-        function constantStreamStress() {
-            if (!gl || !isRunning) return;
-            
-            try {
-                // Use smaller textures but at maximum rate
-                const texWidth = 2048;
-                const texHeight = 2048;
-                
-                // Update stats
-                textureSize.textContent = `${texWidth}×${texHeight}`;
-                const memoryMB = (texWidth * texHeight * 4) / (1024 * 1024);
-                textureMemory.textContent = `${memoryMB.toFixed(1)} MB`;
-                
-                // Create source texture
-                const dataSize = texWidth * texHeight * 4;
-                const sourceData = new Uint8Array(dataSize);
-                for (let i = 0; i < 1000; i++) {
-                    sourceData[i] = Math.floor(Math.random() * 256);
-                }
-                
-                if (!sourceTexture) {
-                    sourceTexture = createTexture(texWidth, texHeight, sourceData);
-                }
-                
-                // Create destination texture and FBO if not exists
-                if (!destTexture) {
-                    destTexture = createTexture(texWidth, texHeight, null);
-                    fbo = gl.createFramebuffer();
-                    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-                    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, destTexture, 0);
-                }
-                
-                gl.viewport(0, 0, texWidth, texHeight);
-                gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, sourceTexture);
-                gl.uniform1i(programInfo.u_texture, 0);
-                
-                // Constant stream of transfers
-                const transfersPerFrame = 20; // Even more transfers for constant mode
-                for (let i = 0; i < transfersPerFrame && isRunning; i++) {
-                    // Update texture data slightly to prevent optimization
-                    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, texWidth, texHeight, gl.RGBA, gl.UNSIGNED_BYTE, sourceData);
-                    
-                    gl.uniform1f(programInfo.u_time, performance.now() / 1000);
-                    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-                    transferCounter++;
-                }
-                
-                // Calculate and display transfer rate
-                const elapsed = (performance.now() - startTime) / 1000;
-                const dataTransferredGB = (transferCounter * memoryMB) / 1024;
-                const rate = dataTransferredGB / elapsed;
-                transferRate.textContent = rate.toFixed(1);
-                
-            } catch (e) {
-                console.error('Error in constant stream:', e);
-                // Continue anyway
-            }
-        }
-
-        function customOverloadStress() {
-            if (!gl || !isRunning) return;
-            
-            try {
-                // Calculate texture size based on multiplier
-                const baseSize = Math.min(maxTextureSize, 4096);
-                const multiplier = parseInt(sizeMultiplier.value);
-                const texWidth = Math.min(maxTextureSize, baseSize * multiplier);
-                const texHeight = Math.min(maxTextureSize, baseSize * multiplier);
-                
-                // Update stats
-                textureSize.textContent = `${texWidth}×${texHeight}`;
-                const memoryMB = (texWidth * texHeight * 4) / (1024 * 1024);
-                textureMemory.textContent = `${memoryMB.toFixed(1)} MB`;
-                
-                // Create or update source texture
-                const dataSize = texWidth * texHeight * 4;
-                const sourceData = new Uint8Array(dataSize);
-                for (let i = 0; i < Math.min(10000, dataSize); i++) {
-                    sourceData[i] = Math.floor(Math.random() * 256);
-                }
-                
-                if (!sourceTexture || sourceTexture.width !== texWidth || sourceTexture.height !== texHeight) {
-                    if (sourceTexture) gl.deleteTexture(sourceTexture);
-                    sourceTexture = createTexture(texWidth, texHeight, sourceData);
-                }
-                
-                // Create or update destination texture and FBO
-                if (!destTexture || destTexture.width !== texWidth || destTexture.height !== texHeight) {
-                    if (destTexture) gl.deleteTexture(destTexture);
-                    if (fbo) gl.deleteFramebuffer(fbo);
-                    
-                    destTexture = createTexture(texWidth, texHeight, null);
-                    fbo = gl.createFramebuffer();
-                    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-                    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, destTexture, 0);
-                }
-                
-                gl.viewport(0, 0, texWidth, texHeight);
-                gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, sourceTexture);
-                gl.uniform1i(programInfo.u_texture, 0);
-                
-                // Custom transfer rate based on multiplier
-                const rateMulti = parseInt(rateMultiplier.value);
-                const transfersPerFrame = Math.min(50, 5 * rateMulti);
-                
-                for (let i = 0; i < transfersPerFrame && isRunning; i++) {
-                    gl.uniform1f(programInfo.u_time, performance.now() / 1000);
-                    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-                    transferCounter++;
-                }
-                
-                // Calculate and display transfer rate
-                const elapsed = (performance.now() - startTime) / 1000;
-                const dataTransferredGB = (transferCounter * memoryMB) / 1024;
-                const rate = dataTransferredGB / elapsed;
-                transferRate.textContent = rate.toFixed(1);
-                
-            } catch (e) {
-                console.error('Error in custom overload:', e);
-                // Continue anyway
-            }
-        }
-
-        // Main stress test function
-        async function startStressTest() {
-            if (isRunning) return;
-            
-            isRunning = true;
-            startBtn.classList.add('hidden');
-            stopBtn.classList.remove('hidden');
-            loadingSpinner.classList.remove('hidden');
-            crashWarning.classList.add('hidden');
-            
-            // Reset counters and stats
-            transferCounter = 0;
-            startTime = performance.now();
-            
-            // Initialize WebGL
-            updateStatus('Initializing WebGL...', 10);
-            if (!initWebGL()) {
-                updateStatus('WebGL initialization failed', 100);
-                stopStressTest();
-                return;
-            }
-            
-            updateStatus('Starting stress test...', 20);
-            
-            // Set up the stress interval based on mode
-            const stressFunction = currentMode === 'constant' ? constantStreamStress : 
-                                 currentMode === 'custom' ? customOverloadStress : 
-                                 massiveTransferStress;
-            
-            // Run stress test in a loop
-            function stressLoop() {
-                if (!isRunning) return;
-                
-                try {
-                    stressFunction();
-                    updateStats();
-                    
-                    // Check if we've reached the duration limit (for custom mode)
-                    if (currentMode === 'custom') {
-                        const elapsed = (performance.now() - startTime) / 1000;
-                        const duration = parseInt(durationSlider.value);
-                        
-                        if (elapsed >= duration) {
-                            updateStatus('Stress test completed', 100);
-                            stopStressTest();
-                            return;
-                        }
-                        
-                        // Update progress
-                        const progress = (elapsed / duration) * 100;
-                        updateStatus(`Running stress test... ${Math.floor(elapsed)}/${duration}s`, 20 + progress * 0.8);
-                    } else {
-                        // For other modes, just show running status
-                        const elapsed = Math.floor((performance.now() - startTime) / 1000);
-                        updateStatus(`Running stress test... ${elapsed}s`, 20 + Math.min(80, elapsed));
-                    }
-                    
-                    // Continue the loop
-                    requestAnimationFrame(stressLoop);
-                } catch (e) {
-                    console.error('Error in stress loop:', e);
-                    // Try to continue despite errors
-                    requestAnimationFrame(stressLoop);
-                }
-            }
-            
-            // Start the stress loop
-            stressLoop();
-        }
-
-        function stopStressTest() {
-            isRunning = false;
-            
-            // Clean up WebGL resources
-            if (gl) {
-                try {
-                    if (sourceTexture) gl.deleteTexture(sourceTexture);
-                    if (destTexture) gl.deleteTexture(destTexture);
-                    if (fbo) gl.deleteFramebuffer(fbo);
-                    if (quadBuffer) gl.deleteBuffer(quadBuffer);
-                    if (shaderProgram) gl.deleteProgram(shaderProgram);
-                    
-                    const ext = gl.getExtension('WEBGL_lose_context');
-                    if (ext) ext.loseContext();
-                } catch (e) {
-                    console.error('Error during cleanup:', e);
-                }
-                
-                gl = null;
-            }
-            
-            startBtn.classList.remove('hidden');
-            stopBtn.classList.add('hidden');
-            loadingSpinner.classList.add('hidden');
-            
-            gpuStatus.textContent = "IDLE";
-            gpuStatus.className = "text-xl font-bold text-white";
-            gpuDetail.textContent = "No active stress";
-            
-            if (!isRunning) {
-                updateStatus('Stress test stopped', 100);
-            }
-        }
-
-        // Event listeners
-        startBtn.addEventListener('click', startStressTest);
-        stopBtn.addEventListener('click', stopStressTest);
-
-        // Detect maximum texture size on load
-        window.addEventListener('load', () => {
-            const tempCanvas = document.createElement('canvas');
-            const tempGl = tempCanvas.getContext('webgl2') || tempCanvas.getContext('webgl') || tempCanvas.getContext('experimental-webgl');
-            if (tempGl) {
-                maxTextureSize = tempGl.getParameter(tempGl.MAX_TEXTURE_SIZE);
-                console.log(`Detected max texture size: ${maxTextureSize}`);
-                
-                const ext = tempGl.getExtension('WEBGL_lose_context');
-                if (ext) ext.loseContext();
-            }
+            });
         });
+
     </script>
 </body>
 </html>
