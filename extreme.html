@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ULTIMATE System Destroyer - Extreme Stress Test</title>
+    <title>ULTIMATE Stress Test - System Destroyer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0a0000 0%, #1a0000 50%, #2d0000 100%);
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0000 100%);
             color: #fff;
         }
         @keyframes danger-pulse {
-            0%, 100% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.6), 0 0 60px rgba(239, 68, 68, 0.3); }
-            50% { box-shadow: 0 0 50px rgba(239, 68, 68, 0.9), 0 0 100px rgba(239, 68, 68, 0.5); }
+            0%, 100% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.6); }
+            50% { box-shadow: 0 0 60px rgba(239, 68, 68, 1); }
         }
         .danger-glow {
             animation: danger-pulse 1.5s ease-in-out infinite;
@@ -26,12 +26,13 @@
         .stat-card {
             background: linear-gradient(135deg, rgba(30, 30, 30, 0.8) 0%, rgba(50, 20, 20, 0.8) 100%);
         }
-        @keyframes spin-extreme {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
-        .spin-extreme {
-            animation: spin-extreme 0.5s linear infinite;
+        input[type="number"] {
+            -moz-appearance: textfield;
         }
     </style>
 </head>
@@ -39,15 +40,15 @@
 
     <canvas id="glCanvas" class="hidden w-0 h-0"></canvas>
 
-    <div class="w-full max-w-5xl bg-gray-900/95 border-2 border-red-900 rounded-2xl shadow-2xl backdrop-blur-sm overflow-hidden danger-glow">
-        <div class="p-6 border-b-2 border-red-900 bg-gradient-to-r from-red-950 via-orange-950 to-gray-900">
+    <div class="w-full max-w-5xl bg-gray-900/90 border-2 border-red-900 rounded-2xl shadow-2xl backdrop-blur-sm overflow-hidden danger-glow">
+        <div class="p-6 border-b-2 border-red-900 bg-gradient-to-r from-red-950 to-gray-900">
             <h1 class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-500 to-red-600">
-                ☠️ ULTIMATE SYSTEM DESTROYER ☠️
+                ☠️ ULTIMATE SYSTEM DESTROYER
             </h1>
             <p class="text-red-300 mt-2 text-sm md:text-base font-bold">
-                ⚠️ EXTREME WARNING: This WILL crash your device. Maximum GPU + CPU torture. USE AT YOUR OWN RISK!
+                ⚠️ EXTREME WARNING: This WILL crash your device. May cause permanent thermal damage, data loss, or system failure.
             </p>
-            <div id="gpuInfo" class="mt-3 p-3 bg-black/60 rounded-lg text-xs text-gray-300 font-mono border border-red-800">
+            <div id="gpuInfo" class="mt-3 p-3 bg-black/50 rounded-lg text-xs text-gray-300 font-mono">
                 Detecting GPU capabilities...
             </div>
         </div>
@@ -56,49 +57,48 @@
             <!-- Test Mode Selection -->
             <div>
                 <fieldset>
-                    <legend class="text-red-400 font-bold mb-3 text-xl uppercase tracking-wider">💀 Torture Mode:</legend>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <legend class="text-red-400 font-bold mb-3 text-xl uppercase tracking-wider">Destruction Mode:</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                         <div>
                             <input type="radio" name="testMode" value="massive" id="modeMassive" class="hidden">
                             <label for="modeMassive" class="cursor-pointer block p-4 bg-gray-800/50 border-2 border-gray-700 rounded-lg transition-all hover:border-red-600">
                                 <span class="font-bold text-red-400 text-lg">🔥 MASSIVE TRANSFERS</span>
-                                <span class="block text-xs text-gray-400 mt-1">Huge chunks at maximum size - severe lag guaranteed</span>
+                                <span class="block text-xs text-gray-400 mt-1">Huge chunks at maximum size</span>
                             </label>
                         </div>
                         <div>
                             <input type="radio" name="testMode" value="constant" id="modeConstant" class="hidden">
                             <label for="modeConstant" class="cursor-pointer block p-4 bg-gray-800/50 border-2 border-gray-700 rounded-lg transition-all hover:border-red-600">
                                 <span class="font-bold text-orange-400 text-lg">⚡ CONSTANT BARRAGE</span>
-                                <span class="block text-xs text-gray-400 mt-1">Rapid-fire medium transfers at maximum rate</span>
+                                <span class="block text-xs text-gray-400 mt-1">Rapid-fire tiny transfers</span>
                             </label>
                         </div>
                         <div>
                             <input type="radio" name="testMode" value="benchmark" id="modeBench" class="hidden" checked>
                             <label for="modeBench" class="cursor-pointer block p-4 bg-gray-800/50 border-2 border-gray-700 rounded-lg transition-all hover:border-red-600">
-                                <span class="font-bold text-yellow-400 text-lg">📊 BENCHMARK STYLE</span>
-                                <span class="block text-xs text-gray-400 mt-1">Proven iPhone killer - shader intensive chaos</span>
+                                <span class="font-bold text-yellow-400 text-lg">📊 BENCHMARK (PROVEN)</span>
+                                <span class="block text-xs text-gray-400 mt-1">The iPhone killer - shader intensive</span>
                             </label>
                         </div>
                         <div>
                             <input type="radio" name="testMode" value="nuclear" id="modeNuclear" class="hidden">
-                            <label for="modeNuclear" class="cursor-pointer block p-4 bg-gray-800/50 border-2 border-red-700 rounded-lg transition-all hover:border-red-500 relative overflow-hidden">
+                            <label for="modeNuclear" class="cursor-pointer block p-4 bg-gray-800/50 border-2 border-red-700 rounded-lg transition-all hover:border-red-500">
                                 <span class="font-bold text-red-500 text-lg">☢️ NUCLEAR MELTDOWN</span>
-                                <span class="block text-xs text-gray-400 mt-1">MAXIMUM texture + MAXIMUM ops - INSTANT CRASH</span>
-                                <div class="absolute top-0 right-0 bg-red-600 text-white text-xs px-2 py-1 font-bold">NEW</div>
+                                <span class="block text-xs text-gray-400 mt-1">Maximum texture + infinite ops</span>
                             </label>
                         </div>
                         <div>
-                            <input type="radio" name="testMode" value="memory" id="modeMemory" class="hidden">
-                            <label for="modeMemory" class="cursor-pointer block p-4 bg-gray-800/50 border-2 border-purple-700 rounded-lg transition-all hover:border-purple-500">
-                                <span class="font-bold text-purple-400 text-lg">🧠 MEMORY BOMB</span>
-                                <span class="block text-xs text-gray-400 mt-1">Allocates massive textures to exhaust RAM/VRAM</span>
+                            <input type="radio" name="testMode" value="cascade" id="modeCascade" class="hidden">
+                            <label for="modeCascade" class="cursor-pointer block p-4 bg-gray-800/50 border-2 border-purple-700 rounded-lg transition-all hover:border-purple-500">
+                                <span class="font-bold text-purple-400 text-lg">🌊 CASCADE OVERLOAD</span>
+                                <span class="block text-xs text-gray-400 mt-1">Multiple textures in parallel</span>
                             </label>
                         </div>
                         <div>
                             <input type="radio" name="testMode" value="custom" id="modeCustom" class="hidden">
-                            <label for="modeCustom" class="cursor-pointer block p-4 bg-gray-800/50 border-2 border-gray-700 rounded-lg transition-all hover:border-red-600">
+                            <label for="modeCustom" class="cursor-pointer block p-4 bg-gray-800/50 border-2 border-gray-700 rounded-lg transition-all hover:border-cyan-600">
                                 <span class="font-bold text-cyan-400 text-lg">⚙️ CUSTOM CHAOS</span>
-                                <span class="block text-xs text-gray-400 mt-1">Fine-tune your destruction parameters</span>
+                                <span class="block text-xs text-gray-400 mt-1">Fine-tune your destruction</span>
                             </label>
                         </div>
                     </div>
@@ -107,43 +107,37 @@
 
             <!-- Multiplier Control -->
             <div>
-                <div class="flex items-center gap-4 mb-2">
-                    <label class="text-red-400 font-bold uppercase tracking-wider flex-shrink-0">Intensity Multiplier: <span id="multiplierValue" class="text-white">1x</span></label>
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" id="customMultiplierToggle" class="w-4 h-4">
-                        <label for="customMultiplierToggle" class="text-sm text-gray-400">Custom Value</label>
-                    </div>
-                </div>
+                <label class="text-red-400 font-bold mb-2 block uppercase tracking-wider">Intensity Multiplier: <span id="multiplierValue" class="text-white">1x</span></label>
                 <input type="range" id="multiplier" min="1" max="1000" value="1" class="w-full h-3 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-600">
                 <div class="flex justify-between text-xs text-gray-500 mt-1">
                     <span>1x</span>
                     <span>250x</span>
                     <span>500x</span>
                     <span>750x</span>
-                    <span class="text-red-500 font-bold">1000x DEATH</span>
+                    <span>1000x (DEATH)</span>
                 </div>
-                <div id="customMultiplierInput" class="hidden mt-3">
-                    <label class="text-sm text-gray-400 mb-1 block">Enter Custom Multiplier (1-100000):</label>
-                    <input type="number" id="customMultiplierValue" min="1" max="100000" value="1" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white">
+                <div class="mt-3 flex items-center gap-3">
+                    <label class="text-gray-300 text-sm">Custom multiplier:</label>
+                    <input type="number" id="customMultiplier" min="1" max="999999" placeholder="1-999999" class="px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white w-32 focus:outline-none focus:border-red-500">
+                    <button id="applyCustomMultiplier" class="px-4 py-2 bg-red-700 hover:bg-red-600 text-white font-semibold rounded-lg text-sm">Apply</button>
                 </div>
             </div>
 
             <!-- CPU Stress Toggle -->
-            <div class="p-4 bg-gradient-to-r from-red-900/30 to-orange-900/30 border-2 border-red-700 rounded-lg">
+            <div class="p-4 bg-gradient-to-r from-purple-950/50 to-pink-950/50 border-2 border-purple-700 rounded-lg">
                 <div class="flex items-center gap-3">
-                    <input type="checkbox" id="cpuStressToggle" class="w-5 h-5 accent-red-600">
-                    <div class="flex-1">
-                        <label for="cpuStressToggle" class="text-red-300 font-bold text-lg cursor-pointer">🔥 ENABLE CPU DESTROYER</label>
-                        <p class="text-xs text-gray-400 mt-1">Adds infinite parallel CPU calculations AFTER GPU stress starts (prevents instant tab crash)</p>
-                    </div>
+                    <input type="checkbox" id="cpuStress" class="w-5 h-5 accent-purple-600 cursor-pointer">
+                    <label for="cpuStress" class="text-purple-300 font-bold text-lg cursor-pointer flex-1">
+                        💀 ENABLE CPU DESTRUCTION (Activates 5s after GPU start)
+                    </label>
                 </div>
-                <div id="cpuStatus" class="hidden mt-2 text-sm text-orange-400 font-semibold">
-                    ⚠️ CPU Stress: <span id="cpuThreadCount">0</span> worker threads active
-                </div>
+                <p class="text-purple-200 text-xs mt-2 ml-8">
+                    Spawns unlimited worker threads performing cryptographic hashing, prime calculations, and infinite loops. WILL FREEZE YOUR DEVICE.
+                </p>
             </div>
 
             <!-- Custom Mode Settings -->
-            <div id="customSettings" class="hidden space-y-4 p-4 bg-black/40 rounded-lg border-2 border-cyan-700">
+            <div id="customSettings" class="hidden space-y-4 p-4 bg-black/30 rounded-lg border border-cyan-700">
                 <div>
                     <label class="text-cyan-300 font-semibold mb-2 block">Transfer Size:</label>
                     <input type="range" id="customSize" min="1" max="100" value="100" class="w-full h-2 bg-gray-700 rounded-lg accent-cyan-600">
@@ -174,36 +168,45 @@
                     <div class="text-gray-400 text-xs uppercase">FPS</div>
                     <div id="fpsCount" class="text-2xl font-bold text-yellow-400">--</div>
                 </div>
+                <div class="stat-card p-3 rounded-lg border border-purple-700 col-span-2">
+                    <div class="text-purple-400 text-xs uppercase">CPU Workers</div>
+                    <div id="cpuWorkers" class="text-2xl font-bold text-purple-300">0</div>
+                </div>
+                <div class="stat-card p-3 rounded-lg border border-purple-700 col-span-2">
+                    <div class="text-purple-400 text-xs uppercase">CPU Operations</div>
+                    <div id="cpuOps" class="text-2xl font-bold text-purple-300">0</div>
+                </div>
             </div>
 
             <!-- Status -->
             <div>
                 <div class="text-gray-300 font-semibold mb-2 flex items-center gap-2">
-                    Status: <span id="statusText" class="text-white">Ready to obliterate your device</span>
-                    <span id="loadingSpinner" class="hidden spin-extreme">
-                        <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    Status: <span id="statusText" class="text-white">Ready to destroy your device</span>
+                    <span id="loadingSpinner" class="hidden">
+                        <svg class="animate-spin h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                     </span>
                 </div>
                 <div class="h-4 w-full bg-gray-800 rounded-full overflow-hidden border border-gray-700">
-                    <div id="progressBar" class="h-full w-0 bg-gradient-to-r from-red-600 via-orange-600 to-red-600 transition-all duration-300"></div>
+                    <div id="progressBar" class="h-full w-0 bg-gradient-to-r from-red-600 to-orange-600 transition-all duration-300"></div>
                 </div>
             </div>
 
             <!-- Control Buttons -->
             <div class="flex gap-3">
-                <button id="startBtn" class="flex-1 px-6 py-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 active:from-red-800 active:to-red-900 text-white font-black rounded-xl transition-all shadow-lg shadow-red-500/40 text-lg">
-                    🚀 START DESTRUCTION
+                <button id="startBtn" class="flex-1 px-6 py-4 bg-red-600 hover:bg-red-500 active:bg-red-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-red-500/30 text-lg">
+                    🚀 INITIATE DESTRUCTION
                 </button>
                 <button id="stopBtn" class="hidden flex-1 px-6 py-4 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-xl transition-all">
-                    ⏹️ EMERGENCY STOP
+                    ⏹️ STOP (if you can...)
                 </button>
             </div>
 
             <div class="p-4 bg-red-900/30 border-2 border-red-600 rounded-lg text-red-200 text-xs">
-                <strong>☠️ CRITICAL WARNING:</strong> This tool is designed to CRASH your system. It will cause extreme heat, system freezes, and potential iOS crashes. Monitor temperature constantly. Stop IMMEDIATELY if device becomes too hot. Use at your own risk - data loss and hardware damage possible!
+                <strong>🚨 CRITICAL WARNING:</strong> This tool is designed to CRASH your device. It WILL cause extreme heat, lag, freezing, and potentially permanent damage. 
+                Use only on devices you're willing to sacrifice. Monitor temperatures constantly. We are NOT responsible for ANY damage.
             </div>
         </div>
     </div>
@@ -221,14 +224,12 @@
         const opCount = document.getElementById('opCount');
         const dataCount = document.getElementById('dataCount');
         const fpsCount = document.getElementById('fpsCount');
+        const cpuWorkers = document.getElementById('cpuWorkers');
+        const cpuOps = document.getElementById('cpuOps');
         const multiplierValue = document.getElementById('multiplierValue');
         const customSettings = document.getElementById('customSettings');
         const customSizeVal = document.getElementById('customSizeVal');
         const customOpsVal = document.getElementById('customOpsVal');
-        const cpuStatus = document.getElementById('cpuStatus');
-        const cpuThreadCount = document.getElementById('cpuThreadCount');
-        const customMultiplierInput = document.getElementById('customMultiplierInput');
-        const customMultiplierToggle = document.getElementById('customMultiplierToggle');
 
         // WebGL Globals
         let gl = null;
@@ -243,16 +244,15 @@
         let totalGBMoved = 0;
         let lastFpsTime = 0;
         let framesSinceFps = 0;
+        let cpuWorkerCount = 0;
+        let cpuOperations = 0;
 
         // Test resources
         let textures = [];
         let framebuffers = [];
         let shaderProgram = null;
         let quadBuffer = null;
-
-        // CPU Stress
-        let cpuWorkers = [];
-        let cpuStressActive = false;
+        let workers = [];
 
         // Detect GPU capabilities
         function detectGPU() {
@@ -270,9 +270,9 @@
                 const vendor = gl.getParameter(gl.VENDOR);
                 
                 gpuInfo.innerHTML = `
-                    <strong>GPU:</strong> ${renderer}<br>
+                    <strong>GPU Detected:</strong> ${renderer}<br>
                     <strong>Vendor:</strong> ${vendor}<br>
-                    <strong>Max Texture:</strong> ${maxTexSize}x${maxTexSize} (${(maxTexSize * maxTexSize * 4 / 1024 / 1024 / 1024).toFixed(2)} GB per texture)
+                    <strong>Max Texture Size:</strong> ${maxTexSize}x${maxTexSize} (${(maxTexSize * maxTexSize * 4 / 1024 / 1024 / 1024).toFixed(2)} GB per texture)
                 `;
                 
                 const ext = gl.getExtension('WEBGL_lose_context');
@@ -293,6 +293,7 @@
             
             if (!gl) throw new Error('WebGL not available');
             
+            // Setup shaders
             const vsSource = `
                 attribute vec2 a_position;
                 varying vec2 v_texCoord;
@@ -306,12 +307,12 @@
                 precision highp float;
                 uniform sampler2D u_texture;
                 varying vec2 v_texCoord;
+                uniform float u_time;
+                
                 void main() {
                     vec4 color = texture2D(u_texture, v_texCoord);
-                    float r = color.r * sin(v_texCoord.x * 100.0) * cos(v_texCoord.y * 100.0);
-                    float g = color.g * cos(v_texCoord.x * 100.0) * sin(v_texCoord.y * 100.0);
-                    float b = color.b * sin(v_texCoord.x * v_texCoord.y * 1000.0);
-                    gl_FragColor = vec4(r, g, b, color.a);
+                    float noise = sin(v_texCoord.x * 100.0 + u_time) * cos(v_texCoord.y * 100.0 + u_time);
+                    gl_FragColor = vec4(color.rgb * (1.0 + noise * 0.1), color.a);
                 }
             `;
             
@@ -327,6 +328,7 @@
                 throw new Error('Shader program failed');
             }
             
+            // Setup quad
             quadBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
             const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
@@ -362,59 +364,71 @@
             return tex;
         }
 
-        // CPU Stress Function
-        function startCPUStress() {
-            if (cpuStressActive) return;
-            cpuStressActive = true;
-            cpuStatus.classList.remove('hidden');
-            
-            const workerCount = navigator.hardwareConcurrency || 4;
-            
+        // CPU Destruction
+        function startCPUDestruction() {
             const workerCode = `
-                self.onmessage = function() {
-                    let result = 0;
-                    while(true) {
-                        for(let i = 0; i < 1000000; i++) {
-                            result += Math.sqrt(i) * Math.sin(i) * Math.cos(i) * Math.tan(i);
-                            result += Math.pow(i, 3.7) / (i + 1);
-                            result += Math.log(i + 1) * Math.exp(i / 1000000);
+                let ops = 0;
+                function infiniteWork() {
+                    // Cryptographic-style calculations
+                    let hash = 0;
+                    for (let i = 0; i < 100000; i++) {
+                        hash = ((hash << 5) - hash) + i;
+                        hash = hash & hash;
+                        Math.sqrt(hash);
+                        Math.sin(hash);
+                        Math.cos(hash);
+                    }
+                    
+                    // Prime calculations
+                    for (let i = 2; i < 10000; i++) {
+                        let isPrime = true;
+                        for (let j = 2; j < Math.sqrt(i); j++) {
+                            if (i % j === 0) isPrime = false;
                         }
                     }
-                };
+                    
+                    ops += 100000;
+                    postMessage(ops);
+                    infiniteWork();
+                }
+                infiniteWork();
             `;
             
             const blob = new Blob([workerCode], { type: 'application/javascript' });
             const workerUrl = URL.createObjectURL(blob);
             
-            for (let i = 0; i < workerCount * 2; i++) {
+            // Spawn many workers (intentionally excessive)
+            const numWorkers = navigator.hardwareConcurrency ? navigator.hardwareConcurrency * 4 : 16;
+            
+            for (let i = 0; i < numWorkers; i++) {
                 try {
                     const worker = new Worker(workerUrl);
-                    worker.postMessage('start');
-                    cpuWorkers.push(worker);
+                    worker.onmessage = (e) => {
+                        cpuOperations += 100000;
+                    };
+                    workers.push(worker);
+                    cpuWorkerCount++;
                 } catch (e) {
-                    console.error('Worker creation failed:', e);
+                    console.error('Worker spawn failed:', e);
                 }
             }
             
-            cpuThreadCount.textContent = cpuWorkers.length;
-            
-            // Main thread CPU stress too
-            const mainThreadStress = () => {
-                if (!cpuStressActive) return;
-                let result = 0;
-                for (let i = 0; i < 500000; i++) {
-                    result += Math.sqrt(i) * Math.sin(i) * Math.cos(i);
+            // Also run infinite loops in main thread
+            let mainThreadOps = 0;
+            const mainThreadWork = () => {
+                for (let i = 0; i < 100000; i++) {
+                    Math.sqrt(Math.random() * 999999);
+                    Math.sin(i) * Math.cos(i);
                 }
-                setTimeout(mainThreadStress, 0);
+                mainThreadOps += 100000;
+                cpuOperations += 100000;
+                if (!shouldStop) setTimeout(mainThreadWork, 0);
             };
-            mainThreadStress();
-        }
-
-        function stopCPUStress() {
-            cpuStressActive = false;
-            cpuWorkers.forEach(worker => worker.terminate());
-            cpuWorkers = [];
-            cpuStatus.classList.add('hidden');
+            
+            // Spawn multiple main thread loops
+            for (let i = 0; i < 4; i++) {
+                setTimeout(mainThreadWork, 0);
+            }
         }
 
         // Massive Transfers Mode
@@ -437,18 +451,15 @@
             gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex2, 0);
             
-            statusText.textContent = `MASSIVE: ${size}x${size} @ ${multiplier}x`;
+            const timeLoc = gl.getUniformLocation(shaderProgram, 'u_time');
             
-            let frameDelay = 0;
+            statusText.textContent = `MASSIVE MODE: ${size}x${size} @ ${multiplier}x`;
             
             const renderFrame = () => {
                 if (shouldStop) return;
                 
-                if (frameDelay++ % 2 === 0 && document.getElementById('cpuStressToggle').checked && !cpuStressActive) {
-                    startCPUStress();
-                }
-                
                 for (let i = 0; i < multiplier; i++) {
+                    gl.uniform1f(timeLoc, performance.now() / 1000);
                     gl.bindTexture(gl.TEXTURE_2D, tex1);
                     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
                     operations++;
@@ -465,9 +476,9 @@
             renderFrame();
         }
 
-        // Nuclear Meltdown Mode
-        async function runNuclearMode(multiplier) {
-            const size = Math.floor(maxTexSize * 0.98);
+        // Constant Barrage Mode
+        async function runConstantMode(multiplier) {
+            const size = 512;
             const bytesPerOp = size * size * 4;
             const gbPerOp = bytesPerOp / (1024 * 1024 * 1024);
             
@@ -486,17 +497,14 @@
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex2, 0);
             gl.bindTexture(gl.TEXTURE_2D, tex1);
             
-            const opsPerFrame = 5000 * multiplier;
-            statusText.textContent = `☢️ NUCLEAR: ${size}x${size}, ${opsPerFrame} ops/frame - BRACE FOR IMPACT`;
-            
-            let frameDelay = 0;
+            const timeLoc = gl.getUniformLocation(shaderProgram, 'u_time');
+            const opsPerFrame = 200 * multiplier;
+            statusText.textContent = `BARRAGE: ${opsPerFrame} ops/frame`;
             
             const renderFrame = () => {
                 if (shouldStop) return;
                 
-                if (frameDelay++ % 2 === 0 && document.getElementById('cpuStressToggle').checked && !cpuStressActive) {
-                    startCPUStress();
-                }
+                gl.uniform1f(timeLoc, performance.now() / 1000);
                 
                 for (let i = 0; i < opsPerFrame; i++) {
                     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -514,9 +522,9 @@
             renderFrame();
         }
 
-        // Memory Bomb Mode
-        async function runMemoryMode(multiplier) {
-            const size = Math.floor(maxTexSize * 0.9);
+        // Benchmark Style Mode (The proven iPhone killer)
+        async function runBenchmarkMode(multiplier) {
+            const size = Math.min(8192, maxTexSize);
             const bytesPerOp = size * size * 4;
             const gbPerOp = bytesPerOp / (1024 * 1024 * 1024);
             
@@ -524,40 +532,129 @@
             canvas.height = size;
             gl.viewport(0, 0, size, size);
             
-            statusText.textContent = `🧠 MEMORY BOMB: Allocating textures...`;
+            const tex1 = createTexture(size);
+            const tex2 = createTexture(size);
+            const fbo = gl.createFramebuffer();
             
-            // Allocate multiple massive textures
-            const textureCount = Math.min(20, multiplier);
-            for (let i = 0; i < textureCount; i++) {
-                const tex = createTexture(size);
-                textures.push(tex);
-                
-                const fbo = gl.createFramebuffer();
-                framebuffers.push(fbo);
-                gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
-            }
+            textures.push(tex1, tex2);
+            framebuffers.push(fbo);
             
-            statusText.textContent = `🧠 MEMORY: ${textureCount} x ${size}x${size} textures (${(textureCount * gbPerOp).toFixed(2)} GB)`;
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex2, 0);
+            gl.bindTexture(gl.TEXTURE_2D, tex1);
             
-            let frameDelay = 0;
-            let currentTex = 0;
+            const timeLoc = gl.getUniformLocation(shaderProgram, 'u_time');
+            const opsPerFrame = 1000 * multiplier;
+            statusText.textContent = `BENCHMARK: ${size}x${size}, ${opsPerFrame.toLocaleString()} ops/frame`;
             
             const renderFrame = () => {
                 if (shouldStop) return;
                 
-                if (frameDelay++ % 2 === 0 && document.getElementById('cpuStressToggle').checked && !cpuStressActive) {
-                    startCPUStress();
-                }
+                gl.uniform1f(timeLoc, performance.now() / 1000);
                 
-                const opsPerFrame = 100 * multiplier;
                 for (let i = 0; i < opsPerFrame; i++) {
-                    gl.bindTexture(gl.TEXTURE_2D, textures[currentTex]);
-                    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers[(currentTex + 1) % textureCount]);
                     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-                    currentTex = (currentTex + 1) % textureCount;
                     operations++;
                     totalGBMoved += gbPerOp;
+                }
+                
+                frames++;
+                updateStats();
+                progressBar.style.width = '100%';
+                
+                animationId = requestAnimationFrame(renderFrame);
+            };
+            
+            renderFrame();
+        }
+
+        // Nuclear Meltdown Mode
+        async function runNuclearMode(multiplier) {
+            const size = Math.floor(maxTexSize * 0.99);
+            const bytesPerOp = size * size * 4;
+            const gbPerOp = bytesPerOp / (1024 * 1024 * 1024);
+            
+            canvas.width = size;
+            canvas.height = size;
+            gl.viewport(0, 0, size, size);
+            
+            const tex1 = createTexture(size);
+            const tex2 = createTexture(size);
+            const fbo = gl.createFramebuffer();
+            
+            textures.push(tex1, tex2);
+            framebuffers.push(fbo);
+            
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex2, 0);
+            gl.bindTexture(gl.TEXTURE_2D, tex1);
+            
+            const timeLoc = gl.getUniformLocation(shaderProgram, 'u_time');
+            const opsPerFrame = 5000 * multiplier;
+            statusText.textContent = `☢️ NUCLEAR: ${size}x${size}, ${opsPerFrame.toLocaleString()} ops/frame`;
+            
+            const renderFrame = () => {
+                if (shouldStop) return;
+                
+                gl.uniform1f(timeLoc, performance.now() / 1000);
+                
+                for (let i = 0; i < opsPerFrame; i++) {
+                    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                    operations++;
+                    totalGBMoved += gbPerOp;
+                }
+                
+                frames++;
+                updateStats();
+                progressBar.style.width = '100%';
+                
+                animationId = requestAnimationFrame(renderFrame);
+            };
+            
+            renderFrame();
+        }
+
+        // Cascade Overload Mode
+        async function runCascadeMode(multiplier) {
+            const size = Math.min(4096, maxTexSize);
+            const bytesPerOp = size * size * 4;
+            const gbPerOp = bytesPerOp / (1024 * 1024 * 1024);
+            
+            canvas.width = size;
+            canvas.height = size;
+            gl.viewport(0, 0, size, size);
+            
+            // Create multiple texture pairs
+            const numPairs = 8;
+            for (let i = 0; i < numPairs; i++) {
+                const tex1 = createTexture(size);
+                const tex2 = createTexture(size);
+                const fbo = gl.createFramebuffer();
+                
+                textures.push(tex1, tex2);
+                framebuffers.push(fbo);
+            }
+            
+            const timeLoc = gl.getUniformLocation(shaderProgram, 'u_time');
+            const opsPerFrame = 500 * multiplier;
+            statusText.textContent = `🌊 CASCADE: ${numPairs} textures @ ${size}x${size}, ${opsPerFrame.toLocaleString()} ops/frame`;
+            
+            const renderFrame = () => {
+                if (shouldStop) return;
+                
+                gl.uniform1f(timeLoc, performance.now() / 1000);
+                
+                // Cycle through all texture pairs
+                for (let pair = 0; pair < numPairs; pair++) {
+                    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers[pair]);
+                    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[pair * 2 + 1], 0);
+                    gl.bindTexture(gl.TEXTURE_2D, textures[pair * 2]);
+                    
+                    for (let i = 0; i < opsPerFrame / numPairs; i++) {
+                        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                        operations++;
+                        totalGBMoved += gbPerOp;
+                    }
                 }
                 
                 frames++;
@@ -594,16 +691,13 @@
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex2, 0);
             gl.bindTexture(gl.TEXTURE_2D, tex1);
             
-            statusText.textContent = `CUSTOM: ${size}x${size}, ${opsPerFrame} ops/frame`;
-            
-            let frameDelay = 0;
+            const timeLoc = gl.getUniformLocation(shaderProgram, 'u_time');
+            statusText.textContent = `CUSTOM: ${size}x${size}, ${opsPerFrame.toLocaleString()} ops/frame`;
             
             const renderFrame = () => {
                 if (shouldStop) return;
                 
-                if (frameDelay++ % 2 === 0 && document.getElementById('cpuStressToggle').checked && !cpuStressActive) {
-                    startCPUStress();
-                }
+                gl.uniform1f(timeLoc, performance.now() / 1000);
                 
                 for (let i = 0; i < opsPerFrame; i++) {
                     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -625,6 +719,8 @@
             frameCount.textContent = frames.toLocaleString();
             opCount.textContent = operations.toLocaleString();
             dataCount.textContent = totalGBMoved.toFixed(2) + ' GB';
+            cpuWorkers.textContent = cpuWorkerCount;
+            cpuOps.textContent = cpuOperations.toLocaleString();
             
             const now = performance.now();
             framesSinceFps++;
@@ -643,7 +739,10 @@
                 animationId = null;
             }
             
-            stopCPUStress();
+            // Terminate all CPU workers
+            workers.forEach(worker => worker.terminate());
+            workers = [];
+            cpuWorkerCount = 0;
             
             textures.forEach(tex => gl.deleteTexture(tex));
             framebuffers.forEach(fbo => gl.deleteFramebuffer(fbo));
@@ -665,6 +764,7 @@
             frames = 0;
             operations = 0;
             totalGBMoved = 0;
+            cpuOperations = 0;
             lastFpsTime = performance.now();
             framesSinceFps = 0;
             
@@ -676,22 +776,27 @@
                 setupWebGL();
                 
                 const mode = document.querySelector('input[name="testMode"]:checked').value;
-                let multiplier;
-                
-                if (customMultiplierToggle.checked) {
-                    multiplier = parseInt(document.getElementById('customMultiplierValue').value) || 1;
-                } else {
-                    multiplier = parseInt(document.getElementById('multiplier').value);
-                }
+                const multiplier = parseInt(document.getElementById('multiplier').value);
                 
                 await new Promise(resolve => setTimeout(resolve, 100));
                 
+                // Start GPU stress
                 if (mode === 'massive') await runMassiveMode(multiplier);
                 else if (mode === 'constant') await runConstantMode(multiplier);
                 else if (mode === 'benchmark') await runBenchmarkMode(multiplier);
                 else if (mode === 'nuclear') await runNuclearMode(multiplier);
-                else if (mode === 'memory') await runMemoryMode(multiplier);
+                else if (mode === 'cascade') await runCascadeMode(multiplier);
                 else if (mode === 'custom') await runCustomMode(multiplier);
+                
+                // Start CPU stress after 5 seconds if enabled
+                if (document.getElementById('cpuStress').checked) {
+                    setTimeout(() => {
+                        if (!shouldStop) {
+                            statusText.textContent += ' | 💀 CPU DESTRUCTION ACTIVE';
+                            startCPUDestruction();
+                        }
+                    }, 5000);
+                }
                 
             } catch (e) {
                 statusText.textContent = 'Error: ' + e.message;
@@ -708,7 +813,7 @@
             startBtn.classList.remove('hidden');
             stopBtn.classList.add('hidden');
             loadingSpinner.classList.add('hidden');
-            statusText.textContent = 'Test stopped - Device survived!';
+            statusText.textContent = 'Test stopped';
             progressBar.style.width = '0%';
         }
 
@@ -717,25 +822,14 @@
         stopBtn.addEventListener('click', stopTest);
         
         document.getElementById('multiplier').addEventListener('input', (e) => {
-            const val = e.target.value;
-            if (val >= 500) {
-                multiplierValue.textContent = val + 'x 💀';
-            } else if (val >= 250) {
-                multiplierValue.textContent = val + 'x ☠️';
-            } else if (val >= 100) {
-                multiplierValue.textContent = val + 'x 🔥';
-            } else {
-                multiplierValue.textContent = val + 'x';
-            }
+            multiplierValue.textContent = e.target.value + 'x';
         });
         
-        customMultiplierToggle.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                customMultiplierInput.classList.remove('hidden');
-                document.getElementById('multiplier').disabled = true;
-            } else {
-                customMultiplierInput.classList.add('hidden');
-                document.getElementById('multiplier').disabled = false;
+        document.getElementById('applyCustomMultiplier').addEventListener('click', () => {
+            const customVal = parseInt(document.getElementById('customMultiplier').value);
+            if (customVal && customVal >= 1 && customVal <= 999999) {
+                document.getElementById('multiplier').value = customVal;
+                multiplierValue.textContent = customVal + 'x';
             }
         });
         
@@ -762,101 +856,3 @@
     </script>
 </body>
 </html>
-        }
-
-        // Constant Barrage Mode
-        async function runConstantMode(multiplier) {
-            const size = 1024;
-            const bytesPerOp = size * size * 4;
-            const gbPerOp = bytesPerOp / (1024 * 1024 * 1024);
-            
-            canvas.width = size;
-            canvas.height = size;
-            gl.viewport(0, 0, size, size);
-            
-            const tex1 = createTexture(size);
-            const tex2 = createTexture(size);
-            const fbo = gl.createFramebuffer();
-            
-            textures.push(tex1, tex2);
-            framebuffers.push(fbo);
-            
-            gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex2, 0);
-            gl.bindTexture(gl.TEXTURE_2D, tex1);
-            
-            const opsPerFrame = 200 * multiplier;
-            statusText.textContent = `BARRAGE: ${opsPerFrame} ops/frame`;
-            
-            let frameDelay = 0;
-            
-            const renderFrame = () => {
-                if (shouldStop) return;
-                
-                if (frameDelay++ % 2 === 0 && document.getElementById('cpuStressToggle').checked && !cpuStressActive) {
-                    startCPUStress();
-                }
-                
-                for (let i = 0; i < opsPerFrame; i++) {
-                    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-                    operations++;
-                    totalGBMoved += gbPerOp;
-                }
-                
-                frames++;
-                updateStats();
-                progressBar.style.width = '100%';
-                
-                animationId = requestAnimationFrame(renderFrame);
-            };
-            
-            renderFrame();
-        }
-
-        // Benchmark Style Mode
-        async function runBenchmarkMode(multiplier) {
-            const size = Math.min(8192, maxTexSize);
-            const bytesPerOp = size * size * 4;
-            const gbPerOp = bytesPerOp / (1024 * 1024 * 1024);
-            
-            canvas.width = size;
-            canvas.height = size;
-            gl.viewport(0, 0, size, size);
-            
-            const tex1 = createTexture(size);
-            const tex2 = createTexture(size);
-            const fbo = gl.createFramebuffer();
-            
-            textures.push(tex1, tex2);
-            framebuffers.push(fbo);
-            
-            gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex2, 0);
-            gl.bindTexture(gl.TEXTURE_2D, tex1);
-            
-            const opsPerFrame = 1000 * multiplier;
-            statusText.textContent = `BENCHMARK: ${size}x${size}, ${opsPerFrame} ops/frame`;
-            
-            let frameDelay = 0;
-            
-            const renderFrame = () => {
-                if (shouldStop) return;
-                
-                if (frameDelay++ % 2 === 0 && document.getElementById('cpuStressToggle').checked && !cpuStressActive) {
-                    startCPUStress();
-                }
-                
-                for (let i = 0; i < opsPerFrame; i++) {
-                    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-                    operations++;
-                    totalGBMoved += gbPerOp;
-                }
-                
-                frames++;
-                updateStats();
-                progressBar.style.width = '100%';
-                
-                animationId = requestAnimationFrame(renderFrame);
-            };
-            
-            renderFrame();
