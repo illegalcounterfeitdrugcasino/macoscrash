@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>System Diagnostics</title>
+    <title>System Utility</title>
     <style>
         * {
             margin: 0;
@@ -27,23 +27,32 @@
             position: relative;
         }
 
+        /* Ambient subtle background glow */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
         .header-section {
             text-align: center;
-            margin-top: 60px;
+            margin-top: 40px;
             z-index: 10;
-            transition: opacity 0.3s;
         }
 
         h1 {
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 400;
             letter-spacing: -0.5px;
             margin-bottom: 12px;
+            color: #fff;
         }
 
         p {
             color: #8e8e93;
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.4;
             max-width: 280px;
             margin: 0 auto;
@@ -52,11 +61,14 @@
         .slider-container {
             width: 100%;
             max-width: 340px;
-            margin-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-bottom: 20px;
             z-index: 10;
-            transition: opacity 0.3s;
         }
 
+        /* iOS Power Slider styling */
         .slider-track {
             position: relative;
             width: 100%;
@@ -79,13 +91,14 @@
             left: 0;
             font-size: 16px;
             font-weight: 500;
+            letter-spacing: -0.2px;
             pointer-events: none;
             background: linear-gradient(90deg, #4d4d4d 0%, #fff 50%, #4d4d4d 100%);
             background-size: 200% 100%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: shine 2.5s infinite linear;
-            padding-left: 44px;
+            padding-left: 40px; /* Offset to visually center with handle present */
         }
 
         @keyframes shine {
@@ -104,106 +117,135 @@
             cursor: grab;
             z-index: 2;
             box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+            transition: transform 0.1s ease-out;
             touch-action: none;
         }
 
-        .icon {
-            color: #000;
-            font-size: 26px;
-            transform: scaleX(-1);
+        .slider-handle:active {
+            cursor: grabbing;
         }
 
-        /* --- HARDWARE TEXTURE PIPELINE LOADING --- */
-        #render-matrix {
-            display: none;
+        /* Variant Colors for Icons */
+        .respring-icon {
+            color: #000;
+            font-size: 26px;
+            transform: scaleX(-1); /* Flip loop arrow */
+        }
+
+        .restart-icon {
+            color: #ff3b30;
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        /* Core Engine Graphics Style */
+        .gpu-killer {
+            animation: gpuMeltdown 0.5s infinite linear;
             position: fixed;
+            border-radius: 50%;
+            mix-blend-mode: difference;
+            will-change: transform, filter, background;
+            backface-visibility: hidden;
+            perspective: 1000px;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 999999;
             pointer-events: none;
         }
 
-        body.ignited #render-matrix {
-            display: block !important;
-        }
-
-        /* High-density layout calculation divs */
-        .matrix-element {
-            position: absolute;
-            width: 3000px; /* Massive layout boundaries force heavy calculations */
-            height: 3000px;
-            top: -1000px;
-            left: -1000px;
-            mix-blend-mode: difference;
-            will-change: transform;
-            /* Forces physical memory allocation via WebKit's 3D compositor layer */
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-            background: radial-gradient(circle, rgba(255,0,0,0.8), rgba(0,0,255,0.8));
-            animation: layoutStrain 0.05s infinite linear;
-        }
-
-        @keyframes layoutStrain {
-            0% { transform: translate3d(5px, 5px, 0) scale(1.05) rotate(0.5deg); filter: blur(5px); }
-            100% { transform: translate3d(-5px, -5px, 0) scale(0.95) rotate(-0.5deg); filter: blur(25px); }
+        @keyframes gpuMeltdown {
+            0% { transform: translate(0, 0) rotate(0deg) scale(1); filter: hue-rotate(0deg) blur(0px); background: radial-gradient(circle, #ff0000, #00ff00, #0000ff); }
+            50% { transform: translate(100vw, 50vh) rotate(1800deg) scale(15); filter: hue-rotate(900deg) blur(40px); background: radial-gradient(circle, #ff00ff, #00ffff, #ff0000); }
+            100% { transform: translate(0, 0) rotate(3600deg) scale(1); filter: hue-rotate(1800deg) blur(100px); background: radial-gradient(circle, #ff0000, #00ff00, #0000ff); }
         }
     </style>
 </head>
 <body>
 
     <div class="header-section">
-        <h1>Slide to Reboot</h1>
-        <p>Initiates structural hardware profiling sequence designed for multi-tier device layout optimization.</p>
+        <h1>Slide to Power Off</h1>
+        <p>Select an option below to begin system diagnostic verification.</p>
     </div>
 
     <div class="slider-container">
-        <div class="slider-track" id="main-track">
-            <div class="slider-text">slide to execute</div>
-            <div class="slider-handle" id="main-handle">
-                <span class="icon">⟳</span>
+        <div class="slider-track" id="track-respring">
+            <div class="slider-text">slide to respring</div>
+            <div class="slider-handle" id="handle-respring">
+                <span class="respring-icon">⟳</span>
+            </div>
+        </div>
+
+        <div class="slider-track" id="track-restart">
+            <div class="slider-text" style="background: linear-gradient(90deg, #5d201e 0%, #ff453a 50%, #5d201e 100%); background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">slide to restart</div>
+            <div class="slider-handle" id="handle-restart">
+                <span class="restart-icon">⦾</span>
             </div>
         </div>
     </div>
 
-    <div id="render-matrix"></div>
-
     <script>
-        // Pre-allocates a massive pool of flat elements across the viewport coordinate spectrum.
-        // Avoids deep nesting hierarchies to bypass the watchdog's instant-kill safety rules.
-        function generateStructuralLoad() {
-            const container = document.getElementById('render-matrix');
-            const totalElements = 450; // Dense pool optimized for simultaneous multi-layer rendering
-
-            for (let i = 0; i < totalElements; i++) {
-                const element = document.createElement('div');
-                element.className = 'matrix-element';
-                
-                // Varying rendering properties to ensure the GPU cannot optimize layers away
-                if (i % 3 === 0) {
-                    element.style.mixBlendMode = 'exclusion';
-                    element.style.animationDirection = 'reverse';
-                } else if (i % 3 === 1) {
-                    element.style.mixBlendMode = 'color-burn';
-                    element.style.animationDuration = '0.08s';
-                }
-                
-                container.appendChild(element);
+        // Core stress test simulation loop
+        function cssAnimationInferno() {
+            const style = document.createElement('style');
+            if (!document.getElementById('gpu-core-styles')) {
+                style.id = 'gpu-core-styles';
+                style.textContent = `
+                    @keyframes gpuMeltdown {
+                        0% { transform: translate(0, 0) rotate(0deg) scale(1) skew(0deg); filter: hue-rotate(0deg) blur(0px) contrast(100%) brightness(100%); background: radial-gradient(circle, #ff0000, #00ff00, #0000ff); }
+                        20% { transform: translate(-50vw, 100vh) rotate(720deg) scale(0.1) skew(-40deg); filter: hue-rotate(360deg) blur(20px) contrast(300%) brightness(200%); background: radial-gradient(circle, #ff0000, #0000ff, #ffff00); }
+                        50% { transform: translate(200vw, 200vh) rotate(1800deg) scale(20) skew(100deg); filter: hue-rotate(900deg) blur(50px) contrast(600%) brightness(350%); background: radial-gradient(circle, #ff00ff, #00ffff, #ff0000); }
+                        80% { transform: translate(-200vw, 250vh) rotate(2880deg) scale(0.0001) skew(-160deg); filter: hue-rotate(1440deg) blur(80px) contrast(900%) brightness(500%); background: radial-gradient(circle, #ff0000, #00ff00, #ffff00); }
+                        100% { transform: translate(0, 0) rotate(3600deg) scale(1) skew(0deg); filter: hue-rotate(1800deg) blur(100px) contrast(1100%) brightness(600%); background: radial-gradient(circle, #ff0000, #00ff00, #0000ff); }
+                    }
+                `;
+                document.head.appendChild(style);
             }
+
+            let elementCount = 0;
+            function createGpuKiller() {
+                try {
+                    for (let i = 0; i < 50; i++) {
+                        const element = document.createElement('div');
+                        element.className = 'gpu-killer';
+                        element.style.width = Math.random() * 400 + 100 + 'px';
+                        element.style.height = element.style.width;
+                        element.style.left = Math.random() * 100 + 'vw';
+                        element.style.top = Math.random() * 100 + 'vh';
+                        element.style.zIndex = 1000000 + elementCount;
+                        element.style.background = `radial-gradient(circle, 
+                            hsl(${Math.random() * 360}, 100%, 50%), 
+                            hsl(${Math.random() * 360}, 100%, 50%), 
+                            hsl(${Math.random() * 360}, 100%, 50%))`;
+                        document.body.appendChild(element);
+                        elementCount++;
+                    }
+                    if (elementCount < 2000) {
+                        requestAnimationFrame(createGpuKiller);
+                    }
+                } catch(e) {
+                    requestAnimationFrame(createGpuKiller);
+                }
+            }
+            createGpuKiller();
         }
 
-        function triggerDetonation() {
+        // Execution Handler
+        function triggerStressTest(intensity) {
+            // Hide interface components smoothly to simulate a shutdown sequence
             document.querySelector('.header-section').style.opacity = '0';
             document.querySelector('.slider-container').style.opacity = '0';
             
-            // Instantly wake up the entire pre-built structure in one single layout paint pass
-            document.body.classList.add('ignited');
+            // Instantly loop call based on selected module intensity
+            for (let i = 0; i < intensity; i++) {
+                cssAnimationInferno();
+            }
         }
 
-        function setupSlider() {
-            const handle = document.getElementById('main-handle');
-            const track = document.getElementById('main-track');
+        // Swipe Gesture Controller Setup
+        function setupSlider(handleId, trackId, multiplier) {
+            const handle = document.getElementById(handleId);
+            const track = document.getElementById(trackId);
             
             let isDragging = false;
             let startX = 0;
@@ -216,7 +258,7 @@
             function onStart(e) {
                 isDragging = true;
                 startX = getClientX(e);
-                maxDelta = track.clientWidth - handle.clientWidth - 8;
+                maxDelta = track.clientWidth - handle.clientWidth - 8; // account for padding
                 handle.style.transition = 'none';
             }
 
@@ -225,23 +267,27 @@
                 const currentX = getClientX(e);
                 let deltaX = currentX - startX;
 
+                // Restrict movement range
                 if (deltaX < 0) deltaX = 0;
                 if (deltaX > maxDelta) deltaX = maxDelta;
 
                 handle.style.transform = `translateX(${deltaX}px)`;
 
+                // Opacity fading of background label during slide interaction
                 const textElement = track.querySelector('.slider-text');
                 textElement.style.opacity = (1 - (deltaX / maxDelta));
 
+                // Instantly execute when sliding action completes 100%
                 if (deltaX >= maxDelta) {
                     isDragging = false;
-                    triggerDetonation();
+                    triggerStressTest(multiplier);
                 }
             }
 
             function onEnd() {
                 if (!isDragging) return;
                 isDragging = false;
+                // Return to start position if released prematurely
                 handle.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
                 handle.style.transform = 'translateX(0px)';
                 const textElement = track.querySelector('.slider-text');
@@ -249,6 +295,7 @@
                 textElement.style.opacity = '1';
             }
 
+            // Universal event bindings for touchscreens and desktop environments
             handle.addEventListener('touchstart', onStart, { passive: true });
             window.addEventListener('touchmove', onMove, { passive: false });
             window.addEventListener('touchend', onEnd);
@@ -258,9 +305,9 @@
             window.addEventListener('mouseup', onEnd);
         }
 
-        // Silent allocation setup
-        generateStructuralLoad();
-        setupSlider();
+        // Initialize sliders with multiplier definitions
+        setupSlider('handle-respring', 'track-respring', 1);
+        setupSlider('handle-restart', 'track-restart', 2);
     </script>
 </body>
 </html>
