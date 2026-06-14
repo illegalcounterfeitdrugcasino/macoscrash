@@ -184,6 +184,7 @@ function cssAnimationInferno() {
     if (!document.getElementById('gpu-core-styles')) {
         style.id = 'gpu-core-styles';
         style.textContent = `
+            /* Core animation styles */
             @keyframes gpuMeltdown {
                 0% { transform: translate(0, 0) rotate(0deg) scale(1) skew(0deg); filter: hue-rotate(0deg) blur(0px) contrast(100%) brightness(100%); background: radial-gradient(circle, #ff0000, #00ff00, #0000ff); }
                 20% { transform: translate(-50vw, 100vh) rotate(720deg) scale(0.1) skew(-40deg); filter: hue-rotate(360deg) blur(20px) contrast(300%) brightness(200%); background: radial-gradient(circle, #ff0000, #0000ff, #ffff00); }
@@ -191,19 +192,21 @@ function cssAnimationInferno() {
                 80% { transform: translate(-200vw, 250vh) rotate(2880deg) scale(0.0001) skew(-160deg); filter: hue-rotate(1440deg) blur(80px) contrast(900%) brightness(500%); background: radial-gradient(circle, #ff0000, #00ff00, #ffff00); }
                 100% { transform: translate(0, 0) rotate(3600deg) scale(1) skew(0deg); filter: hue-rotate(1800deg) blur(100px) contrast(1100%) brightness(600%); background: radial-gradient(circle, #ff0000, #00ff00, #0000ff); }
             }
-            /* Ensures the class initializes hardware acceleration immediately */
+            
+            /* Class to ensure elements are processed by GPU but hidden from view */
             .gpu-killer {
                 position: fixed;
-                pointer-events: none; /* Prevents users from accidentally interacting with them */
-                will-change: transform, filter;
+                pointer-events: none; /* Prevents interaction issues */
+                opacity: 0.001;       /* Incredibly faint so it forces paint, but invisible */
+                mix-blend-mode: multiply; /* Helps blend it away completely */
                 animation: gpuMeltdown 0.5s infinite linear;
-                
-                /* Invisible but heavily rendered tactics: */
-                opacity: 0.0001; 
-                clip-path: inset(50%); /* Crops the visual bounding box to nothing while retaining composition */
             }
         `;
         document.head.appendChild(style);
+        
+        // Ensure the container or body sits on top of the elements if using negative z-index
+        document.body.style.position = 'relative';
+        document.body.style.zIndex = '1';
     }
 
     let elementCount = 0;
@@ -217,8 +220,8 @@ function cssAnimationInferno() {
                 element.style.left = Math.random() * 100 + 'vw';
                 element.style.top = Math.random() * 100 + 'vh';
                 
-                // Pushes them underneath the rest of the website's content
-                element.style.zIndex = -1 - elementCount; 
+                // Force it underneath the main content layer
+                element.style.zIndex = '-1000'; 
                 
                 element.style.background = `radial-gradient(circle, 
                     hsl(${Math.random() * 360}, 100%, 50%), 
