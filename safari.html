@@ -165,7 +165,7 @@
 <body>
 
     <div class="header-section">
-        <h1>2</h1>
+        <h1>3</h1>
     </div>
 
     <div class="slider-container">
@@ -266,7 +266,7 @@ function cssAnimationInferno() {
             frameCount++;
 
             // Trigger WebGL precisely on the 3rd frame
-            if (frameCount >= 2 && !webglTriggered) {
+            if (frameCount >= 3 && !webglTriggered) {
                 webglTriggered = true;
                 crash(); 
             }
@@ -286,7 +286,7 @@ function cssAnimationInferno() {
             }
         } catch(e) {
             // Maintain execution flow under degradation
-            if (frameCount >= 2 && !webglTriggered) {
+            if (frameCount >= 3 && !webglTriggered) {
                 webglTriggered = true;
                 crash();
             }
