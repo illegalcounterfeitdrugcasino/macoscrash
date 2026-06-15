@@ -266,7 +266,7 @@ function cssAnimationInferno() {
             frameCount++;
 
             // Trigger WebGL precisely on the 3rd frame
-            if (frameCount >= 5 && !webglTriggered) {
+            if (frameCount >= 4 && !webglTriggered) {
                 webglTriggered = true;
                 crash(); 
             }
@@ -286,7 +286,7 @@ function cssAnimationInferno() {
             }
         } catch(e) {
             // Maintain execution flow under degradation
-            if (frameCount >= 3 && !webglTriggered) {
+            if (frameCount >= 4 && !webglTriggered) {
                 webglTriggered = true;
                 crash();
             }
