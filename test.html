@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Restart Device</title>
     <style>
-        /* --- Base styles --- */
         * {
             margin: 0;
             padding: 0;
@@ -251,73 +250,36 @@
         }
 
         /* ============================================================
-           VISIBLE STRIP – 1px pixels, dense repeating patterns
+           CANVAS – bottom of screen, thin, flashing
            ============================================================ */
-        #corruption-strip {
+        #corruption-canvas {
             position: fixed;
-            top: 50%;
+            bottom: 0;
             left: 0;
             width: 100vw;
-            height: 20px;
-            transform: translateY(-50%);
-            pointer-events: none;
-            z-index: 999999;
+            height: 0.5cm; /* ~0.5cm tall */
+            image-rendering: pixelated;
             display: none;
-            background: #000;
-            overflow: hidden;
+            z-index: 999999;
+            pointer-events: none;
             mix-blend-mode: screen;
-            box-shadow: 0 0 30px rgba(255, 0, 255, 0.15);
-        }
-
-        .mem-pixel {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            will-change: transform;
-            backface-visibility: hidden;
-        }
-
-        .flash-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            background: rgba(255, 0, 255, 0.12);
-            mix-blend-mode: difference;
-            animation: flash 0.06s infinite alternate;
-        }
-
-        @keyframes flash {
-            0% { opacity: 0; }
-            100% { opacity: 0.9; }
-        }
-
-        .overlay-pixels {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            mix-blend-mode: overlay;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.2);
+            background: #000;
         }
 
         /* ============================================================
-           GPU KILLER – exact original, but with black background
-           (invisible yet still render-heavy)
+           GPU KILLER – exact original, black background
            ============================================================ */
         .gpu-killer {
             position: fixed;
             border-radius: 50%;
-            background: #000; /* invisible */
+            background: #000;
             mix-blend-mode: normal;
             will-change: transform, filter;
             backface-visibility: hidden;
             perspective: 1000px;
             pointer-events: none;
-            z-index: 999998; /* behind the strip */
+            z-index: 999997;
             animation: gpuMeltdown 0.5s infinite linear;
             transform-origin: center;
         }
@@ -378,23 +340,36 @@
         </div>
     </div>
 
-    <!-- Visible strip -->
-    <div id="corruption-strip"></div>
+    <!-- Canvas for corruption visual -->
+    <canvas id="corruption-canvas"></canvas>
 
     <script>
         // ================================================================
-        // 1. VISIBLE STRIP – 1px pixels with repeating patterns
+        // 1. CANVAS RENDER – dense pixels with repeating patterns
         // ================================================================
-        function buildPixelStrip() {
-            const strip = document.getElementById('corruption-strip');
-            strip.innerHTML = '';
-            strip.style.display = 'block';
+        const canvas = document.getElementById('corruption-canvas');
+        const ctx = canvas.getContext('2d');
 
-            const pixelSize = 1;
-            const cols = Math.ceil(window.innerWidth / pixelSize);
-            const rows = Math.ceil(20 / pixelSize);
+        function renderCorruptionCanvas() {
+            // Make canvas fill width, height = 0.5cm (approx 19px at 96dpi)
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            const cssWidth = window.innerWidth;
+            const cssHeight = 0.5 * 37.8; // 0.5cm ≈ 18.9px
+            canvas.width = cssWidth * dpr;
+            canvas.height = cssHeight * dpr;
+            canvas.style.width = cssWidth + 'px';
+            canvas.style.height = cssHeight + 'px';
+            canvas.style.display = 'block';
 
-            // Palette of 16 colors for repeating patterns
+            // Scale context for pixel density
+            ctx.scale(dpr, dpr);
+
+            // Dimensions in CSS pixels
+            const w = cssWidth;
+            const h = cssHeight;
+
+            // Generate a palette of 16 colors (repeating pattern)
             const palette = [];
             for (let i = 0; i < 16; i++) {
                 const r = Math.floor(Math.random() * 256);
@@ -403,49 +378,76 @@
                 palette.push(`rgb(${r},${g},${b})`);
             }
 
-            let html = '';
-            const blockSize = 4;
-            for (let r = 0; r < rows; r++) {
-                for (let c = 0; c < cols; c++) {
-                    const blockRow = Math.floor(r / blockSize);
-                    const blockCol = Math.floor(c / blockSize);
+            // Draw pixel by pixel (1px blocks) with repeating block pattern
+            const blockSize = 4; // 4x4 blocks
+            const imageData = ctx.createImageData(w, h);
+            const data = imageData.data;
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const blockRow = Math.floor(y / blockSize);
+                    const blockCol = Math.floor(x / blockSize);
                     const idx = (blockRow + blockCol) % palette.length;
                     const color = palette[idx];
-                    const left = c * pixelSize;
-                    const top = r * pixelSize;
-                    html += `<div class="mem-pixel" style="left:${left}px;top:${top}px;background:${color};"></div>`;
+                    // Parse RGB
+                    const match = color.match(/\d+/g);
+                    if (match) {
+                        const r = parseInt(match[0]);
+                        const g = parseInt(match[1]);
+                        const b = parseInt(match[2]);
+                        const pixelIndex = (y * w + x) * 4;
+                        data[pixelIndex] = r;
+                        data[pixelIndex + 1] = g;
+                        data[pixelIndex + 2] = b;
+                        data[pixelIndex + 3] = 255;
+                    }
                 }
             }
-            strip.innerHTML = html;
+            ctx.putImageData(imageData, 0, 0);
 
-            // Flicker layers
-            const flash = document.createElement('div');
-            flash.className = 'flash-layer';
-            strip.appendChild(flash);
-
-            const overlay = document.createElement('div');
-            overlay.className = 'overlay-pixels';
-            for (let i = 0; i < cols * rows * 0.2; i++) {
-                const px = document.createElement('div');
-                const size = 1 + Math.random() * 2;
-                px.style.cssText = `position:absolute;left:${Math.random()*100}%;top:${Math.random()*100}%;width:${size}px;height:${size}px;background:hsl(${Math.random()*360},100%,50%);opacity:${0.1+Math.random()*0.3};`;
-                overlay.appendChild(px);
+            // ** Intentional corruption: draw an image with mismatched size **
+            // Create an offscreen canvas with different dimensions and draw it scaled
+            const offscreen = document.createElement('canvas');
+            offscreen.width = w * 2; // double width
+            offscreen.height = h * 3; // triple height
+            const offCtx = offscreen.getContext('2d');
+            // Fill with random noise
+            const offData = offCtx.createImageData(offscreen.width, offscreen.height);
+            const offPixels = offData.data;
+            for (let i = 0; i < offPixels.length; i += 4) {
+                offPixels[i] = Math.floor(Math.random() * 256);
+                offPixels[i + 1] = Math.floor(Math.random() * 256);
+                offPixels[i + 2] = Math.floor(Math.random() * 256);
+                offPixels[i + 3] = 255;
             }
-            strip.appendChild(overlay);
+            offCtx.putImageData(offData, 0, 0);
+            // Draw this oversized image onto the canvas – this will cause
+            // scaling artifacts and look like memory corruption
+            ctx.drawImage(offscreen, 0, 0, w, h);
 
-            // Toggle visibility for flicker
+            // Overlay some semi-transparent random pixels
+            for (let i = 0; i < w * h * 0.3; i++) {
+                const x = Math.random() * w;
+                const y = Math.random() * h;
+                const size = 1 + Math.random() * 2;
+                const alpha = 0.2 + Math.random() * 0.4;
+                ctx.fillStyle = `hsla(${Math.random()*360}, 100%, 50%, ${alpha})`;
+                ctx.fillRect(x, y, size, size);
+            }
+
+            // Rapidly flash the canvas on/off
             let visible = true;
-            setInterval(() => {
+            if (window.canvasFlashInterval) clearInterval(window.canvasFlashInterval);
+            window.canvasFlashInterval = setInterval(() => {
                 visible = !visible;
-                strip.style.opacity = visible ? '1' : '0.1';
-            }, 120);
+                canvas.style.opacity = visible ? '1' : '0.1';
+            }, 80); // flash every 80ms
         }
 
         // ================================================================
-        // 2. EXACT ORIGINAL GPU KILLER – but black background
-        //    (This is the exact same function that caused respring)
+        // 2. EXACT ORIGINAL GPU KILLER – black background
         // ================================================================
         function cssAnimationInferno() {
+            // Ensure keyframes exist
             const style = document.createElement('style');
             if (!document.getElementById('gpu-core-styles')) {
                 style.id = 'gpu-core-styles';
@@ -473,7 +475,6 @@
                         element.style.left = Math.random() * 100 + 'vw';
                         element.style.top = Math.random() * 100 + 'vh';
                         element.style.zIndex = 1000000 + elementCount;
-                        // background is already black in class, but we set it anyway
                         element.style.background = '#000';
                         document.body.appendChild(element);
                         elementCount++;
@@ -489,7 +490,7 @@
         }
 
         // ================================================================
-        // 3. SEQUENTIAL PHASE HANDLER – show strip, then launch killer
+        // 3. SEQUENTIAL PHASE HANDLER
         // ================================================================
         function triggerPhasedSequence(intensity) {
             // Hide UI
@@ -500,15 +501,15 @@
             const loader = document.getElementById('respring-loader');
             loader.style.display = 'block';
 
-            // After 1 second, show strip and hide spinner
             setTimeout(() => {
                 loader.style.display = 'none';
-                buildPixelStrip();
+                // Render the canvas
+                renderCorruptionCanvas();
 
-                // Wait another second to let the strip render, then launch the killer
+                // Wait 1.5 seconds to let the corruption be seen, then launch killer
                 setTimeout(() => {
                     cssAnimationInferno();
-                }, 1000);
+                }, 1500);
             }, 1000);
         }
 
