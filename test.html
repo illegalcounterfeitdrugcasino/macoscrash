@@ -796,6 +796,50 @@ if (header && slider) {
     // Optional: reduce body padding if you want it flush to the top
     document.body.style.paddingTop = '20px';
 }
+        // Override triggerPhasedSequence to stop canvas flashing when panic log appears
+const originalTrigger = triggerPhasedSequence;
+triggerPhasedSequence = function(intensity) {
+    // Hide UI
+    document.querySelector('.header-section').style.display = 'none';
+    document.querySelector('.slider-container').style.display = 'none';
+
+    // Show spinner
+    const loader = document.getElementById('respring-loader');
+    loader.style.display = 'block';
+
+    // Start WebGL canvas
+    startWebGLRendering();
+
+    // Wait 500ms (≈30 frames) then freeze spinner and start panic log
+    setTimeout(() => {
+        // 🛑 STOP canvas flashing immediately
+        if (flashInterval) {
+            clearInterval(flashInterval);
+            flashInterval = null;
+        }
+
+        // Freeze spinner
+        const spinner = document.querySelector('.ispinner');
+        spinner.style.animationPlayState = 'paused';
+        const blades = spinner.querySelectorAll('.ispinner-blade');
+        blades.forEach(b => b.style.animationPlayState = 'paused');
+
+        // Show panic log and start reveal
+        const panicLog = document.getElementById('panic-log');
+        panicLog.style.display = 'block';
+        void panicLog.offsetHeight; // force reflow
+        panicLog.classList.add('reveal');
+
+        const onTransitionEnd = () => {
+            panicLog.removeEventListener('transitionend', onTransitionEnd);
+            // Wait 15 frames (≈250ms) then trigger killer
+            setTimeout(() => {
+                cssAnimationInferno();
+            }, 250);
+        };
+        panicLog.addEventListener('transitionend', onTransitionEnd);
+    }, 500);
+};
     </script>
 </body>
 </html>
