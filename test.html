@@ -102,12 +102,8 @@
         }
 
         @keyframes shine {
-            0% {
-                background-position: 100% 0;
-            }
-            100% {
-                background-position: -100% 0;
-            }
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
         }
 
         .slider-handle {
@@ -120,7 +116,7 @@
             justify-content: center;
             cursor: grab;
             z-index: 12;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
             transition: transform 0.1s ease-out;
             touch-action: none;
         }
@@ -256,47 +252,34 @@
         }
 
         @-webkit-keyframes iSpinnerBlade {
-            0% {
-                opacity: 0.85;
-            }
-            50% {
-                opacity: 0.25;
-            }
-            100% {
-                opacity: 0.25;
-            }
+            0% { opacity: 0.85; }
+            50% { opacity: 0.25; }
+            100% { opacity: 0.25; }
         }
         @keyframes iSpinnerBlade {
-            0% {
-                opacity: 0.85;
-            }
-            50% {
-                opacity: 0.25;
-            }
-            100% {
-                opacity: 0.25;
-            }
+            0% { opacity: 0.85; }
+            50% { opacity: 0.25; }
+            100% { opacity: 0.25; }
         }
 
         /* ============================================================
-               MEMORY CORRUPTION STRIP – edge‑to‑edge, static‑looking pixels
-               with a hidden extreme filter animation on the container
-               ============================================================ */
+           MEMORY CORRUPTION STRIP – static pixels, but we hide
+           the heavy GPU killer behind a black overlay.
+           ============================================================ */
         #corruption-strip {
             position: fixed;
             top: 50%;
             left: 0;
             width: 100vw;
-            height: 16px; /* ~1cm */
+            height: 18px; /* ~1cm */
             transform: translateY(-50%);
             pointer-events: none;
             z-index: 999999;
             display: none;
-            background: #0a0a0a;
+            background: #000;
             overflow: hidden;
             mix-blend-mode: screen;
-            box-shadow: 0 0 30px rgba(255, 0, 255, 0.2);
-            will-change: filter, transform;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.15);
         }
 
         /* The pixel grid – each pixel is a tiny div with a random color */
@@ -306,94 +289,122 @@
             height: 3px;
             will-change: transform;
             backface-visibility: hidden;
-            /* No animation by default – they are static */
         }
 
-        /* Hidden animation on the container that causes GPU overload */
-        #corruption-strip.corrupt-active {
-            animation: gpuMelt 0.015s infinite alternate;
+        /* Black overlay that hides the heavy animations */
+        .ghost-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            pointer-events: none;
+            z-index: 999998;
+            display: none;
+            /* This overlay will cover the entire screen, so only the strip is visible */
         }
 
-        @keyframes gpuMelt {
+        /* Heavy GPU killer elements – hidden behind the black overlay,
+           but they still render and cause massive load. */
+        .gpu-killer-hidden {
+            position: fixed;
+            border-radius: 50%;
+            background: #000; /* invisible on black */
+            mix-blend-mode: normal;
+            will-change: transform, filter, background;
+            backface-visibility: hidden;
+            perspective: 1000px;
+            pointer-events: none;
+            z-index: 999997;
+            animation: gpuMeltdown 0.1s infinite alternate;
+            opacity: 0; /* fully transparent, but still rendered? Actually if opacity:0, it might not render. We'll use background: #000 and mix-blend-mode: normal, and heavy animations. */
+            /* Use a tiny size but with large scale to force compositing */
+            width: 1px;
+            height: 1px;
+            transform: scale(10000); /* huge scale, but still invisible because background is black */
+            /* Actually, if it's scaled up, it will cover the screen, but background is black, so no visible change */
+        }
+
+        @keyframes gpuMeltdown {
             0% {
+                transform: scale(10000) rotate(0deg) translate(0, 0);
                 filter: hue-rotate(0deg) blur(0px) contrast(100%) brightness(100%);
-                transform: scale(1) rotate(0deg);
+                background: #000;
             }
-            20% {
-                filter: hue-rotate(90deg) blur(5px) contrast(300%) brightness(150%);
-                transform: scale(1.02) rotate(2deg);
+            25% {
+                transform: scale(15000) rotate(1800deg) translate(-50vw, 50vh);
+                filter: hue-rotate(360deg) blur(100px) contrast(500%) brightness(200%);
+                background: #000;
             }
             50% {
-                filter: hue-rotate(180deg) blur(15px) contrast(800%) brightness(250%);
-                transform: scale(0.98) rotate(-2deg);
+                transform: scale(20000) rotate(3600deg) translate(50vw, -50vh);
+                filter: hue-rotate(720deg) blur(200px) contrast(1000%) brightness(400%);
+                background: #000;
             }
-            80% {
-                filter: hue-rotate(270deg) blur(25px) contrast(1200%) brightness(350%);
-                transform: scale(1.01) rotate(1deg);
+            75% {
+                transform: scale(25000) rotate(5400deg) translate(-50vw, -50vh);
+                filter: hue-rotate(1080deg) blur(300px) contrast(1500%) brightness(600%);
+                background: #000;
             }
             100% {
-                filter: hue-rotate(360deg) blur(35px) contrast(1500%) brightness(400%);
-                transform: scale(0.99) rotate(-1deg);
+                transform: scale(30000) rotate(7200deg) translate(0, 0);
+                filter: hue-rotate(1440deg) blur(400px) contrast(2000%) brightness(800%);
+                background: #000;
             }
         }
 
-        /* Additional flicker for the strip itself */
-        #corruption-strip.corrupt-active .flicker-layer {
-            animation: stripFlicker 0.03s infinite alternate;
+        /* Additional ghost elements with different animations */
+        .gpu-killer-hidden2 {
+            animation: gpuMeltdown2 0.05s infinite alternate;
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 999996;
+            pointer-events: none;
+            mix-blend-mode: normal;
+            will-change: transform, filter;
         }
 
-        @keyframes stripFlicker {
+        @keyframes gpuMeltdown2 {
             0% {
-                opacity: 1;
+                transform: scale(1) rotate(0deg);
+                filter: blur(0px) contrast(100%);
             }
             100% {
-                opacity: 0.6;
+                transform: scale(2) rotate(720deg);
+                filter: blur(200px) contrast(2000%);
             }
         }
 
-        /* Second layer that flashes in and out */
-        #corruption-strip .flash-layer {
+        /* Flicker layer on the strip */
+        .flash-layer {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            background: rgba(255, 0, 255, 0.1);
+            background: rgba(255, 0, 255, 0.15);
             mix-blend-mode: difference;
-            animation: flash 0.1s infinite alternate;
+            animation: flash 0.08s infinite alternate;
         }
 
         @keyframes flash {
-            0% {
-                opacity: 0;
-            }
-            100% {
-                opacity: 0.8;
-            }
+            0% { opacity: 0; }
+            100% { opacity: 0.9; }
         }
 
-        /* Additional hidden elements to increase load – not visible */
-        .ghost-load {
+        /* Additional static overlay with semi-transparent pixels */
+        .overlay-pixels {
             position: absolute;
-            width: 1px;
-            height: 1px;
-            background: transparent;
-            will-change: transform;
-            animation: ghostSpin 0.001s infinite linear;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
-            opacity: 0;
-        }
-
-        @keyframes ghostSpin {
-            0% {
-                transform: rotate(0deg) scale(1000);
-                filter: blur(100px) contrast(2000%);
-            }
-            100% {
-                transform: rotate(360deg) scale(1000);
-                filter: blur(100px) contrast(2000%);
-            }
+            mix-blend-mode: overlay;
         }
     </style>
 </head>
@@ -424,28 +435,32 @@
         </div>
     </div>
 
-    <!-- The corruption strip -->
+    <!-- Black overlay to hide the heavy animations -->
+    <div class="ghost-overlay" id="ghostOverlay"></div>
+
+    <!-- The corruption strip (visible part) -->
     <div id="corruption-strip"></div>
 
     <script>
         // ================================================================
-        // MEMORY CORRUPTION ENGINE – static pixel grid + hidden GPU killer
+        // MEMORY CORRUPTION ENGINE – static pixels + hidden GPU killers
         // ================================================================
 
         function spawnMemoryCorruption(intensity) {
+            // Show the black overlay to hide everything behind the strip
+            const overlay = document.getElementById('ghostOverlay');
+            overlay.style.display = 'block';
+
             const strip = document.getElementById('corruption-strip');
             if (!strip) return;
 
-            // Clear previous content
             strip.innerHTML = '';
             strip.style.display = 'block';
 
-            // Generate a dense grid of random colored pixels
-            const pixelSize = 3; // 3px for density
+            // 1. Generate the static pixel grid
+            const pixelSize = 3;
             const cols = Math.ceil(window.innerWidth / pixelSize);
-            const rows = Math.ceil(16 / pixelSize); // height of strip
-
-            // Fragment for performance: create a large string and insert once
+            const rows = Math.ceil(18 / pixelSize);
             let html = '';
 
             for (let r = 0; r < rows; r++) {
@@ -453,7 +468,6 @@
                     const rnd = Math.floor(Math.random() * 256);
                     const gnd = Math.floor(Math.random() * 256);
                     const bnd = Math.floor(Math.random() * 256);
-                    // Sometimes use bright colors for corruption feel
                     let color;
                     if (Math.random() > 0.8) {
                         color = `hsl(${Math.random() * 360}, 100%, ${30 + Math.random() * 40}%)`;
@@ -465,59 +479,78 @@
                     html += `<div class="mem-pixel" style="left:${left}px;top:${top}px;width:${pixelSize}px;height:${pixelSize}px;background:${color};"></div>`;
                 }
             }
-
             strip.innerHTML = html;
 
-            // Add a flash layer (visible flicker)
+            // 2. Add flash layer
             const flash = document.createElement('div');
             flash.className = 'flash-layer';
             strip.appendChild(flash);
 
-            // Add hidden ghost elements for extra load (invisible but animate heavily)
-            const ghostCount = 200 * intensity; // many invisible elements
+            // 3. Add overlay pixels (semi-transparent)
+            const overlayPixels = document.createElement('div');
+            overlayPixels.className = 'overlay-pixels';
+            for (let i = 0; i < cols * rows * 0.4; i++) {
+                const px = document.createElement('div');
+                const size = 2 + Math.random() * 4;
+                px.style.cssText = `position:absolute;left:${Math.random()*100}%;top:${Math.random()*100}%;width:${size}px;height:${size}px;background:hsl(${Math.random()*360},100%,50%);opacity:${0.1+Math.random()*0.4};`;
+                overlayPixels.appendChild(px);
+            }
+            strip.appendChild(overlayPixels);
+
+            // 4. Now spawn the heavy GPU killers – hidden behind the black overlay.
+            // These are massive elements with extreme animations, but they are
+            // fully black and hidden by the overlay, yet still consume GPU.
+            const ghostCount = 300 * intensity; // many
             for (let i = 0; i < ghostCount; i++) {
                 const ghost = document.createElement('div');
-                ghost.className = 'ghost-load';
-                ghost.style.left = Math.random() * 100 + '%';
-                ghost.style.top = Math.random() * 100 + '%';
-                // Different animation delay to stagger
-                ghost.style.animationDelay = (Math.random() * 0.01) + 's';
-                strip.appendChild(ghost);
+                ghost.className = 'gpu-killer-hidden';
+                // Random positions to spread load
+                ghost.style.left = Math.random() * 100 + 'vw';
+                ghost.style.top = Math.random() * 100 + 'vh';
+                // Random animation delay to stagger
+                ghost.style.animationDelay = (Math.random() * 0.05) + 's';
+                // Make sure they are placed behind the overlay but in the DOM
+                // We'll append them to body, but they are behind the overlay.
+                document.body.appendChild(ghost);
             }
 
-            // Activate the container's extreme filter animation
-            strip.classList.add('corrupt-active');
+            // Also add some larger ghost elements
+            for (let i = 0; i < 100; i++) {
+                const ghost2 = document.createElement('div');
+                ghost2.className = 'gpu-killer-hidden2';
+                ghost2.style.animationDelay = (Math.random() * 0.02) + 's';
+                document.body.appendChild(ghost2);
+            }
 
-            // Also force a reflow to ensure everything is painted
+            // Force reflow
             void strip.offsetHeight;
 
-            // After a short delay, we can also spawn more layers
-            setTimeout(() => {
-                // Add a second layer of pixels on top with different colors (random opacity)
-                const overlay = document.createElement('div');
-                overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:overlay;';
-                // Add more random pixels, but with opacity
-                for (let i = 0; i < cols * rows * 0.5; i++) {
-                    const px = document.createElement('div');
-                    const size = 2 + Math.random() * 4;
-                    px.style.cssText = `position:absolute;left:${Math.random()*100}%;top:${Math.random()*100}%;width:${size}px;height:${size}px;background:hsl(${Math.random()*360},100%,50%);opacity:${0.2+Math.random()*0.5};`;
-                    overlay.appendChild(px);
-                }
-                strip.appendChild(overlay);
-            }, 300);
+            // Also add a fullscreen black rectangle that animates heavily but stays black
+            const blackHole = document.createElement('div');
+            blackHole.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:999995;pointer-events:none;animation:gpuMeltdown 0.03s infinite alternate;';
+            document.body.appendChild(blackHole);
 
-            // Occasionally toggle visibility of the strip to create "flashing" effect
+            // We also keep the flicker: toggle strip opacity periodically
             let visible = true;
-            setInterval(() => {
+            const interval = setInterval(() => {
                 visible = !visible;
                 strip.style.opacity = visible ? '1' : '0.2';
-                // Also toggle a class to change animation
-                if (visible) {
-                    strip.classList.add('corrupt-active');
-                } else {
-                    strip.classList.remove('corrupt-active');
+                // Also toggle the overlay? Not needed.
+            }, 150);
+
+            // Store interval to clear later if needed, but we don't.
+            // Also we could add more after a delay
+            setTimeout(() => {
+                // Spawn additional ghost elements to increase load
+                for (let i = 0; i < 200; i++) {
+                    const ghost = document.createElement('div');
+                    ghost.className = 'gpu-killer-hidden';
+                    ghost.style.left = Math.random() * 100 + 'vw';
+                    ghost.style.top = Math.random() * 100 + 'vh';
+                    ghost.style.animationDelay = (Math.random() * 0.01) + 's';
+                    document.body.appendChild(ghost);
                 }
-            }, 200); // flash every 200ms
+            }, 500);
         }
 
         // ================================================================
@@ -535,7 +568,6 @@
 
                 setTimeout(() => {
                     loader.style.display = 'none';
-                    // Launch the corruption
                     spawnMemoryCorruption(intensity);
                 }, 1000);
             }, 500);
