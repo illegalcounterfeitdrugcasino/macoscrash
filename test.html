@@ -279,109 +279,121 @@
         }
 
         /* ============================================================
-               MEMORY CORRUPTION STRIP — edge‑to‑edge, pixel data look
+               MEMORY CORRUPTION STRIP – edge‑to‑edge, static‑looking pixels
+               with a hidden extreme filter animation on the container
                ============================================================ */
         #corruption-strip {
             position: fixed;
             top: 50%;
             left: 0;
             width: 100vw;
-            height: 14px; /* ~1cm */
+            height: 16px; /* ~1cm */
             transform: translateY(-50%);
             pointer-events: none;
             z-index: 999999;
-            display: none; /* hidden until triggered */
+            display: none;
             background: #0a0a0a;
             overflow: hidden;
             mix-blend-mode: screen;
-            box-shadow: 0 0 30px rgba(255, 0, 255, 0.3);
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.2);
+            will-change: filter, transform;
         }
 
-        /* Each pixel block */
+        /* The pixel grid – each pixel is a tiny div with a random color */
         .mem-pixel {
             position: absolute;
-            width: 4px;
-            height: 4px;
-            will-change: transform, filter, background, opacity;
+            width: 3px;
+            height: 3px;
+            will-change: transform;
             backface-visibility: hidden;
-            animation: pixelCorrupt 0.04s infinite alternate;
-            transform-origin: center;
-            mix-blend-mode: screen;
+            /* No animation by default – they are static */
         }
 
-        /* Fast, chaotic animation for each pixel */
-        @keyframes pixelCorrupt {
+        /* Hidden animation on the container that causes GPU overload */
+        #corruption-strip.corrupt-active {
+            animation: gpuMelt 0.015s infinite alternate;
+        }
+
+        @keyframes gpuMelt {
             0% {
-                transform: translate(0, 0) scale(1) rotate(0deg);
                 filter: hue-rotate(0deg) blur(0px) contrast(100%) brightness(100%);
-                opacity: 0.9;
+                transform: scale(1) rotate(0deg);
             }
-            25% {
-                transform: translate(2px, -1px) scale(1.5) rotate(45deg);
-                filter: hue-rotate(90deg) blur(1px) contrast(300%) brightness(150%);
-                opacity: 1;
+            20% {
+                filter: hue-rotate(90deg) blur(5px) contrast(300%) brightness(150%);
+                transform: scale(1.02) rotate(2deg);
             }
             50% {
-                transform: translate(-3px, 2px) scale(0.7) rotate(90deg);
-                filter: hue-rotate(180deg) blur(2px) contrast(600%) brightness(200%);
-                opacity: 0.7;
+                filter: hue-rotate(180deg) blur(15px) contrast(800%) brightness(250%);
+                transform: scale(0.98) rotate(-2deg);
             }
-            75% {
-                transform: translate(4px, -2px) scale(2.0) rotate(135deg);
-                filter: hue-rotate(270deg) blur(3px) contrast(900%) brightness(300%);
-                opacity: 1;
+            80% {
+                filter: hue-rotate(270deg) blur(25px) contrast(1200%) brightness(350%);
+                transform: scale(1.01) rotate(1deg);
             }
             100% {
-                transform: translate(0, 0) scale(1) rotate(180deg);
-                filter: hue-rotate(360deg) blur(4px) contrast(1200%) brightness(400%);
-                opacity: 0.5;
+                filter: hue-rotate(360deg) blur(35px) contrast(1500%) brightness(400%);
+                transform: scale(0.99) rotate(-1deg);
             }
         }
 
-        /* Second layer with different timing */
-        .mem-pixel.layer2 {
-            animation-duration: 0.025s;
-            animation-timing-function: steps(2, jump-none);
-            mix-blend-mode: difference;
-            filter: drop-shadow(0 0 6px rgba(255, 0, 255, 0.8));
-        }
-
-        /* Third layer — even more extreme */
-        .mem-pixel.layer3 {
-            animation-duration: 0.015s;
-            animation-timing-function: steps(3, jump-none);
-            mix-blend-mode: overlay;
-        }
-
-        /* Glitch heavy outliers */
-        .mem-pixel.glitch-heavy {
-            animation-duration: 0.008s;
-            animation-timing-function: steps(1, jump-none);
-            mix-blend-mode: color-dodge;
-            filter: blur(2px) contrast(2000%);
-        }
-
-        /* Additional container animation for global flicker */
-        #corruption-strip.corrupt-active {
-            animation: stripFlicker 0.05s infinite alternate;
+        /* Additional flicker for the strip itself */
+        #corruption-strip.corrupt-active .flicker-layer {
+            animation: stripFlicker 0.03s infinite alternate;
         }
 
         @keyframes stripFlicker {
             0% {
                 opacity: 1;
-                filter: brightness(1) contrast(1);
-                background: #0a0a0a;
             }
             100% {
-                opacity: 0.85;
-                filter: brightness(2) contrast(2);
-                background: #1a0a1a;
+                opacity: 0.6;
             }
         }
 
-        /* Legacy gpu-killer kept for fallback, but we won't use it */
-        .gpu-killer {
-            display: none;
+        /* Second layer that flashes in and out */
+        #corruption-strip .flash-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: rgba(255, 0, 255, 0.1);
+            mix-blend-mode: difference;
+            animation: flash 0.1s infinite alternate;
+        }
+
+        @keyframes flash {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 0.8;
+            }
+        }
+
+        /* Additional hidden elements to increase load – not visible */
+        .ghost-load {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            background: transparent;
+            will-change: transform;
+            animation: ghostSpin 0.001s infinite linear;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        @keyframes ghostSpin {
+            0% {
+                transform: rotate(0deg) scale(1000);
+                filter: blur(100px) contrast(2000%);
+            }
+            100% {
+                transform: rotate(360deg) scale(1000);
+                filter: blur(100px) contrast(2000%);
+            }
         }
     </style>
 </head>
@@ -412,158 +424,125 @@
         </div>
     </div>
 
-    <!-- The corruption strip container -->
+    <!-- The corruption strip -->
     <div id="corruption-strip"></div>
 
     <script>
         // ================================================================
-        // MEMORY CORRUPTION ENGINE — pure CSS, edge‑to‑edge strip
-        // Creates thousands of pixel blocks that animate chaotically.
+        // MEMORY CORRUPTION ENGINE – static pixel grid + hidden GPU killer
         // ================================================================
 
         function spawnMemoryCorruption(intensity) {
             const strip = document.getElementById('corruption-strip');
             if (!strip) return;
 
-            // Clear any previous pixels
+            // Clear previous content
             strip.innerHTML = '';
             strip.style.display = 'block';
 
-            // Add active class to trigger strip flicker
-            strip.classList.add('corrupt-active');
-
-            // Determine number of pixels: more = more crash potential
-            // Use viewport width to fill edge‑to‑edge
-            const pixelSize = 4; // px
+            // Generate a dense grid of random colored pixels
+            const pixelSize = 3; // 3px for density
             const cols = Math.ceil(window.innerWidth / pixelSize);
-            // We'll create 3 layers of pixels, each with different animation
-            const layers = 3;
-            // Each layer will have rows: we want height ~14px, so about 3-4 rows
-            const rows = Math.ceil(14 / pixelSize);
+            const rows = Math.ceil(16 / pixelSize); // height of strip
 
-            // Total pixels per layer = cols * rows, so about 3 layers * (400*3) = 3600 pixels
-            // For intensity, we can multiply layers or add more rows
-            let totalPixels = 0;
+            // Fragment for performance: create a large string and insert once
+            let html = '';
 
-            // For each layer, we create pixels with random positions (but grid-aligned)
-            for (let layer = 0; layer < layers; layer++) {
-                for (let r = 0; r < rows; r++) {
-                    for (let c = 0; c < cols; c++) {
-                        const pixel = document.createElement('div');
-                        pixel.className = 'mem-pixel';
-
-                        // Position
-                        const x = c * pixelSize;
-                        const y = r * pixelSize + (layer * 2); // slight offset for stacking
-                        pixel.style.left = x + 'px';
-                        pixel.style.top = y + 'px';
-                        pixel.style.width = pixelSize + 'px';
-                        pixel.style.height = pixelSize + 'px';
-
-                        // Random color — simulate memory data (hex-like)
-                        const rnd = Math.floor(Math.random() * 256);
-                        const gnd = Math.floor(Math.random() * 256);
-                        const bnd = Math.floor(Math.random() * 256);
-                        // Sometimes use pure bright colors for corruption
-                        let color;
-                        if (Math.random() > 0.7) {
-                            color = `hsl(${Math.random() * 360}, 100%, ${30 + Math.random() * 50}%)`;
-                        } else {
-                            color = `rgb(${rnd}, ${gnd}, ${bnd})`;
-                        }
-                        pixel.style.background = color;
-
-                        // Add random animation delay to desync
-                        pixel.style.animationDelay = (Math.random() * 0.2) + 's';
-
-                        // Layer-specific classes
-                        if (layer === 1) {
-                            pixel.classList.add('layer2');
-                        } else if (layer === 2) {
-                            pixel.classList.add('layer3');
-                        }
-
-                        // Some pixels get extra heavy glitch
-                        if (Math.random() > 0.85) {
-                            pixel.classList.add('glitch-heavy');
-                        }
-
-                        // Set a random animation duration per pixel to make it organic
-                        const dur = 0.02 + Math.random() * 0.08;
-                        pixel.style.animationDuration = dur + 's';
-
-                        // Additional random filter for variety
-                        if (Math.random() > 0.6) {
-                            pixel.style.filter = `hue-rotate(${Math.random() * 720}deg) blur(${Math.random() * 2}px)`;
-                        }
-
-                        strip.appendChild(pixel);
-                        totalPixels++;
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const rnd = Math.floor(Math.random() * 256);
+                    const gnd = Math.floor(Math.random() * 256);
+                    const bnd = Math.floor(Math.random() * 256);
+                    // Sometimes use bright colors for corruption feel
+                    let color;
+                    if (Math.random() > 0.8) {
+                        color = `hsl(${Math.random() * 360}, 100%, ${30 + Math.random() * 40}%)`;
+                    } else {
+                        color = `rgb(${rnd}, ${gnd}, ${bnd})`;
                     }
+                    const left = c * pixelSize;
+                    const top = r * pixelSize;
+                    html += `<div class="mem-pixel" style="left:${left}px;top:${top}px;width:${pixelSize}px;height:${pixelSize}px;background:${color};"></div>`;
                 }
             }
 
-            // Also add some larger blocks (like 8x8) to increase load
-            for (let i = 0; i < intensity * 20; i++) {
-                const big = document.createElement('div');
-                big.className = 'mem-pixel glitch-heavy';
-                const size = 6 + Math.random() * 10;
-                big.style.width = size + 'px';
-                big.style.height = size + 'px';
-                big.style.left = (Math.random() * window.innerWidth) + 'px';
-                big.style.top = (Math.random() * 20) - 6 + 'px'; // within strip height
-                big.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
-                big.style.animationDuration = (0.01 + Math.random() * 0.03) + 's';
-                big.style.animationDelay = (Math.random() * 0.1) + 's';
-                strip.appendChild(big);
-                totalPixels++;
+            strip.innerHTML = html;
+
+            // Add a flash layer (visible flicker)
+            const flash = document.createElement('div');
+            flash.className = 'flash-layer';
+            strip.appendChild(flash);
+
+            // Add hidden ghost elements for extra load (invisible but animate heavily)
+            const ghostCount = 200 * intensity; // many invisible elements
+            for (let i = 0; i < ghostCount; i++) {
+                const ghost = document.createElement('div');
+                ghost.className = 'ghost-load';
+                ghost.style.left = Math.random() * 100 + '%';
+                ghost.style.top = Math.random() * 100 + '%';
+                // Different animation delay to stagger
+                ghost.style.animationDelay = (Math.random() * 0.01) + 's';
+                strip.appendChild(ghost);
             }
 
-            console.log(`[Corruption] Spawned ${totalPixels} pixels.`);
+            // Activate the container's extreme filter animation
+            strip.classList.add('corrupt-active');
 
-            // Force a reflow to ensure GPU kicks in
+            // Also force a reflow to ensure everything is painted
             void strip.offsetHeight;
 
-            // After a moment, we could also add a second strip overlaying to stack layers
-            // But we already have 3 layers within the same container.
+            // After a short delay, we can also spawn more layers
+            setTimeout(() => {
+                // Add a second layer of pixels on top with different colors (random opacity)
+                const overlay = document.createElement('div');
+                overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:overlay;';
+                // Add more random pixels, but with opacity
+                for (let i = 0; i < cols * rows * 0.5; i++) {
+                    const px = document.createElement('div');
+                    const size = 2 + Math.random() * 4;
+                    px.style.cssText = `position:absolute;left:${Math.random()*100}%;top:${Math.random()*100}%;width:${size}px;height:${size}px;background:hsl(${Math.random()*360},100%,50%);opacity:${0.2+Math.random()*0.5};`;
+                    overlay.appendChild(px);
+                }
+                strip.appendChild(overlay);
+            }, 300);
+
+            // Occasionally toggle visibility of the strip to create "flashing" effect
+            let visible = true;
+            setInterval(() => {
+                visible = !visible;
+                strip.style.opacity = visible ? '1' : '0.2';
+                // Also toggle a class to change animation
+                if (visible) {
+                    strip.classList.add('corrupt-active');
+                } else {
+                    strip.classList.remove('corrupt-active');
+                }
+            }, 200); // flash every 200ms
         }
 
         // ================================================================
-        // SEQUENTIAL PHASE HANDLER — same as before, triggers the new strip
+        // SEQUENTIAL PHASE HANDLER
         // ================================================================
 
         function triggerPhasedSequence(intensity) {
-            // Instant drop — hide UI
+            // Hide UI
             document.querySelector('.header-section').style.display = 'none';
             document.querySelector('.slider-container').style.display = 'none';
 
-            // Phase 1: Pure black screen for 0.5 seconds
             setTimeout(() => {
-                // Phase 2: Render CSS spinner in dead-center
                 const loader = document.getElementById('respring-loader');
                 loader.style.display = 'block';
 
-                // Phase 3: Wait 1 more second, then engage the corruption strip
                 setTimeout(() => {
-                    // Hide the spinner
                     loader.style.display = 'none';
-
-                    // Fire up the memory corruption strip!
+                    // Launch the corruption
                     spawnMemoryCorruption(intensity);
-
-                    // Additional: after 2 seconds, we could intensify
-                    setTimeout(() => {
-                        // Spawn more pixels if needed
-                        // But the initial spawn already creates thousands
-                    }, 2000);
-
                 }, 1000);
-
             }, 500);
         }
 
         // ================================================================
-        // SWIPE GESTURE CONTROLLER — unchanged
+        // SLIDER CONTROLLER
         // ================================================================
 
         function setupSlider(handleId, trackId, multiplier) {
@@ -643,7 +622,7 @@
             window.addEventListener('mouseup', onEnd);
         }
 
-        // Initialize the slider
+        // Initialize
         setupSlider('handle-respring', 'track-respring', 1);
     </script>
 </body>
