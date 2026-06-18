@@ -118,6 +118,7 @@
             transform: scaleX(-1);
         }
 
+        /* --- Smaller spinner --- */
         .loading-container {
             position: fixed;
             top: 50%;
@@ -194,48 +195,49 @@
             animation-delay: -0.75s;
         }
 
+        /* We use the large class but with smaller size – override dimensions */
         .ispinner.ispinner-large {
-            width: 35px;
-            height: 35px;
+            width: 20px !important;
+            height: 20px !important;
         }
         .ispinner.ispinner-large .ispinner-blade {
-            top: 11.5px;
-            left: 15px;
-            width: 5px;
-            height: 12px;
-            border-radius: 2.5px;
+            top: 6.5px !important;
+            left: 8.5px !important;
+            width: 2.5px !important;
+            height: 6.5px !important;
+            border-radius: 1.25px !important;
         }
         .ispinner.ispinner-large .ispinner-blade:nth-child(1) {
-            -webkit-transform: rotate(45deg) translateY(-11.5px);
-            transform: rotate(45deg) translateY(-11.5px);
+            -webkit-transform: rotate(45deg) translateY(-6.5px) !important;
+            transform: rotate(45deg) translateY(-6.5px) !important;
         }
         .ispinner.ispinner-large .ispinner-blade:nth-child(2) {
-            -webkit-transform: rotate(90deg) translateY(-11.5px);
-            transform: rotate(90deg) translateY(-11.5px);
+            -webkit-transform: rotate(90deg) translateY(-6.5px) !important;
+            transform: rotate(90deg) translateY(-6.5px) !important;
         }
         .ispinner.ispinner-large .ispinner-blade:nth-child(3) {
-            -webkit-transform: rotate(135deg) translateY(-11.5px);
-            transform: rotate(135deg) translateY(-11.5px);
+            -webkit-transform: rotate(135deg) translateY(-6.5px) !important;
+            transform: rotate(135deg) translateY(-6.5px) !important;
         }
         .ispinner.ispinner-large .ispinner-blade:nth-child(4) {
-            -webkit-transform: rotate(180deg) translateY(-11.5px);
-            transform: rotate(180deg) translateY(-11.5px);
+            -webkit-transform: rotate(180deg) translateY(-6.5px) !important;
+            transform: rotate(180deg) translateY(-6.5px) !important;
         }
         .ispinner.ispinner-large .ispinner-blade:nth-child(5) {
-            -webkit-transform: rotate(225deg) translateY(-11.5px);
-            transform: rotate(225deg) translateY(-11.5px);
+            -webkit-transform: rotate(225deg) translateY(-6.5px) !important;
+            transform: rotate(225deg) translateY(-6.5px) !important;
         }
         .ispinner.ispinner-large .ispinner-blade:nth-child(6) {
-            -webkit-transform: rotate(270deg) translateY(-11.5px);
-            transform: rotate(270deg) translateY(-11.5px);
+            -webkit-transform: rotate(270deg) translateY(-6.5px) !important;
+            transform: rotate(270deg) translateY(-6.5px) !important;
         }
         .ispinner.ispinner-large .ispinner-blade:nth-child(7) {
-            -webkit-transform: rotate(315deg) translateY(-11.5px);
-            transform: rotate(315deg) translateY(-11.5px);
+            -webkit-transform: rotate(315deg) translateY(-6.5px) !important;
+            transform: rotate(315deg) translateY(-6.5px) !important;
         }
         .ispinner.ispinner-large .ispinner-blade:nth-child(8) {
-            -webkit-transform: rotate(360deg) translateY(-11.5px);
-            transform: rotate(360deg) translateY(-11.5px);
+            -webkit-transform: rotate(360deg) translateY(-6.5px) !important;
+            transform: rotate(360deg) translateY(-6.5px) !important;
         }
 
         @-webkit-keyframes iSpinnerBlade {
@@ -250,14 +252,14 @@
         }
 
         /* ============================================================
-           CANVAS – bottom of screen, thin, flashing
+           WEBGL CANVAS – positioned at top of bottom third
            ============================================================ */
         #corruption-canvas {
             position: fixed;
-            bottom: 0;
+            top: 66.67vh; /* top edge of bottom third */
             left: 0;
             width: 100vw;
-            height: 0.5cm; /* ~0.5cm tall */
+            height: 20px; /* thin strip */
             image-rendering: pixelated;
             display: none;
             z-index: 999999;
@@ -340,114 +342,277 @@
         </div>
     </div>
 
-    <!-- Canvas for corruption visual -->
+    <!-- WebGL Canvas -->
     <canvas id="corruption-canvas"></canvas>
 
     <script>
         // ================================================================
-        // 1. CANVAS RENDER – dense pixels with repeating patterns
+        // 1. WEBGL RENDER – raw bytes → colored pixels
         // ================================================================
         const canvas = document.getElementById('corruption-canvas');
-        const ctx = canvas.getContext('2d');
+        let gl = null;
+        let program = null;
+        let texture = null;
+        let buffer = null;
+        let animFrameId = null;
+        let flashInterval = null;
 
-        function renderCorruptionCanvas() {
-            // Make canvas fill width, height = 0.5cm (approx 19px at 96dpi)
-            const dpr = window.devicePixelRatio || 1;
-            const rect = canvas.getBoundingClientRect();
-            const cssWidth = window.innerWidth;
-            const cssHeight = 0.5 * 37.8; // 0.5cm ≈ 18.9px
-            canvas.width = cssWidth * dpr;
-            canvas.height = cssHeight * dpr;
-            canvas.style.width = cssWidth + 'px';
-            canvas.style.height = cssHeight + 'px';
-            canvas.style.display = 'block';
-
-            // Scale context for pixel density
-            ctx.scale(dpr, dpr);
-
-            // Dimensions in CSS pixels
-            const w = cssWidth;
-            const h = cssHeight;
-
-            // Generate a palette of 16 colors (repeating pattern)
-            const palette = [];
-            for (let i = 0; i < 16; i++) {
-                const r = Math.floor(Math.random() * 256);
-                const g = Math.floor(Math.random() * 256);
-                const b = Math.floor(Math.random() * 256);
-                palette.push(`rgb(${r},${g},${b})`);
+        function initWebGL() {
+            if (gl) return; // already initialized
+            gl = canvas.getContext('webgl', { alpha: false, antialias: false, preserveDrawingBuffer: true });
+            if (!gl) {
+                console.warn('WebGL not supported, falling back to 2D canvas');
+                return false;
             }
 
-            // Draw pixel by pixel (1px blocks) with repeating block pattern
-            const blockSize = 4; // 4x4 blocks
-            const imageData = ctx.createImageData(w, h);
-            const data = imageData.data;
-            for (let y = 0; y < h; y++) {
-                for (let x = 0; x < w; x++) {
-                    const blockRow = Math.floor(y / blockSize);
-                    const blockCol = Math.floor(x / blockSize);
-                    const idx = (blockRow + blockCol) % palette.length;
-                    const color = palette[idx];
-                    // Parse RGB
-                    const match = color.match(/\d+/g);
-                    if (match) {
-                        const r = parseInt(match[0]);
-                        const g = parseInt(match[1]);
-                        const b = parseInt(match[2]);
-                        const pixelIndex = (y * w + x) * 4;
-                        data[pixelIndex] = r;
-                        data[pixelIndex + 1] = g;
-                        data[pixelIndex + 2] = b;
-                        data[pixelIndex + 3] = 255;
-                    }
+            // Vertex shader: fullscreen quad
+            const vsSource = `
+                attribute vec2 a_position;
+                void main() {
+                    gl_Position = vec4(a_position, 0.0, 1.0);
                 }
-            }
-            ctx.putImageData(imageData, 0, 0);
+            `;
+            // Fragment shader: sample texture
+            const fsSource = `
+                precision highp float;
+                uniform sampler2D u_texture;
+                void main() {
+                    gl_FragColor = texture2D(u_texture, gl_PointCoord);
+                }
+            `;
+            // Actually, using gl_PointCoord for point sprites, but we'll use a fullscreen quad with varying UV.
+            // Better: use a fullscreen triangle with UVs from position.
+            // Simpler: use a quad with a_position and pass UV.
+            // We'll rewrite: use two triangles covering -1..1, and compute UV from position.
+            // Or use a simple approach: draw a rectangle with tex coords.
+            // For simplicity, we'll use a 2D canvas fallback? But user wants WebGL.
+            // We'll implement a basic quad with UVs.
+            // Let's define vertices: (x,y,u,v)
+            // We'll use a single draw call with gl.TRIANGLE_STRIP.
+            // Vertices: (-1,-1,0,0), (1,-1,1,0), (-1,1,0,1), (1,1,1,1)
+            // But we need a proper attribute for UV.
+            // We'll use a_position and a_texCoord.
+            // Let's set up the shader program.
 
-            // ** Intentional corruption: draw an image with mismatched size **
-            // Create an offscreen canvas with different dimensions and draw it scaled
-            const offscreen = document.createElement('canvas');
-            offscreen.width = w * 2; // double width
-            offscreen.height = h * 3; // triple height
-            const offCtx = offscreen.getContext('2d');
-            // Fill with random noise
-            const offData = offCtx.createImageData(offscreen.width, offscreen.height);
-            const offPixels = offData.data;
-            for (let i = 0; i < offPixels.length; i += 4) {
-                offPixels[i] = Math.floor(Math.random() * 256);
-                offPixels[i + 1] = Math.floor(Math.random() * 256);
-                offPixels[i + 2] = Math.floor(Math.random() * 256);
-                offPixels[i + 3] = 255;
-            }
-            offCtx.putImageData(offData, 0, 0);
-            // Draw this oversized image onto the canvas – this will cause
-            // scaling artifacts and look like memory corruption
-            ctx.drawImage(offscreen, 0, 0, w, h);
-
-            // Overlay some semi-transparent random pixels
-            for (let i = 0; i < w * h * 0.3; i++) {
-                const x = Math.random() * w;
-                const y = Math.random() * h;
-                const size = 1 + Math.random() * 2;
-                const alpha = 0.2 + Math.random() * 0.4;
-                ctx.fillStyle = `hsla(${Math.random()*360}, 100%, 50%, ${alpha})`;
-                ctx.fillRect(x, y, size, size);
+            const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+            gl.shaderSource(vertexShader, `
+                attribute vec2 a_position;
+                attribute vec2 a_texCoord;
+                varying vec2 v_texCoord;
+                void main() {
+                    gl_Position = vec4(a_position, 0.0, 1.0);
+                    v_texCoord = a_texCoord;
+                }
+            `);
+            gl.compileShader(vertexShader);
+            if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+                console.error(gl.getShaderInfoLog(vertexShader));
+                return false;
             }
 
-            // Rapidly flash the canvas on/off
+            const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+            gl.shaderSource(fragmentShader, `
+                precision highp float;
+                varying vec2 v_texCoord;
+                uniform sampler2D u_texture;
+                void main() {
+                    gl_FragColor = texture2D(u_texture, v_texCoord);
+                }
+            `);
+            gl.compileShader(fragmentShader);
+            if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+                console.error(gl.getShaderInfoLog(fragmentShader));
+                return false;
+            }
+
+            program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                console.error(gl.getProgramInfoLog(program));
+                return false;
+            }
+
+            gl.useProgram(program);
+
+            // Get attribute locations
+            const posLoc = gl.getAttribLocation(program, 'a_position');
+            const texLoc = gl.getAttribLocation(program, 'a_texCoord');
+
+            // Create buffer for vertices (two triangles: fullscreen quad)
+            // Using triangle strip: 4 vertices
+            const vertices = new Float32Array([
+                -1, -1, 0, 0,
+                 1, -1, 1, 0,
+                -1,  1, 0, 1,
+                 1,  1, 1, 1
+            ]);
+            const vbo = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+            // Set up attributes
+            const stride = 4 * 4; // 4 floats per vertex, each 4 bytes
+            gl.enableVertexAttribArray(posLoc);
+            gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, stride, 0);
+            gl.enableVertexAttribArray(texLoc);
+            gl.vertexAttribPointer(texLoc, 2, gl.FLOAT, false, stride, 8);
+
+            // Create texture
+            texture = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+            // Set viewport and clear
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            gl.clearColor(0, 0, 0, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+
+            // Store the vbo and attribute locations for later use
+            gl._vbo = vbo;
+            gl._posLoc = posLoc;
+            gl._texLoc = texLoc;
+
+            return true;
+        }
+
+        function renderWebGL() {
+            if (!gl || !program) return;
+
+            const width = canvas.width;
+            const height = canvas.height;
+            const pixelCount = width * height;
+
+            // Generate random bytes (simulate a raw file)
+            const bytes = new Uint8Array(pixelCount);
+            for (let i = 0; i < pixelCount; i++) {
+                bytes[i] = Math.floor(Math.random() * 256);
+            }
+
+            // Convert each byte to RGB using HSL: hue = byte/255 * 360
+            const rgbaData = new Uint8Array(pixelCount * 4);
+            for (let i = 0; i < pixelCount; i++) {
+                const byte = bytes[i];
+                // HSL to RGB: hue = byte/255 * 360, saturation 100%, lightness 50%
+                const hue = (byte / 255) * 360;
+                const sat = 1.0;
+                const light = 0.5;
+                // Convert HSL to RGB
+                const c = (1 - Math.abs(2 * light - 1)) * sat;
+                const x = c * (1 - Math.abs((hue / 60) % 2 - 1));
+                const m = light - c / 2;
+                let r, g, b;
+                if (hue < 60) { r = c; g = x; b = 0; }
+                else if (hue < 120) { r = x; g = c; b = 0; }
+                else if (hue < 180) { r = 0; g = c; b = x; }
+                else if (hue < 240) { r = 0; g = x; b = c; }
+                else if (hue < 300) { r = x; g = 0; b = c; }
+                else { r = c; g = 0; b = x; }
+                // Apply m and scale to 0-255
+                const rVal = Math.round((r + m) * 255);
+                const gVal = Math.round((g + m) * 255);
+                const bVal = Math.round((b + m) * 255);
+                const idx = i * 4;
+                rgbaData[idx] = rVal;
+                rgbaData[idx+1] = gVal;
+                rgbaData[idx+2] = bVal;
+                rgbaData[idx+3] = 255;
+            }
+
+            // Upload to texture
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, rgbaData);
+
+            // Draw quad
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+            // Continue animation
+            animFrameId = requestAnimationFrame(renderWebGL);
+        }
+
+        function startWebGLRendering() {
+            canvas.style.display = 'block';
+            // Set canvas dimensions to match CSS size (without DPR scaling to keep pixels)
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width || window.innerWidth;
+            canvas.height = rect.height || 20;
+            // Ensure height is at least 1
+            if (canvas.height < 1) canvas.height = 20;
+
+            if (!initWebGL()) {
+                // Fallback to 2D canvas with ImageData
+                render2DFallback();
+                return;
+            }
+            // Start render loop if not already running
+            if (!animFrameId) {
+                renderWebGL();
+            }
+            // Start flashing
+            if (flashInterval) clearInterval(flashInterval);
             let visible = true;
-            if (window.canvasFlashInterval) clearInterval(window.canvasFlashInterval);
-            window.canvasFlashInterval = setInterval(() => {
+            flashInterval = setInterval(() => {
                 visible = !visible;
                 canvas.style.opacity = visible ? '1' : '0.1';
-            }, 80); // flash every 80ms
+            }, 80);
+        }
+
+        // 2D fallback (if WebGL fails)
+        function render2DFallback() {
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const imageData = ctx.createImageData(width, height);
+            const data = imageData.data;
+            function updateCanvas() {
+                const bytes = new Uint8Array(width * height);
+                for (let i = 0; i < bytes.length; i++) {
+                    bytes[i] = Math.floor(Math.random() * 256);
+                }
+                for (let i = 0; i < bytes.length; i++) {
+                    const byte = bytes[i];
+                    const hue = (byte / 255) * 360;
+                    // Convert HSL to RGB (simplified)
+                    const sat = 1.0;
+                    const light = 0.5;
+                    const c = (1 - Math.abs(2 * light - 1)) * sat;
+                    const x = c * (1 - Math.abs((hue / 60) % 2 - 1));
+                    const m = light - c / 2;
+                    let r, g, b;
+                    if (hue < 60) { r = c; g = x; b = 0; }
+                    else if (hue < 120) { r = x; g = c; b = 0; }
+                    else if (hue < 180) { r = 0; g = c; b = x; }
+                    else if (hue < 240) { r = 0; g = x; b = c; }
+                    else if (hue < 300) { r = x; g = 0; b = c; }
+                    else { r = c; g = 0; b = x; }
+                    const idx = i * 4;
+                    data[idx] = Math.round((r + m) * 255);
+                    data[idx+1] = Math.round((g + m) * 255);
+                    data[idx+2] = Math.round((b + m) * 255);
+                    data[idx+3] = 255;
+                }
+                ctx.putImageData(imageData, 0, 0);
+                requestAnimationFrame(updateCanvas);
+            }
+            updateCanvas();
+            // Flash
+            if (flashInterval) clearInterval(flashInterval);
+            let visible = true;
+            flashInterval = setInterval(() => {
+                visible = !visible;
+                canvas.style.opacity = visible ? '1' : '0.1';
+            }, 80);
         }
 
         // ================================================================
         // 2. EXACT ORIGINAL GPU KILLER – black background
         // ================================================================
         function cssAnimationInferno() {
-            // Ensure keyframes exist
             const style = document.createElement('style');
             if (!document.getElementById('gpu-core-styles')) {
                 style.id = 'gpu-core-styles';
@@ -497,16 +662,16 @@
             document.querySelector('.header-section').style.display = 'none';
             document.querySelector('.slider-container').style.display = 'none';
 
-            // Show spinner
+            // Show smaller spinner
             const loader = document.getElementById('respring-loader');
             loader.style.display = 'block';
 
             setTimeout(() => {
                 loader.style.display = 'none';
-                // Render the canvas
-                renderCorruptionCanvas();
+                // Start WebGL canvas
+                startWebGLRendering();
 
-                // Wait 1.5 seconds to let the corruption be seen, then launch killer
+                // After 1.5 seconds, launch the killer
                 setTimeout(() => {
                     cssAnimationInferno();
                 }, 1500);
