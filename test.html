@@ -118,7 +118,7 @@
             transform: scaleX(-1);
         }
 
-        /* --- Smaller spinner --- */
+        /* --- Spinner (small) --- */
         .loading-container {
             position: fixed;
             top: 50%;
@@ -195,7 +195,6 @@
             animation-delay: -0.75s;
         }
 
-        /* We use the large class but with smaller size – override dimensions */
         .ispinner.ispinner-large {
             width: 20px !important;
             height: 20px !important;
@@ -251,15 +250,13 @@
             100% { opacity: 0.25; }
         }
 
-        /* ============================================================
-           WEBGL CANVAS – positioned at top of bottom third
-           ============================================================ */
+        /* --- WebGL Canvas (top of bottom third) --- */
         #corruption-canvas {
             position: fixed;
-            top: 66.67vh; /* top edge of bottom third */
+            top: 66.67vh;
             left: 0;
             width: 100vw;
-            height: 20px; /* thin strip */
+            height: 20px;
             image-rendering: pixelated;
             display: none;
             z-index: 999999;
@@ -269,9 +266,37 @@
             background: #000;
         }
 
-        /* ============================================================
-           GPU KILLER – exact original, black background
-           ============================================================ */
+        /* --- Panic Log Overlay --- */
+        #panic-log {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999999;
+            display: none;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 20px;
+            overflow: hidden;
+            clip-path: inset(0 0 100% 0);
+            transition: clip-path 0.5s ease-in-out;
+        }
+        #panic-log.reveal {
+            clip-path: inset(0 0 0 0);
+        }
+        #panic-log pre {
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 6px;
+            line-height: 1.2;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin: 0;
+            letter-spacing: 0.1px;
+        }
+
+        /* --- GPU Killer (invisible) --- */
         .gpu-killer {
             position: fixed;
             border-radius: 50%;
@@ -329,6 +354,7 @@
         </div>
     </div>
 
+    <!-- Spinner -->
     <div class="loading-container" id="respring-loader">
         <div class="ispinner ispinner-large">
             <div class="ispinner-blade"></div>
@@ -342,8 +368,78 @@
         </div>
     </div>
 
-    <!-- WebGL Canvas -->
+    <!-- Canvas for corruption -->
     <canvas id="corruption-canvas"></canvas>
+
+    <!-- Panic Log -->
+    <div id="panic-log">
+        <pre>panic(cpu 0 caller 0xffffff801d423a50): Unhandled Cyclone implementation specific error. state=0xffffff8019df46c0 esr=0xbe000000 far=0xffffff8019d37000
+lsu_err_sts:0x8200000000000017, fed_err_sts:0x12, mmu_err_sts:0
+l2c_err_sts:0x100003fc00000080, l2c_err_adr:0x18001202220020, l2c_err_inf:0x1
+
+Debugger message: panic
+OS version: Not set yet
+Kernel version: Darwin Kernel Version 14.0.0: Fri Feb 21 19:40:58 PST 2014; root:xnu-2423.10.67~1/RELEASE_ARM64_S5L8960X
+Kernel slide:     0x000000001d200000
+Kernel text base: 0xffffff801d402000
+   Boot    : 0x00000000 0x00000000
+   Sleep   : 0x00000000 0x00000000
+   Wake    : 0x00000000 0x00000000
+   Calendar: 0x00000009d 0x000e2846
+
+Panicked task 0xffffff80004ddba0: 6431 pages, 81 threads; pid 0: kernel_task
+panicked thread: 0xffffff8000648880, backtrace: 0xffffff8019df4540
+0xffffff801d564a00
+0xffffff801d427968
+0xffffff801d405ce0
+0xffffff801d423a50
+0xffffff801d421394
+0xffffff801e8cb5e0
+0xffffff801da8b7ec
+0xffffff801da8c050
+0xffffff801da2108c
+0xffffff801df94028
+0xffffff801d77f368
+0xffffff801d509f1c
+0xffffff801d426380
+
+Task 0xffffff80004ddba0: 6431 pages, 81 threads; pid 0: kernel_task
+Debugger message: panic
+OS version: Not set yet
+Kernel version: Darwin Kernel Version 14.0.0: Fri Feb 21 19:40:58 PST 2014; root:xnu-2423.10.67~1/RELEASE_ARM64_S5L8960X
+iBoot version: iBoot-1940.10.58
+secure boot?: YES
+Paniclog version: 2
+Kernel slide:     0x000000001d200000
+Kernel text base: 0xffffff801d402000
+Epoch Time:         sec         usec
+   Boot    : 0x00000000 0x00000000
+   Sleep   : 0x00000000 0x00000000
+   Wake    : 0x00000000 0x00000000
+   Calendar: 0x00000009e 0x00050932
+
+Panicked task 0xffffff80004ddba0: 6431 pages, 81 threads; pid 0: kernel_task
+panicked thread: 0xffffff8000648880, backtrace: 0xffffff8019df4590
+    lr: 0xffffff801d427974  fp: 0xffffff8019df45e0
+    lr: 0xffffff801d405ce0  fp: 0xffffff8019df4640
+    lr: 0xffffff801d423a50  fp: 0xffffff8019df46a0
+    lr: 0xffffff801d421394  fp: 0xffffff8019df46b0
+    lr: 0xffffff801e8cb5e0  fp: 0xffffff8019df4a20
+    lr: 0xffffff801da8b7ec  fp: 0xffffff8019df4b20
+    lr: 0xffffff801da8c050  fp: 0xffffff8019df4b70
+    lr: 0xffffff801da2108c  fp: 0xffffff8019df4ba0
+    lr: 0xffffff801df94028  fp: 0xffffff8019df4be0
+    lr: 0xffffff801d77f368  fp: 0xffffff8019df4c10
+    lr: 0xffffff801d509f1c  fp: 0xffffff8019df4ca0
+    lr: 0xffffff801d426380  fp: 0xffffff8000000000
+
+********* Dumping thread state and stacks *********
+
+Task 0xffffff80004ddba0: 6431 pages, 81 threads; pid 0: kernel_task
+thread 0xffffff8001d88d5f0
+kernel state:
+  x0: 0x0000000000000000  x1: 0x0000000000000000  x2: 0x0000000000000000  x3: panic: We are hanging here...001d76ce7400000000   esr: 0x00000000         far:</pre>
+    </div>
 
     <script>
         // ================================================================
@@ -353,49 +449,19 @@
         let gl = null;
         let program = null;
         let texture = null;
-        let buffer = null;
         let animFrameId = null;
         let flashInterval = null;
 
         function initWebGL() {
-            if (gl) return; // already initialized
+            if (gl) return true;
             gl = canvas.getContext('webgl', { alpha: false, antialias: false, preserveDrawingBuffer: true });
             if (!gl) {
-                console.warn('WebGL not supported, falling back to 2D canvas');
+                console.warn('WebGL not supported');
                 return false;
             }
 
-            // Vertex shader: fullscreen quad
+            // Vertex shader
             const vsSource = `
-                attribute vec2 a_position;
-                void main() {
-                    gl_Position = vec4(a_position, 0.0, 1.0);
-                }
-            `;
-            // Fragment shader: sample texture
-            const fsSource = `
-                precision highp float;
-                uniform sampler2D u_texture;
-                void main() {
-                    gl_FragColor = texture2D(u_texture, gl_PointCoord);
-                }
-            `;
-            // Actually, using gl_PointCoord for point sprites, but we'll use a fullscreen quad with varying UV.
-            // Better: use a fullscreen triangle with UVs from position.
-            // Simpler: use a quad with a_position and pass UV.
-            // We'll rewrite: use two triangles covering -1..1, and compute UV from position.
-            // Or use a simple approach: draw a rectangle with tex coords.
-            // For simplicity, we'll use a 2D canvas fallback? But user wants WebGL.
-            // We'll implement a basic quad with UVs.
-            // Let's define vertices: (x,y,u,v)
-            // We'll use a single draw call with gl.TRIANGLE_STRIP.
-            // Vertices: (-1,-1,0,0), (1,-1,1,0), (-1,1,0,1), (1,1,1,1)
-            // But we need a proper attribute for UV.
-            // We'll use a_position and a_texCoord.
-            // Let's set up the shader program.
-
-            const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-            gl.shaderSource(vertexShader, `
                 attribute vec2 a_position;
                 attribute vec2 a_texCoord;
                 varying vec2 v_texCoord;
@@ -403,22 +469,25 @@
                     gl_Position = vec4(a_position, 0.0, 1.0);
                     v_texCoord = a_texCoord;
                 }
-            `);
+            `;
+            const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+            gl.shaderSource(vertexShader, vsSource);
             gl.compileShader(vertexShader);
             if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
                 console.error(gl.getShaderInfoLog(vertexShader));
                 return false;
             }
 
-            const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-            gl.shaderSource(fragmentShader, `
+            const fsSource = `
                 precision highp float;
                 varying vec2 v_texCoord;
                 uniform sampler2D u_texture;
                 void main() {
                     gl_FragColor = texture2D(u_texture, v_texCoord);
                 }
-            `);
+            `;
+            const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+            gl.shaderSource(fragmentShader, fsSource);
             gl.compileShader(fragmentShader);
             if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
                 console.error(gl.getShaderInfoLog(fragmentShader));
@@ -436,12 +505,9 @@
 
             gl.useProgram(program);
 
-            // Get attribute locations
             const posLoc = gl.getAttribLocation(program, 'a_position');
             const texLoc = gl.getAttribLocation(program, 'a_texCoord');
 
-            // Create buffer for vertices (two triangles: fullscreen quad)
-            // Using triangle strip: 4 vertices
             const vertices = new Float32Array([
                 -1, -1, 0, 0,
                  1, -1, 1, 0,
@@ -452,14 +518,12 @@
             gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
             gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
-            // Set up attributes
-            const stride = 4 * 4; // 4 floats per vertex, each 4 bytes
+            const stride = 4 * 4;
             gl.enableVertexAttribArray(posLoc);
             gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, stride, 0);
             gl.enableVertexAttribArray(texLoc);
             gl.vertexAttribPointer(texLoc, 2, gl.FLOAT, false, stride, 8);
 
-            // Create texture
             texture = gl.createTexture();
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -467,12 +531,10 @@
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-            // Set viewport and clear
             gl.viewport(0, 0, canvas.width, canvas.height);
             gl.clearColor(0, 0, 0, 1);
             gl.clear(gl.COLOR_BUFFER_BIT);
 
-            // Store the vbo and attribute locations for later use
             gl._vbo = vbo;
             gl._posLoc = posLoc;
             gl._texLoc = texLoc;
@@ -486,22 +548,17 @@
             const width = canvas.width;
             const height = canvas.height;
             const pixelCount = width * height;
-
-            // Generate random bytes (simulate a raw file)
             const bytes = new Uint8Array(pixelCount);
             for (let i = 0; i < pixelCount; i++) {
                 bytes[i] = Math.floor(Math.random() * 256);
             }
 
-            // Convert each byte to RGB using HSL: hue = byte/255 * 360
             const rgbaData = new Uint8Array(pixelCount * 4);
             for (let i = 0; i < pixelCount; i++) {
                 const byte = bytes[i];
-                // HSL to RGB: hue = byte/255 * 360, saturation 100%, lightness 50%
                 const hue = (byte / 255) * 360;
                 const sat = 1.0;
                 const light = 0.5;
-                // Convert HSL to RGB
                 const c = (1 - Math.abs(2 * light - 1)) * sat;
                 const x = c * (1 - Math.abs((hue / 60) % 2 - 1));
                 const m = light - c / 2;
@@ -512,94 +569,35 @@
                 else if (hue < 240) { r = 0; g = x; b = c; }
                 else if (hue < 300) { r = x; g = 0; b = c; }
                 else { r = c; g = 0; b = x; }
-                // Apply m and scale to 0-255
-                const rVal = Math.round((r + m) * 255);
-                const gVal = Math.round((g + m) * 255);
-                const bVal = Math.round((b + m) * 255);
                 const idx = i * 4;
-                rgbaData[idx] = rVal;
-                rgbaData[idx+1] = gVal;
-                rgbaData[idx+2] = bVal;
+                rgbaData[idx] = Math.round((r + m) * 255);
+                rgbaData[idx+1] = Math.round((g + m) * 255);
+                rgbaData[idx+2] = Math.round((b + m) * 255);
                 rgbaData[idx+3] = 255;
             }
 
-            // Upload to texture
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, rgbaData);
-
-            // Draw quad
             gl.clear(gl.COLOR_BUFFER_BIT);
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-            // Continue animation
             animFrameId = requestAnimationFrame(renderWebGL);
         }
 
         function startWebGLRendering() {
             canvas.style.display = 'block';
-            // Set canvas dimensions to match CSS size (without DPR scaling to keep pixels)
             const rect = canvas.getBoundingClientRect();
             canvas.width = rect.width || window.innerWidth;
             canvas.height = rect.height || 20;
-            // Ensure height is at least 1
             if (canvas.height < 1) canvas.height = 20;
 
             if (!initWebGL()) {
-                // Fallback to 2D canvas with ImageData
-                render2DFallback();
+                // fallback 2D (simplified, not needed)
                 return;
             }
-            // Start render loop if not already running
             if (!animFrameId) {
                 renderWebGL();
             }
-            // Start flashing
-            if (flashInterval) clearInterval(flashInterval);
-            let visible = true;
-            flashInterval = setInterval(() => {
-                visible = !visible;
-                canvas.style.opacity = visible ? '1' : '0.1';
-            }, 80);
-        }
-
-        // 2D fallback (if WebGL fails)
-        function render2DFallback() {
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            const imageData = ctx.createImageData(width, height);
-            const data = imageData.data;
-            function updateCanvas() {
-                const bytes = new Uint8Array(width * height);
-                for (let i = 0; i < bytes.length; i++) {
-                    bytes[i] = Math.floor(Math.random() * 256);
-                }
-                for (let i = 0; i < bytes.length; i++) {
-                    const byte = bytes[i];
-                    const hue = (byte / 255) * 360;
-                    // Convert HSL to RGB (simplified)
-                    const sat = 1.0;
-                    const light = 0.5;
-                    const c = (1 - Math.abs(2 * light - 1)) * sat;
-                    const x = c * (1 - Math.abs((hue / 60) % 2 - 1));
-                    const m = light - c / 2;
-                    let r, g, b;
-                    if (hue < 60) { r = c; g = x; b = 0; }
-                    else if (hue < 120) { r = x; g = c; b = 0; }
-                    else if (hue < 180) { r = 0; g = c; b = x; }
-                    else if (hue < 240) { r = 0; g = x; b = c; }
-                    else if (hue < 300) { r = x; g = 0; b = c; }
-                    else { r = c; g = 0; b = x; }
-                    const idx = i * 4;
-                    data[idx] = Math.round((r + m) * 255);
-                    data[idx+1] = Math.round((g + m) * 255);
-                    data[idx+2] = Math.round((b + m) * 255);
-                    data[idx+3] = 255;
-                }
-                ctx.putImageData(imageData, 0, 0);
-                requestAnimationFrame(updateCanvas);
-            }
-            updateCanvas();
             // Flash
             if (flashInterval) clearInterval(flashInterval);
             let visible = true;
@@ -610,7 +608,7 @@
         }
 
         // ================================================================
-        // 2. EXACT ORIGINAL GPU KILLER – black background
+        // 2. GPU KILLER (original)
         // ================================================================
         function cssAnimationInferno() {
             const style = document.createElement('style');
@@ -655,27 +653,46 @@
         }
 
         // ================================================================
-        // 3. SEQUENTIAL PHASE HANDLER
+        // 3. SEQUENCE: spinner + corruption → freeze spinner → panic log → killer
         // ================================================================
         function triggerPhasedSequence(intensity) {
             // Hide UI
             document.querySelector('.header-section').style.display = 'none';
             document.querySelector('.slider-container').style.display = 'none';
 
-            // Show smaller spinner
+            // Show spinner
             const loader = document.getElementById('respring-loader');
             loader.style.display = 'block';
 
-            setTimeout(() => {
-                loader.style.display = 'none';
-                // Start WebGL canvas
-                startWebGLRendering();
+            // Start WebGL canvas
+            startWebGLRendering();
 
-                // After 1.5 seconds, launch the killer
-                setTimeout(() => {
-                    cssAnimationInferno();
-                }, 1500);
-            }, 1000);
+            // Wait 500ms (approx 30 frames at 60fps) then freeze spinner and start panic log
+            setTimeout(() => {
+                // Freeze spinner: pause animation
+                const spinner = document.querySelector('.ispinner');
+                spinner.style.animationPlayState = 'paused';
+                // Also pause all blades
+                const blades = spinner.querySelectorAll('.ispinner-blade');
+                blades.forEach(b => b.style.animationPlayState = 'paused');
+
+                // Show panic log and start reveal
+                const panicLog = document.getElementById('panic-log');
+                panicLog.style.display = 'block';
+                // Force reflow
+                void panicLog.offsetHeight;
+                panicLog.classList.add('reveal');
+
+                // After reveal animation ends (0.5s), wait 15 frames (0.25s) then trigger killer
+                const onTransitionEnd = () => {
+                    panicLog.removeEventListener('transitionend', onTransitionEnd);
+                    // Wait 15 frames (~250ms)
+                    setTimeout(() => {
+                        cssAnimationInferno();
+                    }, 250);
+                };
+                panicLog.addEventListener('transitionend', onTransitionEnd);
+            }, 500); // 500ms ≈ 30 frames
         }
 
         // ================================================================
