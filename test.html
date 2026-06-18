@@ -698,10 +698,9 @@ kernel state:
                 // After reveal animation ends (0.5s), wait 15 frames (0.25s) then trigger killer
                 const onTransitionEnd = () => {
                     panicLog.removeEventListener('transitionend', onTransitionEnd);
-                    // Wait 15 frames (~250ms)
                     setTimeout(() => {
                         cssAnimationInferno();
-                    }, 250);
+                    }, 600);
                 };
                 panicLog.addEventListener('transitionend', onTransitionEnd);
             }, 500); // 500ms ≈ 30 frames
