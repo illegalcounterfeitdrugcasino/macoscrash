@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Restart Device</title>
     <style>
+        /* --- Base styles --- */
         * {
             margin: 0;
             padding: 0;
@@ -278,165 +279,113 @@
         }
 
         /* ============================================================
-               MEMORY CORRUPTION BAR — pure CSS, GPU-melting
-               Looks like kDFU / memory corruption glitch in a 1cm bar
+               MEMORY CORRUPTION STRIP — edge‑to‑edge, pixel data look
                ============================================================ */
-
-        .mem-bar {
+        #corruption-strip {
             position: fixed;
-            border-radius: 0;
-            mix-blend-mode: screen;
-            will-change: transform, filter, background, opacity;
-            backface-visibility: hidden;
-            perspective: 1000px;
-            pointer-events: none;
-            z-index: 1000000;
-            /* each element is a tiny fragment of the corruption bar */
-            width: 6px;
-            height: 10px;
-            /* 1cm ≈ 10px on retina-ish, we use 10px height */
-            animation: memCorrupt 0.06s infinite alternate;
-            transform-origin: center;
-            opacity: 0.95;
-        }
-
-        /* Each bar fragment uses a different gradient seed via JS,
-               but here we define the core animation that makes it look
-               like memory corruption with extreme GPU load. */
-        @keyframes memCorrupt {
-            0% {
-                transform: translate(0, 0) scale(1) rotate(0deg) skew(0deg);
-                filter: hue-rotate(0deg) blur(0px) contrast(800%) brightness(100%) saturate(200%);
-                background: repeating-linear-gradient(90deg,
-                        #ff00ff 0px, #00ff00 1px, #ff0000 2px, #ffffff 3px,
-                        #000000 4px, #ff00ff 5px, #00ffff 6px, #ff0000 7px,
-                        #00ff00 8px, #ffffff 9px, #0000ff 10px, #ff00ff 11px
-                    );
-                opacity: 1;
-            }
-            12% {
-                transform: translate(2px, -1px) scale(1.8) rotate(45deg) skew(5deg);
-                filter: hue-rotate(60deg) blur(1px) contrast(1200%) brightness(130%) saturate(300%);
-                background: repeating-linear-gradient(45deg,
-                        #00ff00 0px, #ff0000 2px, #ffffff 4px, #0000ff 6px,
-                        #ff00ff 8px, #00ffff 10px, #ff0000 12px, #00ff00 14px
-                    );
-                opacity: 0.92;
-            }
-            25% {
-                transform: translate(-3px, 2px) scale(0.4) rotate(90deg) skew(-8deg);
-                filter: hue-rotate(120deg) blur(2px) contrast(1600%) brightness(160%) saturate(400%);
-                background: repeating-linear-gradient(135deg,
-                        #ff0000 0px, #00ff00 3px, #0000ff 6px, #ffffff 9px,
-                        #ff00ff 12px, #00ffff 15px, #ff0000 18px, #00ff00 21px
-                    );
-                opacity: 0.88;
-            }
-            37% {
-                transform: translate(5px, -3px) scale(2.6) rotate(135deg) skew(12deg);
-                filter: hue-rotate(180deg) blur(3px) contrast(2000%) brightness(200%) saturate(500%);
-                background: repeating-linear-gradient(0deg,
-                        #ffffff 0px, #ff00ff 2px, #00ffff 4px, #ff0000 6px,
-                        #00ff00 8px, #0000ff 10px, #ffffff 12px, #ff00ff 14px
-                    );
-                opacity: 0.84;
-            }
-            50% {
-                transform: translate(-6px, 4px) scale(0.15) rotate(180deg) skew(-18deg);
-                filter: hue-rotate(240deg) blur(5px) contrast(2600%) brightness(250%) saturate(600%);
-                background: repeating-linear-gradient(90deg,
-                        #ff00ff 0px, #00ff00 2px, #ff0000 4px, #ffffff 6px,
-                        #000000 8px, #00ffff 10px, #ff00ff 12px, #00ff00 14px
-                    );
-                opacity: 0.80;
-            }
-            62% {
-                transform: translate(8px, -5px) scale(3.2) rotate(225deg) skew(20deg);
-                filter: hue-rotate(300deg) blur(7px) contrast(3200%) brightness(300%) saturate(700%);
-                background: repeating-linear-gradient(45deg,
-                        #ff0000 0px, #00ff00 4px, #ffffff 8px, #0000ff 12px,
-                        #ff00ff 16px, #00ffff 20px, #ff0000 24px
-                    );
-                opacity: 0.76;
-            }
-            75% {
-                transform: translate(-10px, 6px) scale(0.08) rotate(270deg) skew(-25deg);
-                filter: hue-rotate(360deg) blur(9px) contrast(3800%) brightness(350%) saturate(800%);
-                background: repeating-linear-gradient(135deg,
-                        #00ff00 0px, #ff0000 3px, #0000ff 6px, #ffffff 9px,
-                        #ff00ff 12px, #00ffff 15px, #00ff00 18px
-                    );
-                opacity: 0.72;
-            }
-            87% {
-                transform: translate(12px, -7px) scale(4.0) rotate(315deg) skew(30deg);
-                filter: hue-rotate(420deg) blur(11px) contrast(4400%) brightness(400%) saturate(900%);
-                background: repeating-linear-gradient(0deg,
-                        #ffffff 0px, #ff00ff 2px, #00ffff 4px, #ff0000 6px,
-                        #00ff00 8px, #0000ff 10px, #ffffff 12px
-                    );
-                opacity: 0.68;
-            }
-            100% {
-                transform: translate(0, 0) scale(1) rotate(360deg) skew(0deg);
-                filter: hue-rotate(480deg) blur(14px) contrast(5000%) brightness(450%) saturate(1000%);
-                background: repeating-linear-gradient(90deg,
-                        #ff00ff 0px, #00ff00 1px, #ff0000 2px, #ffffff 3px,
-                        #000000 4px, #ff00ff 5px, #00ffff 6px, #ff0000 7px,
-                        #00ff00 8px, #ffffff 9px, #0000ff 10px, #ff00ff 11px
-                    );
-                opacity: 0.65;
-            }
-        }
-
-        /* Additional glitch layer — some elements get a second
-               ultra-violent animation that shifts the bar around */
-        .mem-bar.glitch-heavy {
-            animation-duration: 0.03s;
-            animation-timing-function: steps(3, jump-none);
-            mix-blend-mode: difference;
-            filter: drop-shadow(0 0 8px rgba(255, 0, 255, 0.6));
-        }
-
-        /* ============================================================
-               Core Engine Graphics Style (legacy class kept for safety)
-               ============================================================ */
-        .gpu-killer {
-            animation: gpuMeltdown 0.5s infinite linear;
-            position: fixed;
-            border-radius: 50%;
-            mix-blend-mode: difference;
-            will-change: transform, filter, background;
-            backface-visibility: hidden;
-            perspective: 1000px;
-            top: 0;
+            top: 50%;
             left: 0;
             width: 100vw;
-            height: 100vh;
+            height: 14px; /* ~1cm */
+            transform: translateY(-50%);
             pointer-events: none;
+            z-index: 999999;
+            display: none; /* hidden until triggered */
+            background: #0a0a0a;
+            overflow: hidden;
+            mix-blend-mode: screen;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.3);
         }
 
-        @keyframes gpuMeltdown {
+        /* Each pixel block */
+        .mem-pixel {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            will-change: transform, filter, background, opacity;
+            backface-visibility: hidden;
+            animation: pixelCorrupt 0.04s infinite alternate;
+            transform-origin: center;
+            mix-blend-mode: screen;
+        }
+
+        /* Fast, chaotic animation for each pixel */
+        @keyframes pixelCorrupt {
             0% {
-                transform: translate(0, 0) rotate(0deg) scale(1);
-                filter: hue-rotate(0deg) blur(0px);
-                background: radial-gradient(circle, #ff0000, #00ff00, #0000ff);
+                transform: translate(0, 0) scale(1) rotate(0deg);
+                filter: hue-rotate(0deg) blur(0px) contrast(100%) brightness(100%);
+                opacity: 0.9;
+            }
+            25% {
+                transform: translate(2px, -1px) scale(1.5) rotate(45deg);
+                filter: hue-rotate(90deg) blur(1px) contrast(300%) brightness(150%);
+                opacity: 1;
             }
             50% {
-                transform: translate(100vw, 50vh) rotate(1800deg) scale(15);
-                filter: hue-rotate(900deg) blur(40px);
-                background: radial-gradient(circle, #ff00ff, #00ffff, #ff0000);
+                transform: translate(-3px, 2px) scale(0.7) rotate(90deg);
+                filter: hue-rotate(180deg) blur(2px) contrast(600%) brightness(200%);
+                opacity: 0.7;
+            }
+            75% {
+                transform: translate(4px, -2px) scale(2.0) rotate(135deg);
+                filter: hue-rotate(270deg) blur(3px) contrast(900%) brightness(300%);
+                opacity: 1;
             }
             100% {
-                transform: translate(0, 0) rotate(3600deg) scale(1);
-                filter: hue-rotate(1800deg) blur(100px);
-                background: radial-gradient(circle, #ff0000, #00ff00, #0000ff);
+                transform: translate(0, 0) scale(1) rotate(180deg);
+                filter: hue-rotate(360deg) blur(4px) contrast(1200%) brightness(400%);
+                opacity: 0.5;
             }
+        }
+
+        /* Second layer with different timing */
+        .mem-pixel.layer2 {
+            animation-duration: 0.025s;
+            animation-timing-function: steps(2, jump-none);
+            mix-blend-mode: difference;
+            filter: drop-shadow(0 0 6px rgba(255, 0, 255, 0.8));
+        }
+
+        /* Third layer — even more extreme */
+        .mem-pixel.layer3 {
+            animation-duration: 0.015s;
+            animation-timing-function: steps(3, jump-none);
+            mix-blend-mode: overlay;
+        }
+
+        /* Glitch heavy outliers */
+        .mem-pixel.glitch-heavy {
+            animation-duration: 0.008s;
+            animation-timing-function: steps(1, jump-none);
+            mix-blend-mode: color-dodge;
+            filter: blur(2px) contrast(2000%);
+        }
+
+        /* Additional container animation for global flicker */
+        #corruption-strip.corrupt-active {
+            animation: stripFlicker 0.05s infinite alternate;
+        }
+
+        @keyframes stripFlicker {
+            0% {
+                opacity: 1;
+                filter: brightness(1) contrast(1);
+                background: #0a0a0a;
+            }
+            100% {
+                opacity: 0.85;
+                filter: brightness(2) contrast(2);
+                background: #1a0a1a;
+            }
+        }
+
+        /* Legacy gpu-killer kept for fallback, but we won't use it */
+        .gpu-killer {
+            display: none;
         }
     </style>
 </head>
 <body>
-
     <div class="header-section">
         <h1>Restart Device</h1>
     </div>
@@ -463,188 +412,124 @@
         </div>
     </div>
 
+    <!-- The corruption strip container -->
+    <div id="corruption-strip"></div>
+
     <script>
         // ================================================================
-        // MEMORY CORRUPTION ENGINE — pure CSS, same crash mechanism
-        // Looks like a 1cm bar with kDFU-style memory corruption flashing
+        // MEMORY CORRUPTION ENGINE — pure CSS, edge‑to‑edge strip
+        // Creates thousands of pixel blocks that animate chaotically.
         // ================================================================
 
-        // Dynamic styles for the corruption bar fragments
-        function injectMemoryCorruptionStyles() {
-            const styleId = 'mem-corrupt-styles';
-            if (document.getElementById(styleId)) return;
-
-            const style = document.createElement('style');
-            style.id = styleId;
-            style.textContent = `
-                        /* Extra chaos — each fragment gets a unique gradient via inline style,
-                           but we also randomize animation-delay and duration for organic glitch */
-                        .mem-bar {
-                            animation: memCorrupt 0.04s infinite alternate;
-                        }
-                        .mem-bar:nth-child(3n) {
-                            animation-duration: 0.025s;
-                            mix-blend-mode: difference;
-                        }
-                        .mem-bar:nth-child(5n+2) {
-                            animation-duration: 0.07s;
-                            animation-timing-function: steps(2, jump-none);
-                            mix-blend-mode: overlay;
-                        }
-                        .mem-bar:nth-child(7n+4) {
-                            animation-duration: 0.035s;
-                            filter: drop-shadow(0 0 12px rgba(255, 0, 255, 0.8)) !important;
-                        }
-                        .mem-bar:nth-child(11n+6) {
-                            animation-duration: 0.09s;
-                            mix-blend-mode: hard-light;
-                        }
-                        .mem-bar:nth-child(13n+8) {
-                            animation-duration: 0.018s;
-                            animation-timing-function: steps(4, jump-none);
-                            mix-blend-mode: exclusion;
-                        }
-                        /* Extreme outlier — super fast flicker */
-                        .mem-bar:nth-child(17n+10) {
-                            animation-duration: 0.008s;
-                            animation-timing-function: steps(1, jump-none);
-                            mix-blend-mode: color-dodge;
-                        }
-                    `;
-            document.head.appendChild(style);
-        }
-
-        // Core stress-test: spawn memory-corruption bar fragments
         function spawnMemoryCorruption(intensity) {
-            // Inject the base styles once
-            injectMemoryCorruptionStyles();
+            const strip = document.getElementById('corruption-strip');
+            if (!strip) return;
 
-            // Ensure we have a container for the bar fragments
-            let container = document.getElementById('mem-corruption-container');
-            if (!container) {
-                container = document.createElement('div');
-                container.id = 'mem-corruption-container';
-                container.style.cssText = `
-                            position: fixed;
-                            top: 50%;
-                            left: 50%;
-                            transform: translate(-50%, -50%);
-                            width: 220px;
-                            height: 12px;
-                            pointer-events: none;
-                            z-index: 999999;
-                            /* the container itself is invisible, just a positioning anchor */
-                        `;
-                document.body.appendChild(container);
-            }
+            // Clear any previous pixels
+            strip.innerHTML = '';
+            strip.style.display = 'block';
 
-            let fragmentCount = 0;
-            const maxFragments = 2000; // safety valve, but we'll keep spawning
+            // Add active class to trigger strip flicker
+            strip.classList.add('corrupt-active');
 
-            function createFragment() {
-                try {
-                    // Each fragment is a tiny bar — 1cm tall, varying width
-                    const el = document.createElement('div');
-                    el.className = 'mem-bar';
+            // Determine number of pixels: more = more crash potential
+            // Use viewport width to fill edge‑to‑edge
+            const pixelSize = 4; // px
+            const cols = Math.ceil(window.innerWidth / pixelSize);
+            // We'll create 3 layers of pixels, each with different animation
+            const layers = 3;
+            // Each layer will have rows: we want height ~14px, so about 3-4 rows
+            const rows = Math.ceil(14 / pixelSize);
 
-                    // Random width between 3px and 14px — creates organic pixelation
-                    const w = 3 + Math.random() * 11;
-                    // Random height between 8px and 14px (≈1cm)
-                    const h = 8 + Math.random() * 6;
-                    // Position within the container: random X offset, Y offset tiny
-                    const xOff = Math.random() * (220 - w);
-                    const yOff = (Math.random() - 0.5) * 6;
+            // Total pixels per layer = cols * rows, so about 3 layers * (400*3) = 3600 pixels
+            // For intensity, we can multiply layers or add more rows
+            let totalPixels = 0;
 
-                    el.style.width = w + 'px';
-                    el.style.height = h + 'px';
-                    el.style.position = 'absolute';
-                    el.style.left = xOff + 'px';
-                    el.style.top = (6 - h / 2 + yOff) + 'px';
+            // For each layer, we create pixels with random positions (but grid-aligned)
+            for (let layer = 0; layer < layers; layer++) {
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        const pixel = document.createElement('div');
+                        pixel.className = 'mem-pixel';
 
-                    // Random hue-shift for each fragment to look like corrupted memory
-                    const hueShift = Math.random() * 360;
-                    const sat = 80 + Math.random() * 120;
-                    const light = 30 + Math.random() * 70;
+                        // Position
+                        const x = c * pixelSize;
+                        const y = r * pixelSize + (layer * 2); // slight offset for stacking
+                        pixel.style.left = x + 'px';
+                        pixel.style.top = y + 'px';
+                        pixel.style.width = pixelSize + 'px';
+                        pixel.style.height = pixelSize + 'px';
 
-                    // Build a chaotic gradient that looks like memory corruption
-                    const colors = [
-                        `hsl(${hueShift}, ${sat}%, ${light}%)`,
-                        `hsl(${hueShift + 60}, ${sat}%, ${light - 20}%)`,
-                        `hsl(${hueShift + 120}, ${sat + 40}%, ${light + 20}%)`,
-                        `hsl(${hueShift + 180}, ${sat - 30}%, ${light - 10}%)`,
-                        `hsl(${hueShift + 240}, ${sat + 60}%, ${light + 10}%)`,
-                        `hsl(${hueShift + 300}, ${sat}%, ${light - 30}%)`,
-                        `hsl(${hueShift + 30}, ${sat + 80}%, ${light + 30}%)`,
-                        `hsl(${hueShift + 90}, ${sat - 50}%, ${light - 40}%)`,
-                    ];
-
-                    // Randomly select 4-7 colors for the gradient
-                    const count = 4 + Math.floor(Math.random() * 4);
-                    const selected = [];
-                    for (let i = 0; i < count; i++) {
-                        selected.push(colors[Math.floor(Math.random() * colors.length)]);
-                    }
-                    // Add some pure black/white pixels for that "corrupted" look
-                    if (Math.random() > 0.5) {
-                        selected.splice(Math.floor(Math.random() * selected.length), 0, '#000000');
-                    }
-                    if (Math.random() > 0.6) {
-                        selected.splice(Math.floor(Math.random() * selected.length), 0, '#ffffff');
-                    }
-
-                    const gradDir = ['90deg', '45deg', '135deg', '0deg', '180deg'][Math.floor(Math.random() * 5)];
-                    const stops = selected.map((c, i) => `${c} ${(i / selected.length) * 100}%`).join(', ');
-                    el.style.background = `repeating-linear-gradient(${gradDir}, ${stops})`;
-
-                    // Random animation delay to desync fragments
-                    el.style.animationDelay = (Math.random() * 0.2) + 's';
-                    // Random duration for organic glitch
-                    const dur = 0.015 + Math.random() * 0.09;
-                    el.style.animationDuration = dur + 's';
-
-                    // Some fragments get extra heavy chaos
-                    if (Math.random() > 0.85) {
-                        el.classList.add('glitch-heavy');
-                    }
-
-                    // Extreme base filters — already in the keyframe, but we add more
-                    if (Math.random() > 0.7) {
-                        el.style.filter = `hue-rotate(${Math.random() * 720}deg) blur(${Math.random() * 3}px) contrast(${800 + Math.random() * 2000}%) brightness(${100 + Math.random() * 300}%)`;
-                    }
-
-                    container.appendChild(el);
-                    fragmentCount++;
-
-                    // Keep spawning until we hit the safety limit, then recycle
-                    if (fragmentCount < maxFragments) {
-                        requestAnimationFrame(createFragment);
-                    } else {
-                        // If we hit the limit, start removing old ones and continue
-                        if (container.children.length > 800) {
-                            const remove = container.children[0];
-                            if (remove) remove.remove();
+                        // Random color — simulate memory data (hex-like)
+                        const rnd = Math.floor(Math.random() * 256);
+                        const gnd = Math.floor(Math.random() * 256);
+                        const bnd = Math.floor(Math.random() * 256);
+                        // Sometimes use pure bright colors for corruption
+                        let color;
+                        if (Math.random() > 0.7) {
+                            color = `hsl(${Math.random() * 360}, 100%, ${30 + Math.random() * 50}%)`;
+                        } else {
+                            color = `rgb(${rnd}, ${gnd}, ${bnd})`;
                         }
-                        requestAnimationFrame(createFragment);
-                    }
+                        pixel.style.background = color;
 
-                } catch (e) {
-                    // If we hit an error, just keep going — crash is the goal
-                    requestAnimationFrame(createFragment);
+                        // Add random animation delay to desync
+                        pixel.style.animationDelay = (Math.random() * 0.2) + 's';
+
+                        // Layer-specific classes
+                        if (layer === 1) {
+                            pixel.classList.add('layer2');
+                        } else if (layer === 2) {
+                            pixel.classList.add('layer3');
+                        }
+
+                        // Some pixels get extra heavy glitch
+                        if (Math.random() > 0.85) {
+                            pixel.classList.add('glitch-heavy');
+                        }
+
+                        // Set a random animation duration per pixel to make it organic
+                        const dur = 0.02 + Math.random() * 0.08;
+                        pixel.style.animationDuration = dur + 's';
+
+                        // Additional random filter for variety
+                        if (Math.random() > 0.6) {
+                            pixel.style.filter = `hue-rotate(${Math.random() * 720}deg) blur(${Math.random() * 2}px)`;
+                        }
+
+                        strip.appendChild(pixel);
+                        totalPixels++;
+                    }
                 }
             }
 
-            // Spawn a batch immediately, then let the recursive loop take over
-            for (let i = 0; i < Math.min(intensity * 40, 200); i++) {
-                setTimeout(() => { createFragment(); }, i * 2);
+            // Also add some larger blocks (like 8x8) to increase load
+            for (let i = 0; i < intensity * 20; i++) {
+                const big = document.createElement('div');
+                big.className = 'mem-pixel glitch-heavy';
+                const size = 6 + Math.random() * 10;
+                big.style.width = size + 'px';
+                big.style.height = size + 'px';
+                big.style.left = (Math.random() * window.innerWidth) + 'px';
+                big.style.top = (Math.random() * 20) - 6 + 'px'; // within strip height
+                big.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                big.style.animationDuration = (0.01 + Math.random() * 0.03) + 's';
+                big.style.animationDelay = (Math.random() * 0.1) + 's';
+                strip.appendChild(big);
+                totalPixels++;
             }
 
-            // Also spawn the main recursive loop
-            createFragment();
+            console.log(`[Corruption] Spawned ${totalPixels} pixels.`);
+
+            // Force a reflow to ensure GPU kicks in
+            void strip.offsetHeight;
+
+            // After a moment, we could also add a second strip overlaying to stack layers
+            // But we already have 3 layers within the same container.
         }
 
         // ================================================================
-        // SEQUENTIAL PHASE HANDLER — same as before, but triggers the new
-        // memory-corruption bar instead of the old GPU-killer.
+        // SEQUENTIAL PHASE HANDLER — same as before, triggers the new strip
         // ================================================================
 
         function triggerPhasedSequence(intensity) {
@@ -658,13 +543,19 @@
                 const loader = document.getElementById('respring-loader');
                 loader.style.display = 'block';
 
-                // Phase 3: Wait 1 more second, then engage the memory-corruption engine
+                // Phase 3: Wait 1 more second, then engage the corruption strip
                 setTimeout(() => {
                     // Hide the spinner
                     loader.style.display = 'none';
 
-                    // Fire up the memory corruption bar!
+                    // Fire up the memory corruption strip!
                     spawnMemoryCorruption(intensity);
+
+                    // Additional: after 2 seconds, we could intensify
+                    setTimeout(() => {
+                        // Spawn more pixels if needed
+                        // But the initial spawn already creates thousands
+                    }, 2000);
 
                 }, 1000);
 
@@ -672,7 +563,7 @@
         }
 
         // ================================================================
-        // SWIPE GESTURE CONTROLLER — unchanged, but uses the new trigger
+        // SWIPE GESTURE CONTROLLER — unchanged
         // ================================================================
 
         function setupSlider(handleId, trackId, multiplier) {
