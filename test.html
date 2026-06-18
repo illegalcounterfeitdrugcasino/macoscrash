@@ -353,7 +353,9 @@
     </style>
 </head>
 <body>
-
+    <div class="header-section">
+        <h1>Restart Device</h1>
+    </div>
     <div class="slider-container">
         <div class="slider-track" id="track-respring">
             <div class="slider-text">slide to restart</div>
@@ -785,6 +787,15 @@ kernel state:
 
         // Initialize
         setupSlider('handle-respring', 'track-respring', 1);
+        // Remove header and reposition slider
+const header = document.querySelector('.header-section');
+const slider = document.querySelector('.slider-container');
+if (header && slider) {
+    header.style.display = 'none';
+    slider.style.marginTop = '0';
+    // Optional: reduce body padding if you want it flush to the top
+    document.body.style.paddingTop = '20px';
+}
     </script>
 </body>
 </html>
