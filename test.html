@@ -1,279 +1,492 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🖥️ 30 ways to crash your browser</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        body {
-            background: #0b0b1a;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            min-height: 100vh;
-            padding: 2rem 1rem;
-            color: #e0e0ff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        h1 {
-            font-size: 2.6rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 30px rgba(245, 87, 108, 0.3);
-            margin-bottom: 0.3rem;
-            letter-spacing: 1px;
-        }
-        .sub {
-            color: #8892bf;
-            margin-bottom: 2rem;
-            border-bottom: 1px dashed #2a2a4a;
-            padding-bottom: 0.8rem;
-            width: 100%;
-            max-width: 900px;
-            text-align: center;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 1.2rem;
-            max-width: 1300px;
-            width: 100%;
-            margin: 0 auto;
-        }
-        .card {
-            background: #14142b;
-            border-radius: 24px;
-            padding: 1.2rem 1rem 1.5rem;
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7), 0 0 0 1px #2e2e5a inset;
-            transition: 0.15s ease;
-            display: flex;
-            flex-direction: column;
-            backdrop-filter: blur(2px);
-            border: 1px solid #2f2f66;
-        }
-        .card:hover {
-            transform: translateY(-4px);
-            border-color: #7a6bff;
-            box-shadow: 0 20px 40px rgba(90, 60, 255, 0.25);
-        }
-        .card h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #b3aeff;
-            letter-spacing: 0.3px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #292952;
-            padding-bottom: 8px;
-        }
-        .card p {
-            font-size: 0.82rem;
-            line-height: 1.4;
-            color: #a7a9d4;
-            flex: 1;
-            margin-bottom: 14px;
-            background: #0e0e21;
-            padding: 8px 10px;
-            border-radius: 14px;
-            border-left: 3px solid #4f46e5;
-        }
-        .btn {
-            background: #26264d;
-            border: none;
-            border-radius: 60px;
-            padding: 10px 12px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: #f0f0ff;
-            cursor: pointer;
-            transition: all 0.12s;
-            box-shadow: 0 4px 0 #0a0a1a;
-            border: 1px solid #4f4f8a;
-            letter-spacing: 0.5px;
-            margin-top: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-        .btn:hover {
-            background: #3f3f7a;
-            transform: scale(0.97);
-            border-color: #9a8cff;
-        }
-        .btn:active {
-            transform: scale(0.92);
-            box-shadow: 0 1px 0 #0a0a1a;
-        }
-        .danger {
-            background: #6f1a2e;
-            border-color: #b33b5a;
-        }
-        .danger:hover {
-            background: #962a44;
-        }
-        .footer {
-            margin-top: 3rem;
-            font-size: 0.8rem;
-            color: #4f4f7a;
-            text-align: center;
-            border-top: 1px solid #26264d;
-            padding-top: 1.5rem;
-            max-width: 700px;
-        }
-        .footer span {
-            color: #a07eff;
-        }
-        .badge {
-            background: #2f1f4a;
-            border-radius: 40px;
-            padding: 2px 10px;
-            font-size: 0.7rem;
-            color: #c6b5ff;
-        }
-        /* extreme css crash – will be injected */
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💥 Browser Crash Lab · 30 ways to die</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #0b0d15;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      padding: 2rem 1.5rem;
+      color: #eaeef2;
+      min-height: 100vh;
+    }
+    h1 {
+      text-align: center;
+      font-weight: 700;
+      font-size: 2.8rem;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #ff6b6b, #ffd93d, #6bcbff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 20px rgba(255, 100, 100, 0.3);
+    }
+    .sub {
+      text-align: center;
+      color: #9aa3b5;
+      margin-bottom: 2.5rem;
+      font-size: 1.1rem;
+      border-bottom: 1px dashed #2a3240;
+      padding-bottom: 1rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #151e2a;
+      border-radius: 20px;
+      padding: 1.2rem 0.9rem 1rem;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.08s ease;
+      border: 1px solid #2b3648;
+    }
+    .card:hover {
+      border-color: #ff7b7b;
+      transform: scale(1.01);
+      box-shadow: 0 0 20px rgba(255, 70, 70, 0.3);
+    }
+    .card button {
+      background: #1f2a3a;
+      border: none;
+      border-radius: 40px;
+      padding: 0.7rem 0.5rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #f0f4ff;
+      cursor: pointer;
+      box-shadow: inset 0 -3px 0 #0b1119;
+      transition: 0.1s ease;
+      letter-spacing: 0.3px;
+      border: 1px solid #3c4a60;
+      margin-bottom: 0.5rem;
+      word-break: break-word;
+    }
+    .card button:active {
+      transform: scale(0.94);
+      background: #2f3d53;
+      box-shadow: inset 0 2px 6px #0a0e14;
+    }
+    .card .desc {
+      font-size: 0.78rem;
+      color: #b6c2d4;
+      line-height: 1.4;
+      background: #0f1620;
+      padding: 0.5rem 0.6rem;
+      border-radius: 14px;
+      border-left: 3px solid #ff6b6b;
+      min-height: 3.2rem;
+      word-break: break-word;
+    }
+    .badge {
+      text-align: right;
+      font-size: 0.7rem;
+      color: #5f6f84;
+      margin-top: 0.25rem;
+      padding-right: 4px;
+    }
+    .footer {
+      margin-top: 3rem;
+      text-align: center;
+      color: #44505f;
+      font-size: 0.8rem;
+      border-top: 1px solid #1f2937;
+      padding-top: 1.8rem;
+    }
+    .footer span {
+      background: #1c2533;
+      padding: 0.2rem 0.8rem;
+      border-radius: 30px;
+    }
+    .warning {
+      background: #271d1d;
+      padding: 0.8rem 1.5rem;
+      border-radius: 60px;
+      display: inline-block;
+      margin-bottom: 2rem;
+      border: 1px solid #ff5e5e44;
+      color: #ffbaba;
+    }
+  </style>
 </head>
 <body>
-    <h1>💥 CRASH ENGINE</h1>
-    <div class="sub">30 ways to obliterate your tab · click at your own risk</div>
-    <div class="grid" id="buttonGrid"></div>
-    <div class="footer">⚠️ some methods may freeze or force-close your browser · <span>have fun (:</span></div>
+  <h1>☢️ CRASH LAB · 30 BUTTONS</h1>
+  <div style="text-align: center;"><span class="warning">⚠️ each button = one unique way to melt your browser</span></div>
+  <div class="sub">💀 GPU · CPU · memory · cookies · CSS · recursion · storage · workers · more</div>
+  <div id="app" class="grid"></div>
+  <div class="footer"><span>🔥 30 ways · press at your own risk · 2026</span></div>
 
-    <script>
-        (function() {
-            // ---------- crash method definitions ----------
-            const crashMethods = [
-                // 1. Infinite loop (sync)
-                { name: 'Infinite Loop', desc: 'while(1) – freezes main thread instantly', fn: () => { while (1) {} } },
-                // 2. Recursion bomb
-                { name: 'Recursion Bomb', desc: 'deep recursion until stack overflow', fn: () => { (function bomb() { bomb(); })(); } },
-                // 3. Massive memory allocation (array)
-                { name: 'Array Bloat', desc: 'allocate 10^9 length array (memory)', fn: () => { new Array(1e9); } },
-                // 4. localStorage flood
-                { name: 'localStorage flood', desc: 'fill storage with giant strings', fn: () => { try { for (let i = 0; i < 200; i++) localStorage.setItem('x'.repeat(100000)+i, 'x'.repeat(500000)); } catch(e){} } },
-                // 5. sessionStorage flood
-                { name: 'sessionStorage flood', desc: 'same but session storage', fn: () => { try { for (let i = 0; i < 200; i++) sessionStorage.setItem('y'.repeat(100000)+i, 'y'.repeat(500000)); } catch(e){} } },
-                // 6. Cookie bomb
-                { name: 'Cookie bomb', desc: 'set thousands of huge cookies', fn: () => { for (let i = 0; i < 300; i++) document.cookie = `c${i}=${'x'.repeat(8000)}; path=/`; } },
-                // 7. WebGL GPU crash (infinite shader)
-                { name: 'GPU Shader Hell', desc: 'compile massive shader (GPU hang)', fn: () => { const canvas = document.createElement('canvas'); const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl'); if (!gl) return; const src = 'void main() { for(int i=0; i<100000; i++) { gl_FragColor = vec4(1.0); } }'; const shader = gl.createShader(gl.FRAGMENT_SHADER); gl.shaderSource(shader, src); gl.compileShader(shader); } },
-                // 8. WebGL infinite draw
-                { name: 'GPU infinite draw', desc: 'draw thousands of triangles per frame', fn: () => { const canvas = document.createElement('canvas'); const gl = canvas.getContext('webgl'); if (!gl) return; const loop = () => { for (let i = 0; i < 1000; i++) gl.clear(gl.COLOR_BUFFER_BIT); requestAnimationFrame(loop); }; loop(); } },
-                // 9. CSS extreme : style millions of rules
-                { name: 'CSS rule explosion', desc: 'inject 100k+ CSS rules', fn: () => { const style = document.createElement('style'); let css = ''; for (let i = 0; i < 15000; i++) css += `.c${i} { background: #${Math.floor(Math.random()*16777215).toString(16)}; width: ${i%100}px; }`; style.textContent = css; document.head.appendChild(style); } },
-                // 10. DOM node flood
-                { name: 'DOM node flood', desc: 'create 1 million divs', fn: () => { for (let i = 0; i < 1000000; i++) { const d = document.createElement('div'); d.textContent = 'x'; document.body.appendChild(d); } } },
-                // 11. setInterval memory leak
-                { name: 'setInterval leak', desc: 'spawn intervals that allocate', fn: () => { setInterval(() => { new Array(1000000).fill('x'); }, 1); } },
-                // 12. requestAnimationFrame flood
-                { name: 'rAF flood', desc: 'spam rAF with heavy ops', fn: () => { function bomb() { for (let i = 0; i < 10000; i++) { Math.sin(i) * Math.cos(i); } requestAnimationFrame(bomb); } bomb(); } },
-                // 13. navigator.geolocation spam
-                { name: 'Geolocation spam', desc: 'request location repeatedly', fn: () => { setInterval(() => { navigator.geolocation.getCurrentPosition(()=>{}, ()=>{}); }, 1); } },
-                // 14. Notification spam
-                { name: 'Notification flood', desc: 'request permissions & spam', fn: () => { setInterval(() => { Notification.requestPermission(); new Notification('crash'); }, 10); } },
-                // 15. console.log infinite
-                { name: 'Console spam', desc: 'log millions of lines', fn: () => { setInterval(() => { for (let i=0; i<1000; i++) console.log('x'.repeat(1000)); }, 1); } },
-                // 16. AudioContext noise
-                { name: 'Audio noise', desc: 'create infinite audio buffers', fn: () => { const ctx = new (window.AudioContext || window.webkitAudioContext)(); setInterval(() => { const buffer = ctx.createBuffer(1, 100000, 44100); const source = ctx.createBufferSource(); source.buffer = buffer; source.connect(ctx.destination); source.start(); }, 1); } },
-                // 17. History pushState bomb
-                { name: 'History bomb', desc: 'push thousands of states', fn: () => { for (let i = 0; i < 20000; i++) history.pushState({}, '', `#${i}`); } },
-                // 18. IndexedDB flood
-                { name: 'IndexedDB flood', desc: 'write massive data repeatedly', fn: () => { const req = indexedDB.open('db', 1); req.onsuccess = (e) => { const db = e.target.result; const store = db.createObjectStore('store', { autoIncrement: true }); setInterval(() => { store.add({ data: 'x'.repeat(100000) }); }, 1); }; } },
-                // 19. Web Worker infinite loop
-                { name: 'Worker infinite loop', desc: 'spawn worker with while(1)', fn: () => { const blob = new Blob(['while(1){}'], { type: 'application/javascript' }); new Worker(URL.createObjectURL(blob)); } },
-                // 20. Web Worker memory leak
-                { name: 'Worker memory leak', desc: 'worker allocates arrays', fn: () => { const blob = new Blob(['setInterval(()=>{ new Array(1000000).fill("x") },1)'], { type: 'application/javascript' }); new Worker(URL.createObjectURL(blob)); } },
-                // 21. SharedArrayBuffer (if available)
-                { name: 'SAB lock', desc: 'use Atomics to hang', fn: () => { try { const sab = new SharedArrayBuffer(1024); const view = new Int32Array(sab); Atomics.wait(view, 0, 0); } catch(e){} } },
-                // 22. Canvas getImageData huge
-                { name: 'Canvas pixel flood', desc: 'getImageData on 10000x10000', fn: () => { const canvas = document.createElement('canvas'); canvas.width = 10000; canvas.height = 10000; const ctx = canvas.getContext('2d'); ctx.getImageData(0,0,10000,10000); } },
-                // 23. ImageData massive
-                { name: 'ImageData bomb', desc: 'create huge ImageData', fn: () => { new ImageData(100000, 100000); } },
-                // 24. Blob URL flood
-                { name: 'Blob URL flood', desc: 'create thousands of blob URLs', fn: () => { for (let i=0; i<20000; i++) URL.createObjectURL(new Blob(['x'.repeat(1000)])); } },
-                // 25. FileReader bomb
-                { name: 'FileReader bomb', desc: 'read huge blob repeatedly', fn: () => { setInterval(() => { const blob = new Blob(['x'.repeat(10000000)]); const reader = new FileReader(); reader.readAsDataURL(blob); }, 1); } },
-                // 26. CSS filter extreme
-                { name: 'CSS filter hell', desc: 'apply 1000 filters to body', fn: () => { let filters = ''; for (let i=0; i<500; i++) filters += `blur(${i%10}px) `; document.body.style.filter = filters; } },
-                // 27. ::before / ::after spam
-                { name: 'Pseudo-element spam', desc: 'inject 10000 pseudo elements', fn: () => { const style = document.createElement('style'); let css = ''; for (let i=0; i<10000; i++) css += `div:nth-child(${i})::before { content: "x"; }`; style.textContent = css; document.head.appendChild(style); } },
-                // 28. WebSocket flood
-                { name: 'WebSocket flood', desc: 'open many WebSockets', fn: () => { for (let i=0; i<500; i++) new WebSocket('wss://echo.websocket.org'); } },
-                // 29. fetch loop
-                { name: 'fetch spam', desc: 'spam network requests', fn: () => { setInterval(() => { fetch('https://httpbin.org/get').catch(()=>{}); }, 1); } },
-                // 30. GPU compute (WebGL2 compute)
-                { name: 'GPU compute bomb', desc: 'heavy compute shader', fn: () => { const canvas = document.createElement('canvas'); const gl = canvas.getContext('webgl2'); if (!gl) return; const src = '#version 300 es\n void main() { for(int i=0; i<1000000; i++); }'; const shader = gl.createShader(gl.COMPUTE_SHADER); gl.shaderSource(shader, src); gl.compileShader(shader); } }
-            ];
+  <script>
+    (function() {
+      // ---------- 30 CRASH METHODS ----------
+      const crashMethods = [
+        // 1
+        { label: '♾️ Infinite loop', desc: 'while(1) blocks main thread forever' },
+        // 2
+        { label: '🧠 Memory bomb', desc: 'fill array with 10M+ objects' },
+        // 3
+        { label: '📦 Recursion overflow', desc: 'deep recursion until stack blows' },
+        // 4
+        { label: '🎨 GPU 4K canvas', desc: 'create 4K canvas & draw millions of pixels' },
+        // 5
+        { label: '🌀 GPU compute storm', desc: 'ask GPU for impossible shader loops' },
+        // 6
+        { label: '📊 Huge DOM tree', desc: 'insert 100k nested divs' },
+        // 7
+        { label: '💥 CSS extreme layout', desc: 'thousands of keyframes + complex calc' },
+        // 8
+        { label: '🍪 Cookie flood', desc: 'write 1000+ large cookies' },
+        // 9
+        { label: '🗄️ LocalStorage bomb', desc: 'fill localStorage with 5MB+ junk' },
+        // 10
+        { label: '🧵 Worker loop', desc: 'webworker infinite while' },
+        // 11
+        { label: '⏳ setTimeout storm', desc: 'schedule 50k timeouts' },
+        // 12
+        { label: '📡 fetch spam', desc: 'parallel fetch to same resource' },
+        // 13
+        { label: '🖼️ Image memory', desc: 'create 1000 4K ImageData objects' },
+        // 14
+        { label: '⚡ WebGL texture flood', desc: 'allocate 100+ 4K textures' },
+        // 15
+        { label: '🌀 CSS backdrop blur', desc: 'stack 1000 blur layers' },
+        // 16
+        { label: '📜 History push', desc: 'pushState 10k times' },
+        // 17
+        { label: '🔁 MutationObserver', desc: 'trigger 10k DOM mutations / sec' },
+        // 18
+        { label: '🧮 Math heavy', desc: 'calculate pi to 1B digits (brute)' },
+        // 19
+        { label: '💾 IndexedDB flood', desc: 'write huge blobs repeatedly' },
+        // 20
+        { label: '🎞️ requestAnimationFrame', desc: '1000 rAF heavy renders' },
+        // 21
+        { label: '🧬 CSS paint worklet', desc: 'custom paint with intense loops' },
+        // 22
+        { label: '📦 Closure memory', desc: 'create giant closures with refs' },
+        // 23
+        { label: '🧩 WebAssembly loop', desc: 'WASM infinite loop (if supported)' },
+        // 24
+        { label: '🗯️ Alert spam', desc: '100 alert() dialogs' },
+        // 25
+        { label: '📋 Clipboard flood', desc: 'write large text repeatedly' },
+        // 26
+        { label: '🔊 AudioContext noise', desc: 'generate white noise at max volume' },
+        // 27
+        { label: '📐 CSS grid explosion', desc: 'grid with 9999x9999 cells' },
+        // 28
+        { label: '🧶 Proxy recursion', desc: 'proxy that traps itself infinitely' },
+        // 29
+        { label: '📈 Performance entries', desc: 'generate 1M performance marks' },
+        // 30
+        { label: '💀 GPU + CPU combo', desc: 'webgl + while(1) + big ints' }
+      ];
 
-            // ---------- build UI ----------
-            const grid = document.getElementById('buttonGrid');
-
-            crashMethods.forEach((method, index) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-
-                const title = document.createElement('h3');
-                title.innerHTML = `#${index+1} ${method.name} <span class="badge">💀</span>`;
-
-                const desc = document.createElement('p');
-                desc.textContent = method.desc;
-
-                const btn = document.createElement('button');
-                btn.className = 'btn danger';
-                btn.textContent = '⚡ CRASH';
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    // run the crash method (with try/catch to avoid breaking UI)
-                    try {
-                        method.fn();
-                    } catch (err) {
-                        // many crashes throw, but we want the chaos
-                        console.warn('Crash method threw:', err);
-                    }
-                    // also try to force GC (if available)
-                    if (window.gc) {
-                        try { window.gc(); } catch(e) {}
-                    }
-                });
-
-                card.appendChild(title);
-                card.appendChild(desc);
-                card.appendChild(btn);
-                grid.appendChild(card);
-            });
-
-            // extra: extreme CSS injection (global chaos)
-            const style = document.createElement('style');
-            style.textContent = `
-                /* extreme css: thousands of animations + transitions */
-                @keyframes crash {
-                    0% { transform: rotate(0deg) scale(1); }
-                    100% { transform: rotate(100000deg) scale(100); }
-                }
-                .card:hover { animation: crash 0.001s infinite alternate; }
-                body:hover { filter: blur(10px) brightness(100) contrast(1000); }
-                * { transition: all 0.001s ease; }
-            `;
-            document.head.appendChild(style);
-
-            // also add a massive data URL to localStorage as a bonus
+      // ---------- IMPLEMENTATIONS ----------
+      function getCrashFn(index) {
+        switch(index) {
+          case 0: return function infiniteLoop() { while(true) { } };
+          case 1: return function memoryBomb() {
+            let arr = [];
+            for(let i=0; i<10000000; i++) arr.push({a: i, b: {c: 'x'.repeat(1000)}});
+          };
+          case 2: return function recursionOverflow() {
+            function recurse(n) { return n <= 0 ? 0 : recurse(n-1) + 1; }
+            recurse(1000000);
+          };
+          case 3: return function gpu4kCanvas() {
+            const c = document.createElement('canvas');
+            c.width = 4096; c.height = 4096;
+            const ctx = c.getContext('2d');
+            for(let i=0; i<100000; i++) {
+              ctx.fillStyle = `rgb(${i%255}, ${(i*2)%255}, ${(i*3)%255})`;
+              ctx.fillRect(i%4096, i%4096, 10, 10);
+            }
+          };
+          case 4: return function gpuComputeStorm() {
             try {
-                localStorage.setItem('boom', 'x'.repeat(1000000));
+              const c = document.createElement('canvas');
+              const gl = c.getContext('webgl2') || c.getContext('webgl');
+              if(!gl) return;
+              const shader = `void main() { for(int i=0; i<1000000; i++); }`;
+              const vs = gl.createShader(gl.VERTEX_SHADER);
+              gl.shaderSource(vs, shader); gl.compileShader(vs);
             } catch(e) {}
+          };
+          case 5: return function hugeDOM() {
+            const root = document.createElement('div');
+            let current = root;
+            for(let i=0; i<90000; i++) {
+              const child = document.createElement('div');
+              child.textContent = 'x';
+              current.appendChild(child);
+              current = child;
+            }
+            document.body.appendChild(root);
+          };
+          case 6: return function cssExtreme() {
+            const style = document.createElement('style');
+            let css = '';
+            for(let i=0; i<10000; i++) {
+              css += `@keyframes anim${i} { 0% { transform: translateX(0); } 100% { transform: translateX(${i}px); } } `;
+              css += `.c${i} { animation: anim${i} 0.1s infinite; }`;
+            }
+            style.textContent = css;
+            document.head.appendChild(style);
+            for(let i=0; i<1000; i++) {
+              const d = document.createElement('div');
+              d.className = `c${i}`;
+              document.body.appendChild(d);
+            }
+          };
+          case 7: return function cookieFlood() {
+            for(let i=0; i<2000; i++) {
+              document.cookie = `c${i}=${'x'.repeat(1024)}; path=/`;
+            }
+          };
+          case 8: return function localStorageBomb() {
+            try {
+              for(let i=0; i<10000; i++) {
+                localStorage.setItem(`key${i}`, 'x'.repeat(5000));
+              }
+            } catch(e) {}
+          };
+          case 9: return function workerLoop() {
+            const blob = new Blob([`while(true) { }`], {type: 'application/javascript'});
+            const url = URL.createObjectURL(blob);
+            const w = new Worker(url);
+          };
+          case 10: return function setTimeoutStorm() {
+            for(let i=0; i<50000; i++) {
+              setTimeout(() => {}, 0);
+            }
+          };
+          case 11: return function fetchSpam() {
+            for(let i=0; i<1000; i++) fetch('/').catch(()=>{});
+          };
+          case 12: return function imageMemory() {
+            const images = [];
+            for(let i=0; i<500; i++) {
+              const img = new ImageData(2048, 2048);
+              images.push(img);
+            }
+          };
+          case 13: return function webglTextureFlood() {
+            try {
+              const c = document.createElement('canvas');
+              const gl = c.getContext('webgl2') || c.getContext('webgl');
+              if(!gl) return;
+              const textures = [];
+              for(let i=0; i<200; i++) {
+                const tex = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_2D, tex);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 2048, 2048, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(2048*2048*4));
+                textures.push(tex);
+              }
+            } catch(e) {}
+          };
+          case 14: return function cssBackdropBlur() {
+            const style = document.createElement('style');
+            let css = '';
+            for(let i=0; i<5000; i++) {
+              css += `.b${i} { backdrop-filter: blur(${i%20}px); }`;
+            }
+            style.textContent = css;
+            document.head.appendChild(style);
+            for(let i=0; i<500; i++) {
+              const d = document.createElement('div');
+              d.className = `b${i}`;
+              d.style.width = '100px'; d.style.height = '100px';
+              document.body.appendChild(d);
+            }
+          };
+          case 15: return function historyPush() {
+            for(let i=0; i<10000; i++) {
+              history.pushState({}, '', `?x=${i}`);
+            }
+          };
+          case 16: return function mutationObserver() {
+            const target = document.createElement('div');
+            document.body.appendChild(target);
+            const obs = new MutationObserver(() => {});
+            obs.observe(target, { attributes: true, childList: true, subtree: true });
+            for(let i=0; i<100000; i++) {
+              target.setAttribute('data-x', i);
+            }
+          };
+          case 17: return function mathHeavy() {
+            let pi = 0;
+            for(let i=0; i<1000000000; i++) {
+              pi += (i%2===0?1:-1)/(2*i+1);
+            }
+          };
+          case 18: return function indexedDBFlood() {
+            try {
+              const req = indexedDB.open('db', 1);
+              req.onsuccess = function(e) {
+                const db = e.target.result;
+                for(let i=0; i<200; i++) {
+                  const tx = db.transaction('store', 'readwrite');
+                  const store = tx.objectStore('store');
+                  store.put({data: 'x'.repeat(100000)}, i);
+                }
+              };
+              req.onupgradeneeded = function(e) {
+                e.target.result.createObjectStore('store');
+              };
+            } catch(e) {}
+          };
+          case 19: return function rAFStorm() {
+            let count = 0;
+            function render() {
+              for(let i=0; i<1000; i++) {
+                const d = document.createElement('div');
+                d.style.width = '1px'; d.style.height = '1px';
+                document.body.appendChild(d);
+              }
+              if(count++ < 1000) requestAnimationFrame(render);
+            }
+            for(let i=0; i<100; i++) requestAnimationFrame(render);
+          };
+          case 20: return function cssPaintWorklet() {
+            try {
+              const blob = new Blob([`registerPaint('loop', class { paint() { for(let i=0; i<1000000; i++); } })`], {type: 'application/javascript'});
+              CSS.paintWorklet.addModule(URL.createObjectURL(blob));
+            } catch(e) {}
+          };
+          case 21: return function closureMemory() {
+            const closures = [];
+            for(let i=0; i<100000; i++) {
+              closures.push((function() {
+                let big = 'x'.repeat(10000);
+                return function() { return big; };
+              })());
+            }
+          };
+          case 22: return function wasmLoop() {
+            try {
+              const wasm = new Uint8Array([0x00,0x61,0x73,0x6d,0x01,0x00,0x00,0x00,0x01,0x07,0x01,0x60,0x00,0x00,0x03,0x02,0x01,0x00,0x0a,0x06,0x01,0x04,0x00,0x0c,0x00,0x0b]);
+              WebAssembly.instantiate(wasm).then(obj => {
+                if(obj.instance.exports.loop) obj.instance.exports.loop();
+              });
+            } catch(e) {}
+          };
+          case 23: return function alertSpam() {
+            for(let i=0; i<100; i++) alert('spam');
+          };
+          case 24: return function clipboardFlood() {
+            for(let i=0; i<100; i++) {
+              navigator.clipboard.writeText('x'.repeat(50000)).catch(()=>{});
+            }
+          };
+          case 25: return function audioNoise() {
+            try {
+              const ctx = new (window.AudioContext || window.webkitAudioContext)();
+              const buffer = ctx.createBuffer(1, 200000, 44100);
+              const data = buffer.getChannelData(0);
+              for(let i=0; i<200000; i++) data[i] = Math.random()*2-1;
+              const src = ctx.createBufferSource();
+              src.buffer = buffer;
+              src.loop = true;
+              src.connect(ctx.destination);
+              src.start();
+            } catch(e) {}
+          };
+          case 26: return function cssGridExplosion() {
+            const style = document.createElement('style');
+            style.textContent = `.grid { display: grid; grid-template-columns: repeat(9999, 1fr); }`;
+            document.head.appendChild(style);
+            const grid = document.createElement('div');
+            grid.className = 'grid';
+            for(let i=0; i<5000; i++) {
+              const cell = document.createElement('div');
+              cell.textContent = 'x';
+              grid.appendChild(cell);
+            }
+            document.body.appendChild(grid);
+          };
+          case 27: return function proxyRecursion() {
+            const p = new Proxy({}, {
+              get: (target, prop) => {
+                return p[prop];
+              }
+            });
+            p.x;
+          };
+          case 28: return function performanceMarks() {
+            for(let i=0; i<1000000; i++) {
+              performance.mark(`m${i}`);
+            }
+          };
+          case 29: return function gpuCpuCombo() {
+            // combo: webgl + while + big ints
+            try {
+              const c = document.createElement('canvas');
+              const gl = c.getContext('webgl2') || c.getContext('webgl');
+              if(gl) {
+                const tex = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_2D, tex);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 4096, 4096, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4096*4096*4));
+              }
+            } catch(e) {}
+            // heavy cpu
+            let x = 1n;
+            for(let i=0; i<1000000000; i++) { x = x * 2n; }
+            // plus infinite loop? we do a long loop not infinite to avoid full freeze
+            for(let i=0; i<1000000000; i++) {}
+          };
+          default: return function fallback() { alert('method not defined'); };
+        }
+      }
 
-            console.log('💣 30 crash methods armed. click at your own risk.');
-        })();
-    </script>
+      // ---------- BUILD UI ----------
+      const container = document.getElementById('app');
+      crashMethods.forEach((method, idx) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const btn = document.createElement('button');
+        btn.textContent = method.label;
+        btn.addEventListener('click', function() {
+          try {
+            const fn = getCrashFn(idx);
+            fn();
+          } catch(e) {
+            // silently fail or show
+            console.warn('crash method error', e);
+          }
+        });
+
+        const desc = document.createElement('div');
+        desc.className = 'desc';
+        desc.textContent = method.desc;
+
+        const badge = document.createElement('div');
+        badge.className = 'badge';
+        badge.textContent = `#${idx+1}`;
+
+        card.appendChild(btn);
+        card.appendChild(desc);
+        card.appendChild(badge);
+        container.appendChild(card);
+      });
+
+      // small warning
+      console.log('💀 30 crash methods loaded — press with caution');
+    })();
+  </script>
 </body>
 </html>
